@@ -11,10 +11,12 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
+// latest graph: https://www.desmos.com/calculator/uelfpbcsvf
+
 (function() {
     'use strict';
 
-    let renderer, Calc, THREE, scene, camera;
+    let renderer, Calc, THREE, scene, camera, lookAt;
     let meshData = [];
 
     function observeCamera() {
@@ -22,7 +24,13 @@
             Calc.HelperExpression({latex: `\\xi_{cam${"XYZ"[c]}}`})
             .observe('numericValue', (_, {numericValue}) => {
                 camera.position["xyz"[c]] = numericValue;
-                camera.lookAt(0, 0, 0);
+                camera.lookAt(lookAt);
+                rerender()
+            })
+            Calc.HelperExpression({latex: `\\xi_{lookAt${"XYZ"[c]}}`})
+            .observe('numericValue', (_, {numericValue}) => {
+                lookAt["xyz"[c]] = numericValue;
+                camera.lookAt(lookAt);
                 rerender()
             })
         }
@@ -108,6 +116,7 @@
             1, // aspect ratio, temp until first `applyGraphpaperBounds`
             0.1, 1000 // clipping plane
         );
+        lookAt = new THREE.Vector3(0, 0, 0);
 
         renderer = new THREE.WebGLRenderer();
 
