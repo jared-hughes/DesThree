@@ -11,13 +11,13 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/uelfpbcsvf
+// latest graph: https://www.desmos.com/calculator/vbb1xlav4s
 
 (function() {
     'use strict';
 
-    let renderer, Calc, THREE, scene, camera, lookAt;
-    let meshData = [];
+    let renderer, Calc, THREE, scene, camera, lookAt, light, ambientLight;
+    let meshData = []
 
     function observeCamera() {
         for (let c=0; c<3; c++) {
@@ -45,6 +45,7 @@
         renderer.domElement.style.left = bounds.left + "px";
         camera.aspect = bounds.width / bounds.height;
         camera.updateProjectionMatrix();
+        rerender()
     }
 
     function updateMesh(index, coordinate, listValue) {
@@ -61,7 +62,12 @@
         }
         mesh.changed = true
         // TODO: interface directly with the BufferAttribute.array?
+        // Undoubtedly storing mesh.vertices is slower and takes more space
         mesh.geometry.setAttribute('position', new THREE.BufferAttribute(mesh.vertices, 3))
+        mesh.geometry.deleteAttribute('normal')
+        mesh.geometry.computeFaceNormals();
+        mesh.geometry.computeVertexNormals();
+        mesh.geometry.normalizeNormals();
         rerender();
     }
 
@@ -83,13 +89,17 @@
                     })
                     meshData[i].helpers[c] = helper
                 }
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const material = new THREE.MeshLambertMaterial({
+                  color: 0x00ff00,
+                  side: THREE.DoubleSide,
+                });
                 const mesh = new THREE.Mesh(meshData[i].geometry, material);
                 scene.add(mesh);
             }
         } else if (numMeshes < meshData.length) {
             for (let i=numMeshes; i<meshData.lenth; i++) {
                 meshData[i].helper.unobserve('listValue');
+                meshData[i].geometry.dispose();
             }
             meshData.splice(numMeshes)
         }
@@ -98,6 +108,40 @@
     function observeMeshes() {
         Calc.HelperExpression({latex: `\\xi_{numMeshes}`})
             .observe('numericValue', (_, {numericValue}) => updateNumMeshes(numericValue))
+    }
+
+    function updateLightPos(coordinate, value) {
+      if (coordinate == 0) light.position.setX(value)
+      else if (coordinate == 1) light.position.setY(value)
+      else if (coordinate == 2) light.position.setZ(value)
+      rerender();
+    }
+
+    function updateLightIntensity(value) {
+      light.intensity = value;
+      rerender();
+    }
+
+    function updateAmbientLightIntensity(value) {
+      ambientLight.intensity = value;
+      rerender();
+    }
+
+    function observeLights() {
+        light = new THREE.PointLight(0xffffff, 0)
+        scene.add(light)
+
+        ambientLight = new THREE.AmbientLight(0xffffff, 0)
+        scene.add(ambientLight)
+
+        for (let c=0; c<3; c++) {
+          Calc.HelperExpression({latex: `\\xi_{light${"XYZ"[c]}}`})
+            .observe('numericValue', (_, {numericValue}) => updateLightPos(c, numericValue))
+        }
+        Calc.HelperExpression({latex: `\\xi_{lightIntensity}`})
+          .observe('numericValue', (_, {numericValue}) => updateLightIntensity(numericValue))
+        Calc.HelperExpression({latex: `\\xi_{ambientLightIntensity}`})
+          .observe('numericValue', (_, {numericValue}) => updateAmbientLightIntensity(numericValue))
     }
 
     function rerender() {
@@ -129,6 +173,7 @@
         Calc.observe('graphpaperBounds', applyGraphpaperBounds);
         observeCamera()
         observeMeshes()
+        observeLights()
 
         rerender()
     }
