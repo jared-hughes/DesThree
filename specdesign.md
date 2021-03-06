@@ -7,7 +7,7 @@ In order of sidebar of [https://threejs.org/docs/index.html](https://threejs.org
 - `OrthographicCamera`
   - can define left/right/top/bottom same as Desmos's `graphpaperBounds.mathCoordinates`
   - near/far: need to give values
-- `PerspectiveCamera`
+- (partial) `PerspectiveCamera`
   - fov: options
     - compute based on Desmos's left/right, some trig and a zoom factor
     - fixed FOV
@@ -30,7 +30,7 @@ In order of sidebar of [https://threejs.org/docs/index.html](https://threejs.org
   - `CylinderGeometry`
   - `PolyhedronGeometry`
     - `DodecahedronGeometry`
-    - `IcosahedronGeometry`
+    - ✓ `IcosahedronGeometry`
     - `OctahedronGeometry`
     - `TetrahedronGeometry`
   - `SphereGeometry`
@@ -57,10 +57,10 @@ Seem to be geared towards debugging (e.g. showing lights, arrows, bounding boxes
 
 All take colors (`advancedStyling` FTW!)
 
-- `AmbientLight`
+- ✓ `AmbientLight`
 - `DirectionLight`
 - `HemisphereLight`
-- `PointLight`
+- ✓ `PointLight`
 - `SpotLight`
 
 ### Loaders
@@ -69,9 +69,9 @@ Probably not going to deal with these for a while. Maybe will end up doing `Buff
 ### Materials
 
 Looks kinda realistic:
-- `MeshBasicMaterial` (not affected by lighting, fastest)
+- ✓ `MeshBasicMaterial` (not affected by lighting, fastest)
 - `MeshToonMaterial`
-- `MeshLambertMaterial` (faster)
+- ✓ `MeshLambertMaterial` (faster)
 - `MeshPhongMaterial` (fast)
 - `MeshStandardMaterial` (slow)
 - `MeshPhysicalMaterial` (slowest)
@@ -93,7 +93,7 @@ Not considering yet due to complexity
 ### Objects
 
 - `Line`, `LineLoop`, `LineSegments`
-- `Group`
+- ○ `Group`
 - `Points`
 - `Sprite` (need to load image)
 
@@ -120,9 +120,9 @@ Not considering yet due to complexity
 
 ## Design
 
-Maybe comments with commands inside them, separated by semicolons? (commas can get confused with Desmos commas). Should be able to use `HelperExpression`s to evaluate each semicolon-separated prt
+Desmos notes with commands inside them, separated by commas. Should be able to use `HelperExpression`s to evaluate each comma-separated part
 
-- `BoxGeometry(3;4;5)`
+- `BoxGeometry(3,4,5)`
 
 Ooh I want tooltips giving argument order/names and what each command does.
 
@@ -131,7 +131,7 @@ Need argument types allowed:
 - Numbers
 - Lists of numbers (for x,y,z coordinates)
   - May want to allow variadic functions by allowing lists of points for `Shape`s (`ExtrudeGeometry` and other purposes)
-- Material
+- Material (Desmos3D name -- should know by position that this is not vanilla argument and should not be listened to)
 
 Want to re-use materials across objects
 
