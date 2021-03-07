@@ -174,6 +174,7 @@ class DesThree {
       // materials
       MeshBasicMaterial,
       MeshLambertMaterial,
+      MeshToonMaterial,
       MeshNormalMaterial,
       MeshDepthMaterial,
       MeshPhongMaterial,
@@ -465,6 +466,12 @@ class MeshLambertMaterial extends MeshMaterial {
 class MeshPhongMaterial extends MeshMaterial {
   constructor(args) {
     super(args, THREE.MeshPhongMaterial)
+  }
+}
+
+class MeshToonMaterial extends MeshMaterial {
+  constructor(args) {
+    super(args, THREE.MeshToonMaterial)
   }
 }
 

@@ -70,7 +70,7 @@ Probably not going to deal with these for a while. Maybe will end up doing `Buff
 
 Looks kinda realistic:
 - ✓ `MeshBasicMaterial` (not affected by lighting, fastest)
-- `MeshToonMaterial`
+- ✓ `MeshToonMaterial`
 - ✓ `MeshLambertMaterial` (faster)
 - ✓ `MeshPhongMaterial` (fast)
 - `MeshStandardMaterial` (slow)
