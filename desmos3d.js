@@ -434,8 +434,36 @@ class Show extends IntermediateObject {
   }
 }
 
+function setThreeExprs(ids) {
+  document.querySelectorAll('.three-textexpr')
+  .forEach(el => {
+    el.classList.remove('three-textexpr')
+    // revert "enter" starting the next element
+    const textarea = el.querySelector('textarea')
+    textarea.onkeydown = textarea.onKeyDownBackup
+    textarea.spellcheck = true
+  })
+  ids.forEach(id => {
+    const el = document.querySelector(`.dcg-expressiontext[expr-id="${id}"]`)
+    el.classList.add('three-textexpr')
+    // suppress "enter" starting the next element
+    const textarea = el.querySelector('textarea')
+    textarea.onKeyDownBackup = textarea.onkeydown
+    textarea.onkeydown = e => {
+      const e1 = e.key == "Enter" && textarea.selectionEnd != textarea.value.length
+      const e2 = e.key == "ArrowDown" && textarea.selectionEnd != textarea.value.length
+      const e3 = e.key == "ArrowUp" && textarea.selectionStart != 0
+      if (!(e1 || e2 || e3)) {
+        textarea.onKeyDownBackup(e)
+      }
+    }
+    textarea.spellcheck = false
+  })
+}
+
 function graphChanged() {
   let parsed = []
+  let threeExprs = []
   Calc.getState().expressions.list.map(expr => {
     if (expr.type == "text") {
       const lines = (expr.text || "").split("\n")
@@ -446,9 +474,11 @@ function graphChanged() {
             parsed.push(parsedLine)
           }
         })
+        threeExprs.push(expr.id)
       }
     }
   })
+  setThreeExprs(threeExprs)
   let changedDefinitions = {}
   let nextVariables = new Set()
   parsed.forEach(newDef => {
@@ -487,7 +517,26 @@ function rerender() {
   renderer.render(scene, camera);
 }
 
+function injectStyle() {
+  const styleEl = document.createElement('style')
+  // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+  styleEl.innerHTML = `
+    .three-textexpr .dcg-tab .dcg-icon-text::before {
+      content: "";
+      background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: -2px;
+      color: #7b7b7b;
+    }
+  `
+  document.head.appendChild(styleEl)
+}
+
 function init() {
+  injectStyle()
+
   THREE = window.THREE
   Calc = window.Calc
 
