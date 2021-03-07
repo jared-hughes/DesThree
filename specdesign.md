@@ -72,7 +72,7 @@ Looks kinda realistic:
 - ✓ `MeshBasicMaterial` (not affected by lighting, fastest)
 - `MeshToonMaterial`
 - ✓ `MeshLambertMaterial` (faster)
-- `MeshPhongMaterial` (fast)
+- ✓ `MeshPhongMaterial` (fast)
 - `MeshStandardMaterial` (slow)
 - `MeshPhysicalMaterial` (slowest)
 
@@ -82,8 +82,8 @@ Miscellaneous:
 - `ShadowMaterial` (renders only the shadows on an object)
 
 Debug
-- `MeshDepthMaterial`
-- `MeshNormalMetrial`
+- ✓ `MeshDepthMaterial`
+- ✓ `MeshNormalMaterial`
 
 Not considering yet due to complexity
 - `MeshMatcapMaterial`
