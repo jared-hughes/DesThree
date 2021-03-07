@@ -47,6 +47,10 @@ function isDefinitionEqual(a, b) {
 
 function parseLine(line) {
   // let parts = line.match(/^(?:\s*(?<var>\w+)\s*=)?\s*(?<func>\w+)\((?<args>(?:[^;]+(?:;[^;]+)*)?)\)$/)
+  if (line[0] == "#") {
+    // comment
+    return null
+  }
   let parts = line.split("=")
   let variable = null
   if (parts.length > 2) {
@@ -101,10 +105,12 @@ function deleteVariable(variable) {
 
 function changeVariable(variable, value) {
   deleteVariable(variable)
-  values[variable] = value
+  if (value !== null) values[variable] = value
+  variableChanged(variable)
 }
 
 function variableChanged(variable) {
+  console.log("variable changed", variable);
   // TODO: handle cyclic loops
   (dependents[variable] || [])
   .forEach(object => object.afterDepChanged(variable))
@@ -152,7 +158,8 @@ function helperExpression(expr, type, callback) {
 }
 
 class IntermediateObject {
-  constructor(expectedArgs, args) {
+  constructor(expectedArgs, args, threeObject) {
+    this.threeObject = threeObject
     // expectedArgs: [{name:x, type:numericValue}]
     if (args.length !== expectedArgs.length) {
       // shouldn't get to this point
@@ -180,6 +187,9 @@ class IntermediateObject {
         //   throw `3D variable \`${expr}\` not defined`
         // }
         this.dependencies[expr] = expectedArgs[i].name
+        if (values[expr]) {
+          this.afterDepChanged(expr)
+        }
         dependents[expr] = dependents[expr] || new Set()
         dependents[expr].add(this)
       }
@@ -193,19 +203,25 @@ class IntermediateObject {
 
   changeArg(argName, value) {
     this.values[argName] = value
-    this.argChanged(argName, value)
-    if (Object.values(this.values).some(e => e === null || e.isDefined === false)) {
-      if (this.isDefined) {
-        this.isDefined = false
-        variableChanged(this.variable)
-      } else {
-        // not enough args, and currently not defined, so no change
-      }
+    if (value === undefined) {
+      if (this.isDefined) this.setDefined(false)
     } else {
-      this.isDefined = true
-      // HERE can check for cyclic variable definition?
-      variableChanged(this.variable)
+      this.argChanged(argName, value)
+      if (Object.values(this.values).some(e => e === null || e.isDefined === false)) {
+        if (this.isDefined) this.setDefined(false)
+      } else {
+        this.setDefined(true)
+      }
     }
+  }
+
+  setDefined(defined) {
+    this.isDefined = defined
+    if (this.type === Type.OBJECT3D) {
+      this.threeObject.visible = defined
+    }
+    // HERE can check for cyclic variable definition?
+    variableChanged(this.variable)
   }
 
   dispose() {
@@ -227,8 +243,7 @@ class Color extends IntermediateObject {
       {name: 'g', type: Type.NUM},
       {name: 'b', type: Type.NUM},
     ]
-    super(expectedArgs, args)
-    this.threeObject = new THREE.Color()
+    super(expectedArgs, args, new THREE.Color())
   }
 
   static clampMapRGBComponent(x) {
@@ -255,8 +270,7 @@ class MeshMaterial extends IntermediateObject {
     const expectedArgs = [
       {name: 'color', type: Type.COLOR},
     ]
-    super(expectedArgs, args)
-    this.threeObject = new threeObject()
+    super(expectedArgs, args, new threeObject())
   }
 
   argChanged(name, value) {
@@ -292,8 +306,7 @@ class Light extends IntermediateObject {
       {name: 'color', type: Type.COLOR},
       {name: 'intensity', type: Type.NUM},
     ]
-    super(expectedArgs, args)
-    this.threeObject = new threeObject()
+    super(expectedArgs, args, new threeObject())
   }
 
   argChanged(name, value) {
@@ -330,8 +343,7 @@ class Position extends IntermediateObject {
       {name: 'y', type: Type.NUM},
       {name: 'z', type: Type.NUM},
     ]
-    super(expectedArgs, args)
-    this.threeObject = new THREE.Group()
+    super(expectedArgs, args, new THREE.Group())
   }
 
   argChanged(name, value) {
@@ -357,8 +369,7 @@ class IcosahedronGeometry extends IntermediateObject {
       {name: 'radius', type: Type.NUM}, // should default to 1
       {name: 'detail', type: Type.NUM}, // should default to 0
     ]
-    super(expectedArgs, args)
-    this.threeObject = new THREE.IcosahedronGeometry()
+    super(expectedArgs, args, new THREE.IcosahedronGeometry())
   }
 
   argChanged(name, value) {
@@ -383,8 +394,7 @@ class Mesh extends IntermediateObject {
       {name: 'geometry', type: Type.GEOMETRY},
       {name: 'material', type: Type.MATERIAL}
     ]
-    super(expectedArgs, args)
-    this.threeObject = new THREE.Mesh()
+    super(expectedArgs, args, new THREE.Mesh())
   }
 
   argChanged(name, value) {
@@ -409,8 +419,7 @@ class Show extends IntermediateObject {
     const expectedArgs = [
       {name: 'object', type: Type.OBJECT},
     ]
-    super(expectedArgs, args)
-    this.threeObject = null
+    super(expectedArgs, args, null)
   }
 
   argChanged(name, value) {
@@ -452,7 +461,7 @@ function graphChanged() {
   })
   for (let variable in definitions) {
     if (!nextVariables.has(variable)) {
-      deleteVariable(variable)
+      changeVariable(variable, null)
     }
   }
   for (let variable in changedDefinitions) {
@@ -460,7 +469,6 @@ function graphChanged() {
     definitions[variable] = changedDefinitions[variable]
   }
   console.log('defs', definitions)
-  console.log('values', values)
 }
 
 function observeGraph() {
@@ -469,7 +477,13 @@ function observeGraph() {
 }
 
 function rerender() {
-  console.log("rerender", performance.now(), scene, camera);
+  console.groupCollapsed("rerender", performance.now())
+  console.log(scene)
+  console.log(camera)
+  console.log(values)
+  console.log("defined:", Object.entries(values).filter(([e, v]) => v.isDefined).map(([e,v]) => e))
+  console.log("undefined:", Object.entries(values).filter(([e, v]) => !v.isDefined).map(([e,v]) => e))
+  console.groupEnd()
   renderer.render(scene, camera);
 }
 
