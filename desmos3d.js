@@ -45,54 +45,42 @@ function isDefinitionEqual(a, b) {
     && a.args.every((e, i) => b.args[i] == e)
 }
 
-function parseLine(line) {
-  // let parts = line.match(/^(?:\s*(?<var>\w+)\s*=)?\s*(?<func>\w+)\((?<args>(?:[^;]+(?:;[^;]+)*)?)\)$/)
-  if (line[0] == "#") {
-    // comment
-    return null
-  }
-  let parts = line.split("=")
-  let variable = null
-  if (parts.length > 2) {
-    throw "ParseError: more than one `=`"
-  }
-  if (parts.length == 2) {
-    variable = parts.shift().trim()
-  }
-  const match = parts[0].match(/\s*(?<func>\w+)\((?<args>[^)]*)\)/)
-  if (match == null) {
-    // Silent parse error
-    return null
-  }
-  const {func, args: argsString} = match.groups
-  let braceStack = []
-  let args = []
-  let lastArg = ""
-  for (const c of argsString) {
-    if ("([{".includes(c)) {
-      braceStack.push(c)
-    } else if (")]}".includes(c)) {
-      if ("([{"[")]}".indexOf(c)] != braceStack.pop()) {
-        throw "ParseError: mismatched braces"
+function parse(text) {
+  // prune comments
+  text = text.replace(/#[^\n]*\n/, "")
+
+  // the true parsing
+  const regex = /(?<variable>\w+)\s*=\s*(?<func>\w+)\((?<args>[^)]*)\)/g
+  return [...text.matchAll(regex)].map(match => {
+    const {variable, func, args: argsString} = match.groups
+    let braceStack = []
+    let args = []
+    let lastArg = ""
+    for (const c of argsString) {
+      if ("([{".includes(c)) {
+        braceStack.push(c)
+      } else if (")]}".includes(c)) {
+        if ("([{"[")]}".indexOf(c)] != braceStack.pop()) {
+          throw "ParseError: mismatched braces"
+        }
+      }
+      if (c == "," && braceStack.length == 0) {
+        // all braces are closed, so this comma separates arguments
+        args.push(lastArg.trim())
+        lastArg = ""
+      } else {
+        lastArg += c;
       }
     }
-
-    if (c == "," && braceStack.length == 0) {
-      // all braces are closed, so this comma separates arguments
+    if (lastArg != "") {
       args.push(lastArg.trim())
-      lastArg = ""
-    } else {
-      lastArg += c;
     }
-  }
-  if (lastArg != "") {
-    args.push(lastArg.trim())
-  }
-  return {
-    variable,
-    func,
-    args,
-  }
+    return {
+      variable,
+      func,
+      args,
+    }
+  })
 }
 
 function deleteVariable(variable) {
@@ -498,14 +486,10 @@ function graphChanged() {
   let threeExprs = []
   Calc.getState().expressions.list.map(expr => {
     if (expr.type == "text") {
-      const lines = (expr.text || "").split("\n")
-      if (lines[0] == "@three") {
-        lines.slice(1).map(line => {
-          const parsedLine = parseLine(line)
-          if (parsedLine !== null) {
-            parsed.push(parsedLine)
-          }
-        })
+      const text = expr.text || ""
+      const parts = text.split(/^\s*@three\s*/)
+      if (parts.length === 2) {
+        parsed.push(...parse(parts[1]))
         threeExprs.push(expr.id)
       }
     }
@@ -579,6 +563,7 @@ function init() {
     0.1, 1000 // clipping plane
   );
   camera.position.x = 3
+
   camera.lookAt(0,0,0)
 
   renderer = new THREE.WebGLRenderer();
