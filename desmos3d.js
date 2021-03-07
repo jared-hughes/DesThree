@@ -385,7 +385,7 @@ class Position extends IntermediateObject {
   }
 
   _dispose() {
-    this.threeObject.dispose()
+
   }
 }
 
@@ -473,7 +473,7 @@ class Mesh extends IntermediateObject {
   }
 
   _dispose() {
-    this.threeObject.dispose()
+
   }
 }
 
@@ -590,13 +590,16 @@ function graphChanged() {
       const text = expr.text || ""
       const parts = text.split(/^\s*@three\s*/)
       if (parts.length === 2) {
-        parsed.push(...parse(parts[1]))
+        try {
+          parsed.push(...parse(parts[1]))
+        } catch {
+          console.warn("Parse Error. Oh well.")
+        }
         threeExprs.push(expr.id)
       }
     }
   })
   // TODO: check for cyclic definitions
-  // TODO: check for duplicate variables
   // TODO: check for two+ cameras defined
   setThreeExprs(threeExprs)
   let changedDefinitions = {}
@@ -604,6 +607,9 @@ function graphChanged() {
   parsed.forEach(newDef => {
     const variable = newDef.variable;
     const oldDef = definitions[variable]
+    if (nextVariables.has(variable)) {
+      throw `Duplicate variable: ${variable}`
+    }
     nextVariables.add(variable)
     if (!isDefinitionEqual(newDef, oldDef)) {
       changedDefinitions[variable] = newDef
