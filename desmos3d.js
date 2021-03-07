@@ -125,7 +125,7 @@ function changeVariable(variable, value) {
 }
 
 function variableChanged(variable) {
-  console.log("variable changed", variable);
+  // console.log("variable changed", variable);
   (dependents[variable] || [])
   .forEach(object => object.afterDepChanged(variable))
 }
@@ -226,7 +226,7 @@ class IntermediateObject {
       if (this.isDefined) this.setDefined(false)
     } else {
       this.argChanged(argName, value)
-      if (Object.values(this.values).some(e => e === null || e.isDefined === false)) {
+      if (Object.values(this.values).some(e => e === null || e === undefined || e.isDefined === false)) {
         if (this.isDefined) this.setDefined(false)
       } else {
         this.setDefined(true)
@@ -624,7 +624,6 @@ function graphChanged() {
     changeVariable(variable, generateObject(changedDefinitions[variable]))
     definitions[variable] = changedDefinitions[variable]
   }
-  console.log('defs', definitions)
 }
 
 function observeGraph() {
@@ -633,13 +632,13 @@ function observeGraph() {
 }
 
 function rerender() {
-  console.groupCollapsed("rerender", performance.now())
-  console.log(scene)
-  console.log(camera)
-  console.log(values)
-  console.log("defined:", Object.entries(values).filter(([e, v]) => v.isDefined).map(([e,v]) => e))
-  console.log("undefined:", Object.entries(values).filter(([e, v]) => !v.isDefined).map(([e,v]) => e))
-  console.groupEnd()
+  // console.groupCollapsed("rerender", performance.now())
+  // console.log(scene)
+  // console.log(camera)
+  // console.log(values)
+  // console.log("defined:", Object.entries(values).filter(([e, v]) => v.isDefined).map(([e,v]) => e))
+  // console.log("undefined:", Object.entries(values).filter(([e, v]) => !v.isDefined).map(([e,v]) => e))
+  // console.groupEnd()
   renderer.render(scene, camera);
 }
 
