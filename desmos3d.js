@@ -47,16 +47,38 @@ function isDefinitionEqual(a, b) {
 
 function parse(text) {
   // prune comments
-  text = text.replace(/#[^\n]*\n/, "")
+  text = text.replaceAll(/#[^\n]*\n/g, "")
 
-  // the true parsing
-  const regex = /(?<variable>\w+)\s*=\s*(?<func>\w+)\((?<args>[^)]*)\)/g
-  return [...text.matchAll(regex)].map(match => {
-    const {variable, func, args: argsString} = match.groups
-    let braceStack = []
+  let defs = []
+  let index = 0
+  let assignRegex = /\s*(?<variable>\w+)\s*=\s*/y
+  let funcNameRegex = /\s*(?<func>\w+)\s*\(/y
+  while (index < text.length) {
+    const match = assignRegex.exec(text)
+    let variable
+    if (match) {
+      variable = match.groups.variable
+      funcNameRegex.lastIndex = assignRegex.lastIndex
+    } else {
+      throw "ParseError: expected variable assignment"
+    }
+
+    const match2 = funcNameRegex.exec(text)
+    let func
+    if (match2) {
+      func = match2.groups.func
+    } else {
+      throw "ParseError: expected function name"
+    }
+
+    let braceStack = ["("]
     let args = []
     let lastArg = ""
-    for (const c of argsString) {
+    for (index=funcNameRegex.lastIndex; braceStack.length > 0; index++) {
+      if (index >= text.length) {
+        throw "ParseError: EOF before closing function"
+      }
+      const c = text[index]
       if ("([{".includes(c)) {
         braceStack.push(c)
       } else if (")]}".includes(c)) {
@@ -64,23 +86,28 @@ function parse(text) {
           throw "ParseError: mismatched braces"
         }
       }
-      if (c == "," && braceStack.length == 0) {
-        // all braces are closed, so this comma separates arguments
+      if (braceStack.length == 0) {
+        // at this point, the outer function is closed
+        if (lastArg != "") {
+          args.push(lastArg.trim())
+        }
+        defs.push({
+          variable,
+          func,
+          args,
+        })
+      } else if (c == "," && braceStack.length == 1) {
+        // all braces are closed (except the opening paren), so this comma separates arguments
         args.push(lastArg.trim())
         lastArg = ""
       } else {
         lastArg += c;
       }
     }
-    if (lastArg != "") {
-      args.push(lastArg.trim())
-    }
-    return {
-      variable,
-      func,
-      args,
-    }
-  })
+    assignRegex.lastIndex = index
+    funcNameRegex.lastIndex = index
+  }
+  return defs
 }
 
 function deleteVariable(variable) {
