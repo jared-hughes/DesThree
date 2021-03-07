@@ -28,11 +28,11 @@ In order of sidebar of [https://threejs.org/docs/index.html](https://threejs.org
   - `BoxGeometry`
   - `ConeGeometry`
   - `CylinderGeometry`
-  - `PolyhedronGeometry`
-    - `DodecahedronGeometry`
+  - ✓ `PolyhedronGeometry`
+    - ✓ `DodecahedronGeometry`
     - ✓ `IcosahedronGeometry`
-    - `OctahedronGeometry`
-    - `TetrahedronGeometry`
+    - ✓ `OctahedronGeometry`
+    - ✓ `TetrahedronGeometry`
   - `SphereGeometry`
   - `TorusGeometry`
   - `TorusKnotGeometry`

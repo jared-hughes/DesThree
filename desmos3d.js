@@ -11,7 +11,7 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/rz8tcumv52
+// latest graph: https://www.desmos.com/calculator/ovudmkewnj
 
 (function() {
 'use strict';
@@ -119,14 +119,22 @@ function variableChanged(variable) {
 function generateObject(def) {
   const funcs = {
     'ColorRGB': Color,
+    // materials
     MeshBasicMaterial,
     MeshLambertMaterial,
+    // geometries
     IcosahedronGeometry,
+    DodecahedronGeometry,
+    OctahedronGeometry,
+    TetrahedronGeometry,
+    // objects
     Mesh,
-    Position,
-    Show,
+    // lights
     PointLight,
     AmbientLight,
+    // setup
+    Position,
+    Show,
   }
   if (def.func in funcs) {
     let object = new funcs[def.func](def.args)
@@ -181,11 +189,6 @@ class IntermediateObject {
           helper,
         }
       } else {
-        // // can only define desmos3d objects in order
-        // // global onValueChange('geometry') to get list
-        // if (!(expr in values)) {
-        //   throw `3D variable \`${expr}\` not defined`
-        // }
         this.dependencies[expr] = expectedArgs[i].name
         if (values[expr]) {
           this.afterDepChanged(expr)
@@ -361,28 +364,57 @@ class Position extends IntermediateObject {
   }
 }
 
-class IcosahedronGeometry extends IntermediateObject {
+class PolyhedronGeometry extends IntermediateObject {
   static type = Type.GEOMETRY
 
-  constructor(args) {
+  constructor(args, threeConstructor) {
     const expectedArgs = [
       {name: 'radius', type: Type.NUM}, // should default to 1
       {name: 'detail', type: Type.NUM}, // should default to 0
     ]
-    super(expectedArgs, args, new THREE.IcosahedronGeometry())
+    super(expectedArgs, args, new threeConstructor(3, 0))
+    this.threeConstructor = threeConstructor
   }
 
   argChanged(name, value) {
-    // HERE
-    // TODO: parameters: Any modification after instantiation does not change the geometry.
     switch (name) {
       case 'radius':
-        this.threeObject.radius = value
+        // Any modification after instantiation does not change the geometry.
+        // so must create a new object
+        const detail = this.threeObject.parameters.detail
+        this.threeObject.dispose()
+        this.threeObject = new this.threeConstructor(value, detail)
         break
       case 'detail':
-        this.threeObject.detail = value
+        const radius = this.threeObject.parameters.radius
+        this.threeObject.dispose()
+        this.threeObject = new this.threeConstructor(radius, value)
         break
     }
+  }
+}
+
+class IcosahedronGeometry extends PolyhedronGeometry {
+  constructor(args) {
+    super(args, THREE.IcosahedronGeometry)
+  }
+}
+
+class DodecahedronGeometry extends PolyhedronGeometry {
+  constructor(args) {
+    super(args, THREE.DodecahedronGeometry)
+  }
+}
+
+class OctahedronGeometry extends PolyhedronGeometry {
+  constructor(args) {
+    super(args, THREE.OctahedronGeometry)
+  }
+}
+
+class TetrahedronGeometry extends PolyhedronGeometry {
+  constructor(args) {
+    super(args, THREE.TetrahedronGeometry)
   }
 }
 
