@@ -11,7 +11,7 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/ovudmkewnj
+// latest graph: https://www.desmos.com/calculator/aavlvdbll2
 
 (function() {
 'use strict';
@@ -85,7 +85,7 @@ function parse(text) {
 
 function deleteVariable(variable) {
   if (variable in values) {
-    values[variable]?.dispose()
+    values[variable].dispose()
     delete values[variable]
     delete definitions[variable]
   }
@@ -99,7 +99,6 @@ function changeVariable(variable, value) {
 
 function variableChanged(variable) {
   console.log("variable changed", variable);
-  // TODO: handle cyclic loops
   (dependents[variable] || [])
   .forEach(object => object.afterDepChanged(variable))
 }
@@ -120,6 +119,8 @@ function generateObject(def) {
     // lights
     PointLight,
     AmbientLight,
+    // camera
+    PerspectiveCamera,
     // setup
     Position,
     Show,
@@ -211,16 +212,15 @@ class IntermediateObject {
     if (this.type === Type.OBJECT3D) {
       this.threeObject.visible = defined
     }
-    // HERE can check for cyclic variable definition?
     variableChanged(this.variable)
   }
 
   dispose() {
-    // HERE
-    // TODO
+    console.log("disposing", this)
     // this.values.forEach((value, i) => {
     //   value.helper && value.helper.unObserve(value.type)
     // })
+    this._dispose()
   }
 }
 
@@ -252,6 +252,8 @@ class Color extends IntermediateObject {
         break
     }
   }
+
+  _dispose() {}
 }
 
 class MeshMaterial extends IntermediateObject {
@@ -271,6 +273,8 @@ class MeshMaterial extends IntermediateObject {
         break
     }
   }
+
+  _dispose() {}
 }
 
 class MeshBasicMaterial extends MeshMaterial {
@@ -310,6 +314,8 @@ class Light extends IntermediateObject {
         break
     }
   }
+
+  _dispose() {}
 }
 
 class PointLight extends Light {
@@ -350,6 +356,10 @@ class Position extends IntermediateObject {
         this.threeObject.add(value.threeObject)
     }
   }
+
+  _dispose() {
+    this.threeObject.dispose()
+  }
 }
 
 class PolyhedronGeometry extends IntermediateObject {
@@ -379,6 +389,10 @@ class PolyhedronGeometry extends IntermediateObject {
         this.threeObject = new this.threeConstructor(radius, value)
         break
     }
+  }
+
+  _dispose() {
+    this.threeObject.dispose()
   }
 }
 
@@ -430,6 +444,10 @@ class Mesh extends IntermediateObject {
         break
     }
   }
+
+  _dispose() {
+    this.threeObject.dispose()
+  }
 }
 
 class Show extends IntermediateObject {
@@ -451,6 +469,62 @@ class Show extends IntermediateObject {
         break
     }
     rerender()
+  }
+
+  _dispose() {
+    scene.remove(this.threeObject)
+  }
+}
+
+class PerspectiveCamera extends IntermediateObject {
+  static type = Type.CAMERA
+
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'x', type: Type.NUM},
+      {name: 'y', type: Type.NUM},
+      {name: 'z', type: Type.NUM},
+      {name: 'lx', type: Type.NUM},
+      {name: 'ly', type: Type.NUM},
+      {name: 'lz', type: Type.NUM},
+      {name: 'fov', type: Type.NUM},
+    ]
+    super(expectedArgs, args, new THREE.PerspectiveCamera(75, camera.aspect, 0.1, 1000))
+    // this.controls = new OrbitControls(this.threeObject, renderer.domElement)
+    this.lookAt = new THREE.Vector3(0, 0, 0)
+    this.threeObject.lookAt(this.lookAt)
+    camera = this.threeObject
+  }
+
+  argChanged(name, value) {
+    switch (name) {
+      case 'x':
+      case 'y':
+      case 'z':
+        this.threeObject.position[name] = value
+        break
+      case 'lx':
+        this.lookAt.setX(value)
+        break
+      case 'ly':
+        this.lookAt.setY(value)
+        break
+      case 'lz':
+        this.lookAt.setZ(value)
+        break
+      case 'fov':
+        this.threeObject.fov = value
+        break
+    }
+    this.threeObject.lookAt(this.lookAt)
+    camera.updateProjectionMatrix();
+    // this.controls.update()
+    rerender()
+    // camera = this.threeObject
+  }
+
+  _dispose() {
+    initDefaultCamera()
   }
 }
 
@@ -494,6 +568,9 @@ function graphChanged() {
       }
     }
   })
+  // TODO: check for cyclic definitions
+  // TODO: check for duplicate variables
+  // TODO: check for two+ cameras defined
   setThreeExprs(threeExprs)
   let changedDefinitions = {}
   let nextVariables = new Set()
@@ -550,6 +627,25 @@ function injectStyle() {
   document.head.appendChild(styleEl)
 }
 
+function initDefaultCamera() {
+  // default camera position
+  camera = new THREE.PerspectiveCamera(
+    75, // FOV (degrees)
+    1, // aspect ratio, temp until first `applyGraphpaperBounds`
+    0.1, 1000 // clipping plane
+  );
+  camera.position.x = 3
+  camera.lookAt(0,0,0)
+}
+
+function initRenderer() {
+  renderer = new THREE.WebGLRenderer();
+  renderer.domElement.style.position = 'absolute';
+  const container = document.querySelector(".dcg-container")
+  container.prepend(renderer.domElement);
+  container.querySelector(".dcg-grapher").style.opacity = 0
+}
+
 function init() {
   injectStyle()
 
@@ -557,22 +653,9 @@ function init() {
   Calc = window.Calc
 
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(
-    75, // FOV (degrees)
-    1, // aspect ratio, temp until first `applyGraphpaperBounds`
-    0.1, 1000 // clipping plane
-  );
-  camera.position.x = 3
 
-  camera.lookAt(0,0,0)
-
-  renderer = new THREE.WebGLRenderer();
-
-  renderer.domElement.style.position = 'absolute';
-  const container = document.querySelector(".dcg-container")
-  container.prepend(renderer.domElement);
-  container.querySelector(".dcg-grapher").style.opacity = 0.5
-
+  initDefaultCamera()
+  initRenderer()
   observeGraphpaperBounds()
   observeGraph()
 }
