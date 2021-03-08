@@ -11,7 +11,7 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/prmn23bxqz
+// latest graph: https://www.desmos.com/calculator/g70cv6vqxw
 
 (function() {
 'use strict';
@@ -39,7 +39,6 @@ function helperExpression(expr, type, callback) {
   })
   return helper
 }
-
 
 class DesThree {
   constructor() {
@@ -156,9 +155,11 @@ class DesThree {
     }
   }
 
-  changeVariable(variable, value) {
+  changeVariable(variable, valueFunc) {
+    // pass in function instead of value itself to defer construction
+    // until after deleting the variable
     this.deleteVariable(variable)
-    if (value !== null) this.values[variable] = value
+    if (valueFunc !== null) this.values[variable] = valueFunc()
     this.variableChanged(variable)
   }
 
@@ -187,6 +188,7 @@ class DesThree {
       TorusGeometry,
       TorusKnotGeometry,
       CylinderGeometry,
+      FrustumGeometry,
       ConeGeometry,
       BoxGeometry,
       // objects
@@ -202,6 +204,7 @@ class DesThree {
     }
     if (def.func in funcs) {
       let object = new funcs[def.func](def.args)
+      object.init()
       object.variable = def.variable
       return object
     } else {
@@ -292,7 +295,7 @@ class DesThree {
       }
     }
     for (let variable in changedDefinitions) {
-      this.changeVariable(variable, this.generateObject(changedDefinitions[variable]))
+      this.changeVariable(variable, () => this.generateObject(changedDefinitions[variable]))
       this.definitions[variable] = changedDefinitions[variable]
     }
   }
@@ -336,36 +339,45 @@ class DesThree {
 class IntermediateObject {
   constructor(expectedArgs, args, threeObject) {
     this.threeObject = threeObject
-    // expectedArgs: [{name:x, type:numericValue}]
-    if (args.length !== expectedArgs.length) {
-      // shouldn't get to this point
-      throw "Argument length mismatch"
-    }
     this.isDefined = false
     this.values = {}
     this.dependencies = {}
     this.helpers = {}
+    if (args.length > expectedArgs.length) {
+      throw "Too many arguments"
+    }
     if (expectedArgs.length === 0) {
       this.setDefined(true)
     }
-    args.forEach((expr, i) => {
-      const type = expectedArgs[i].type
-      this.values[expectedArgs[i].name] = null;
-      if (type == Type.NUM || type == Type.LIST) {
-        const helper = helperExpression(expr, type, value => {
-          this.changeArg(expectedArgs[i].name, value)
-        })
-        this.helpers[expectedArgs[i].name] = {
-          type,
-          helper,
+    this.expectedArgs = expectedArgs
+    this.args = args
+  }
+
+  init() {
+    this.expectedArgs.forEach((expectedArg, i) => {
+      if (i < this.args.length) {
+        const expr = this.args[i]
+        this.values[expectedArg.name] = null;
+        if (expectedArg.type == Type.NUM || expectedArg.type == Type.LIST) {
+          const helper = helperExpression(expr, expectedArg.type, value => {
+            this.changeArg(expectedArg.name, value)
+          })
+          this.helpers[expectedArg.name] = {
+            type: expectedArg.type,
+            helper,
+          }
+        } else {
+          this.dependencies[expr] = expectedArg.name
+          if (CalcThree.values[expr]) {
+            this.afterDepChanged(expr)
+          }
+          CalcThree.dependents[expr] = CalcThree.dependents[expr] || new Set()
+          CalcThree.dependents[expr].add(this)
         }
+      } else if (i >= this.args.length && expectedArg.default !== undefined) {
+        this.changeArg(expectedArg.name, expectedArg.default)
       } else {
-        this.dependencies[expr] = expectedArgs[i].name
-        if (CalcThree.values[expr]) {
-          this.afterDepChanged(expr)
-        }
-        CalcThree.dependents[expr] = CalcThree.dependents[expr] || new Set()
-        CalcThree.dependents[expr].add(this)
+        throw `Not enough arguments in call to ${this.constructor.name}: ${this.args.length}`
       }
     })
   }
@@ -376,6 +388,7 @@ class IntermediateObject {
   }
 
   changeArg(argName, value) {
+    // TODO: check type of arguments and map over lists
     this.values[argName] = value
     if (value === undefined) {
       if (this.isDefined) this.setDefined(false)
@@ -441,7 +454,7 @@ class MeshMaterial extends IntermediateObject {
 
   constructor(args, threeObject) {
     const expectedArgs = [
-      {name: 'color', type: Type.COLOR},
+      {name: 'color', type: Type.COLOR, default: {threeObject: new THREE.Color(255,255,255)}},
     ]
     super(expectedArgs, args, new threeObject())
   }
@@ -500,10 +513,10 @@ class Light extends IntermediateObject {
 
   constructor(args, threeObject) {
     const expectedArgs = [
-      // NOTE: can add color, distance, decay
+      {name: 'intensity', type: Type.NUM, default: 1},
+      {name: 'color', type: Type.COLOR, default: {threeObject: new THREE.Color(255,255,255)}},
+      // TODO: additional args (distance, decay)
       // https://threejs.org/docs/index.html#api/en/lights/PointLight
-      {name: 'color', type: Type.COLOR},
-      {name: 'intensity', type: Type.NUM},
     ]
     super(expectedArgs, args, new threeObject())
   }
@@ -565,16 +578,15 @@ class PassthroughGeometry extends IntermediateObject {
 
   constructor(expectedArgs, args, threeConstructor) {
     super(expectedArgs, args, new threeConstructor())
+    expectedArgs.order = expectedArgs.order || expectedArgs.map(({name}) => name)
     this.expectedArgs = expectedArgs
     this.threeConstructor = threeConstructor
   }
 
   argChanged(name, value) {
-    let params = this.threeObject.parameters
-    params[name] = value
     this.threeObject.dispose()
     this.threeObject = new this.threeConstructor(
-      ...this.expectedArgs.map(({name}) => params[name])
+      ...this.expectedArgs.order.map(name => this.values[name])
     )
   }
 
@@ -587,7 +599,7 @@ class PolyhedronGeometry extends PassthroughGeometry {
   constructor(args, threeConstructor) {
     const expectedArgs = [
       {name: 'radius', type: Type.NUM},
-      {name: 'detail', type: Type.NUM},
+      {name: 'detail', type: Type.NUM, default: 0},
     ]
     super(expectedArgs, args, threeConstructor)
   }
@@ -621,8 +633,8 @@ class SphereGeometry extends PassthroughGeometry {
   constructor(args) {
     const expectedArgs = [
       {name: 'radius', type: Type.NUM},
-      {name: 'widthSegments', type: Type.NUM},
-      {name: 'heightSegments', type: Type.NUM},
+      {name: 'widthSegments', type: Type.NUM, default: 16},
+      {name: 'heightSegments', type: Type.NUM, default: 12},
       // TODO: more args
     ]
     super(expectedArgs, args, THREE.SphereGeometry)
@@ -634,9 +646,9 @@ class TorusGeometry extends PassthroughGeometry {
     const expectedArgs = [
       {name: 'radius', type: Type.NUM},
       {name: 'tube', type: Type.NUM},
-      {name: 'radialSegments', type: Type.NUM},
-      {name: 'tubularSegments', type: Type.NUM},
-      {name: 'arc', type: Type.NUM},
+      {name: 'radialSegments', type: Type.NUM, default: 8},
+      {name: 'tubularSegments', type: Type.NUM, default: 32},
+      {name: 'arc', type: Type.NUM, default: 2*Math.PI},
     ]
     super(expectedArgs, args, THREE.TorusGeometry)
   }
@@ -647,10 +659,11 @@ class TorusKnotGeometry extends PassthroughGeometry {
     const expectedArgs = [
       {name: 'radius', type: Type.NUM},
       {name: 'tube', type: Type.NUM},
-      {name: 'radialSegments', type: Type.NUM},
-      {name: 'tubularSegments', type: Type.NUM},
-      {name: 'p', type: Type.NUM},
-      {name: 'q', type: Type.NUM},
+      // note that this is in the reverse order of TorusGeometry
+      {name: 'tubularSegments', type: Type.NUM, default: 64},
+      {name: 'radialSegments', type: Type.NUM, default: 8},
+      {name: 'p', type: Type.NUM, default: 2},
+      {name: 'q', type: Type.NUM, default: 3},
     ]
     super(expectedArgs, args, THREE.TorusKnotGeometry)
   }
@@ -673,24 +686,38 @@ class ConeGeometry extends PassthroughGeometry {
     const expectedArgs = [
       {name: 'radius', type: Type.NUM},
       {name: 'height', type: Type.NUM},
-      {name: 'radialSegments', type: Type.NUM},
-      {name: 'heightSegments', type: Type.NUM},
-      // TODO: more args
+      {name: 'radialSegments', type: Type.NUM, default: 16},
+      {name: 'heightSegments', type: Type.NUM, default: 1},
+      // TODO: more args (see FrustumGeometry)
     ]
     super(expectedArgs, args, THREE.ConeGeometry)
+  }
+}
+
+class FrustumGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'radiusTop', type: Type.NUM},
+      {name: 'radiusBottom', type: Type.NUM},
+      {name: 'height', type: Type.NUM},
+      {name: 'radialSegments', type: Type.NUM, default: 16},
+      {name: 'heightSegments', type: Type.NUM, default: 1},
+      // TODO: more args (update ConeGeometry & CylinderGeometry)
+    ]
+    super(expectedArgs, args, THREE.CylinderGeometry)
   }
 }
 
 class CylinderGeometry extends PassthroughGeometry {
   constructor(args) {
     const expectedArgs = [
-      {name: 'radiusTop', type: Type.NUM},
-      {name: 'radiusBottom', type: Type.NUM},
+      {name: 'radius', type: Type.NUM},
       {name: 'height', type: Type.NUM},
-      {name: 'radialSegments', type: Type.NUM},
-      {name: 'heightSegments', type: Type.NUM},
-      // TODO: more args
+      {name: 'radialSegments', type: Type.NUM, default: 16},
+      {name: 'heightSegments', type: Type.NUM, default: 1},
+      // TODO: more args (see FrustumGeometry)
     ]
+    expectedArgs.order = ['radius', 'radius', 'height', 'radialSegments', 'heightSegments']
     super(expectedArgs, args, THREE.CylinderGeometry)
   }
 }
@@ -757,18 +784,19 @@ class PerspectiveCamera extends IntermediateObject {
       {name: 'x', type: Type.NUM},
       {name: 'y', type: Type.NUM},
       {name: 'z', type: Type.NUM},
-      {name: 'lx', type: Type.NUM},
-      {name: 'ly', type: Type.NUM},
-      {name: 'lz', type: Type.NUM},
-      {name: 'fov', type: Type.NUM},
-      {name: 'near', type: Type.NUM},
-      {name: 'far', type: Type.NUM},
+      {name: 'lx', type: Type.NUM, default: 0},
+      {name: 'ly', type: Type.NUM, default: 0},
+      {name: 'lz', type: Type.NUM, default: 0},
+      {name: 'fov', type: Type.NUM, default: 75},
+      {name: 'near', type: Type.NUM, default: 0.1},
+      {name: 'far', type: Type.NUM, default: 1000},
     ]
     super(expectedArgs, args, new THREE.PerspectiveCamera(75, CalcThree.camera.aspect, 0.1, 1000))
     // this.controls = new OrbitControls(this.threeObject, renderer.domElement)
     this.lookAt = new THREE.Vector3(0, 0, 0)
     this.threeObject.lookAt(this.lookAt)
     CalcThree.camera = this.threeObject
+    CalcThree.applyGraphpaperBounds()
   }
 
   argChanged(name, value) {
