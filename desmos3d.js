@@ -11,7 +11,7 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/t6eycvwnzx
+// latest graph: https://www.desmos.com/calculator/prmn23bxqz
 
 (function() {
 'use strict';
@@ -183,6 +183,12 @@ class DesThree {
       DodecahedronGeometry,
       OctahedronGeometry,
       TetrahedronGeometry,
+      SphereGeometry,
+      TorusGeometry,
+      TorusKnotGeometry,
+      CylinderGeometry,
+      ConeGeometry,
+      BoxGeometry,
       // objects
       Mesh,
       // lights
@@ -554,37 +560,36 @@ class Position extends IntermediateObject {
   }
 }
 
-class PolyhedronGeometry extends IntermediateObject {
+class PassthroughGeometry extends IntermediateObject {
   static type = Type.GEOMETRY
 
-  constructor(args, threeConstructor) {
-    const expectedArgs = [
-      {name: 'radius', type: Type.NUM}, // should default to 1
-      {name: 'detail', type: Type.NUM}, // should default to 0
-    ]
-    super(expectedArgs, args, new threeConstructor(3, 0))
+  constructor(expectedArgs, args, threeConstructor) {
+    super(expectedArgs, args, new threeConstructor())
+    this.expectedArgs = expectedArgs
     this.threeConstructor = threeConstructor
   }
 
   argChanged(name, value) {
-    switch (name) {
-      case 'radius':
-        // Any modification after instantiation does not change the geometry.
-        // so must create a new object
-        const detail = this.threeObject.parameters.detail
-        this.threeObject.dispose()
-        this.threeObject = new this.threeConstructor(value, detail)
-        break
-      case 'detail':
-        const radius = this.threeObject.parameters.radius
-        this.threeObject.dispose()
-        this.threeObject = new this.threeConstructor(radius, value)
-        break
-    }
+    let params = this.threeObject.parameters
+    params[name] = value
+    this.threeObject.dispose()
+    this.threeObject = new this.threeConstructor(
+      ...this.expectedArgs.map(({name}) => params[name])
+    )
   }
 
   _dispose() {
     this.threeObject.dispose()
+  }
+}
+
+class PolyhedronGeometry extends PassthroughGeometry {
+  constructor(args, threeConstructor) {
+    const expectedArgs = [
+      {name: 'radius', type: Type.NUM},
+      {name: 'detail', type: Type.NUM},
+    ]
+    super(expectedArgs, args, threeConstructor)
   }
 }
 
@@ -609,6 +614,84 @@ class OctahedronGeometry extends PolyhedronGeometry {
 class TetrahedronGeometry extends PolyhedronGeometry {
   constructor(args) {
     super(args, THREE.TetrahedronGeometry)
+  }
+}
+
+class SphereGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'radius', type: Type.NUM},
+      {name: 'widthSegments', type: Type.NUM},
+      {name: 'heightSegments', type: Type.NUM},
+      // TODO: more args
+    ]
+    super(expectedArgs, args, THREE.SphereGeometry)
+  }
+}
+
+class TorusGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'radius', type: Type.NUM},
+      {name: 'tube', type: Type.NUM},
+      {name: 'radialSegments', type: Type.NUM},
+      {name: 'tubularSegments', type: Type.NUM},
+      {name: 'arc', type: Type.NUM},
+    ]
+    super(expectedArgs, args, THREE.TorusGeometry)
+  }
+}
+
+class TorusKnotGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'radius', type: Type.NUM},
+      {name: 'tube', type: Type.NUM},
+      {name: 'radialSegments', type: Type.NUM},
+      {name: 'tubularSegments', type: Type.NUM},
+      {name: 'p', type: Type.NUM},
+      {name: 'q', type: Type.NUM},
+    ]
+    super(expectedArgs, args, THREE.TorusKnotGeometry)
+  }
+}
+
+class BoxGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'width', type: Type.NUM},
+      {name: 'height', type: Type.NUM},
+      {name: 'depth', type: Type.NUM},
+      // TODO: more args
+    ]
+    super(expectedArgs, args, THREE.BoxGeometry)
+  }
+}
+
+class ConeGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'radius', type: Type.NUM},
+      {name: 'height', type: Type.NUM},
+      {name: 'radialSegments', type: Type.NUM},
+      {name: 'heightSegments', type: Type.NUM},
+      // TODO: more args
+    ]
+    super(expectedArgs, args, THREE.ConeGeometry)
+  }
+}
+
+class CylinderGeometry extends PassthroughGeometry {
+  constructor(args) {
+    const expectedArgs = [
+      {name: 'radiusTop', type: Type.NUM},
+      {name: 'radiusBottom', type: Type.NUM},
+      {name: 'height', type: Type.NUM},
+      {name: 'radialSegments', type: Type.NUM},
+      {name: 'heightSegments', type: Type.NUM},
+      // TODO: more args
+    ]
+    super(expectedArgs, args, THREE.CylinderGeometry)
   }
 }
 

@@ -25,17 +25,17 @@ In order of sidebar of [https://threejs.org/docs/index.html](https://threejs.org
   - `CircleGeometry`
   - `PlaneGeometry`
 - 3D Geometries taking only numbers as arguments
-  - `BoxGeometry`
-  - `ConeGeometry`
-  - `CylinderGeometry`
+  - ✓ `BoxGeometry`
+  - ✓ `ConeGeometry`
+  - ✓ `CylinderGeometry`
   - ✓ `PolyhedronGeometry`
     - ✓ `DodecahedronGeometry`
     - ✓ `IcosahedronGeometry`
     - ✓ `OctahedronGeometry`
     - ✓ `TetrahedronGeometry`
-  - `SphereGeometry`
-  - `TorusGeometry`
-  - `TorusKnotGeometry`
+  - ✓ `SphereGeometry`
+  - ✓ `TorusGeometry`
+  - ✓ `TorusKnotGeometry`
 - Take another geometry as input
   - `EdgesGeometry`
   - `WireframeGeometry`
