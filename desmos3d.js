@@ -11,7 +11,7 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/g70cv6vqxw
+// latest graph: https://www.desmos.com/calculator/oqacytx08i
 
 (function() {
 'use strict';
@@ -41,6 +41,41 @@ function helperExpression(expr, type, callback) {
 }
 
 class DesThree {
+  exprPrefix = "@3"
+
+  funcs = {
+    'ColorRGB': Color,
+    // materials
+    MeshBasicMaterial,
+    MeshLambertMaterial,
+    MeshToonMaterial,
+    MeshNormalMaterial,
+    MeshDepthMaterial,
+    MeshPhongMaterial,
+    // geometries
+    IcosahedronGeometry,
+    DodecahedronGeometry,
+    OctahedronGeometry,
+    TetrahedronGeometry,
+    SphereGeometry,
+    TorusGeometry,
+    TorusKnotGeometry,
+    CylinderGeometry,
+    FrustumGeometry,
+    ConeGeometry,
+    BoxGeometry,
+    // objects
+    Mesh,
+    // lights
+    PointLight,
+    AmbientLight,
+    // camera
+    PerspectiveCamera,
+    // setup
+    Position,
+    Show,
+  }
+
   constructor() {
     this.renderer = null
     this.scene = new THREE.Scene()
@@ -48,6 +83,7 @@ class DesThree {
     this.definitions = {}
     this.values = {}
     this.dependents = {}
+    this.maxFuncNameLength = Math.max(...Object.keys(this.funcs).map(c => c.length))
   }
 
   init() {
@@ -76,82 +112,10 @@ class DesThree {
     Calc.observe('graphpaperBounds', () => this.applyGraphpaperBounds());
   }
 
-  isDefinitionEqual(a, b) {
-    return a && b && a.func == b.func
-    && a.args.length == b.args.length
-    && a.args.every((e, i) => b.args[i] == e)
-  }
-
-  parse(text) {
-    // prune comments
-    text = text.replaceAll(/#[^\n]*\n/g, "")
-
-    let defs = []
-    let index = 0
-    let assignRegex = /\s*(?<variable>\w+)\s*=\s*/y
-    let funcNameRegex = /\s*(?<func>\w+)\s*\(/y
-    while (index < text.length) {
-      const match = assignRegex.exec(text)
-      let variable
-      if (match) {
-        variable = match.groups.variable
-        funcNameRegex.lastIndex = assignRegex.lastIndex
-      } else {
-        throw "ParseError: expected variable assignment"
-      }
-
-      const match2 = funcNameRegex.exec(text)
-      let func
-      if (match2) {
-        func = match2.groups.func
-      } else {
-        throw "ParseError: expected function name"
-      }
-
-      let braceStack = ["("]
-      let args = []
-      let lastArg = ""
-      for (index=funcNameRegex.lastIndex; braceStack.length > 0; index++) {
-        if (index >= text.length) {
-          throw "ParseError: EOF before closing function"
-        }
-        const c = text[index]
-        if ("([{".includes(c)) {
-          braceStack.push(c)
-        } else if (")]}".includes(c)) {
-          if ("([{"[")]}".indexOf(c)] != braceStack.pop()) {
-            throw "ParseError: mismatched braces"
-          }
-        }
-        if (braceStack.length == 0) {
-          // at this point, the outer function is closed
-          if (lastArg != "") {
-            args.push(lastArg.trim())
-          }
-          defs.push({
-            variable,
-            func,
-            args,
-          })
-        } else if (c == "," && braceStack.length == 1) {
-          // all braces are closed (except the opening paren), so this comma separates arguments
-          args.push(lastArg.trim())
-          lastArg = ""
-        } else {
-          lastArg += c;
-        }
-      }
-      assignRegex.lastIndex = index
-      funcNameRegex.lastIndex = index
-    }
-    return defs
-  }
-
   deleteVariable(variable) {
     if (variable in this.values) {
       this.values[variable].dispose()
       delete this.values[variable]
-      delete this.definitions[variable]
     }
   }
 
@@ -170,40 +134,8 @@ class DesThree {
   }
 
   generateObject(def) {
-    const funcs = {
-      'ColorRGB': Color,
-      // materials
-      MeshBasicMaterial,
-      MeshLambertMaterial,
-      MeshToonMaterial,
-      MeshNormalMaterial,
-      MeshDepthMaterial,
-      MeshPhongMaterial,
-      // geometries
-      IcosahedronGeometry,
-      DodecahedronGeometry,
-      OctahedronGeometry,
-      TetrahedronGeometry,
-      SphereGeometry,
-      TorusGeometry,
-      TorusKnotGeometry,
-      CylinderGeometry,
-      FrustumGeometry,
-      ConeGeometry,
-      BoxGeometry,
-      // objects
-      Mesh,
-      // lights
-      PointLight,
-      AmbientLight,
-      // camera
-      PerspectiveCamera,
-      // setup
-      Position,
-      Show,
-    }
-    if (def.func in funcs) {
-      let object = new funcs[def.func](def.args)
+    if (def.func in this.funcs) {
+      let object = new this.funcs[def.func](def.args)
       object.init()
       object.variable = def.variable
       return object
@@ -213,91 +145,228 @@ class DesThree {
   }
 
   setThreeExprs(ids) {
-    document.querySelectorAll('.three-textexpr')
+    // TODO
+    document.querySelectorAll('.three-expr')
     .forEach(el => {
-      el.classList.remove('three-textexpr')
-      // revert "enter" starting the next element
-      const textarea = el.querySelector('textarea')
-      textarea.onkeydown = textarea.onKeyDownBackup
-      textarea.spellcheck = true
+      el.classList.remove('three-expr')
     })
+    const exprList = document.querySelector(".dcg-expressionlist")
     ids.forEach(id => {
-      const el = document.querySelector(`.dcg-expressiontext[expr-id="${id}"]`)
-      el.classList.add('three-textexpr')
-      // suppress "enter" starting the next element
-      const textarea = el.querySelector('textarea')
-      textarea.onKeyDownBackup = textarea.onkeydown
-      textarea.onkeydown = e => {
-        const e1 = e.key == "Enter" && textarea.selectionEnd != textarea.value.length
-        const e2 = e.key == "ArrowDown" && textarea.selectionEnd != textarea.value.length
-        const e3 = e.key == "ArrowUp" && textarea.selectionStart != 0
-        if (!(e1 || e2 || e3)) {
-          textarea.onKeyDownBackup(e)
-        }
-      }
-      textarea.spellcheck = false
+      const outerDomNode = exprList.querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
+      let autoOperatorNames = outerDomNode.querySelector(".dcg-mq-math-mode")._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
+      Object.keys(this.funcs).forEach(c => {
+        autoOperatorNames[c] = c
+      })
+      autoOperatorNames._maxLength = Math.max(this.maxFuncNameLength, autoOperatorNames._maxLength)
+      outerDomNode.classList.add('three-expr')
     })
   }
 
   injectStyle() {
     const styleEl = document.createElement('style')
     // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    // Data URI with https://websemantics.uk/tools/image-to-data-uri-converter/
     styleEl.innerHTML = `
-      .three-textexpr .dcg-tab .dcg-icon-text::before {
+      .three-expr .dcg-tab-interior .dcg-tooltip-hit-area-container {
+        display: none
+      }
+      .three-expr .dcg-tab-interior .dcg-expression-icon-container::before {
         content: "";
-        background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
+        background-image: url(data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjN2I3YjdiIiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
         position: absolute;
         width: 20px;
         height: 20px;
-        left: -2px;
-        color: #7b7b7b;
+        top: 2px;
+        left: 50%;
+        transform: translateX(-50%)
+      }
+      .three-expr .dcg-expression-mathquill .dcg-mq-root-block > span:nth-child(-n+2) {
+        display: none;
       }
     `
     document.head.appendChild(styleEl)
   }
 
-  graphChanged() {
-    let parsed = []
-    let threeExprs = []
-    Calc.getState().expressions.list.map(expr => {
-      if (expr.type == "text") {
-        const text = expr.text || ""
-        const parts = text.split(/^\s*@three\s*/)
-        if (parts.length === 2) {
-          try {
-            parsed.push(...this.parse(parts[1]))
-          } catch {
-            console.warn("Parse Error. Oh well.")
-          }
-          threeExprs.push(expr.id)
+  parseAssignment(text, index) {
+    const assignRegex = /\s*(?<variable>\w+)\s*=\s*/y
+    assignRegex.lastIndex = index
+    const match = assignRegex.exec(text)
+    if (match) {
+      return {
+        variable: match.groups.variable,
+        nextIndex: assignRegex.lastIndex
+      }
+    } else {
+      this.maxExpr = (this.maxExpr || 0) + 1
+      return {
+        variable: "__expr" + this.maxExpr,
+        nextIndex: index
+      }
+    }
+  }
+
+  parseFuncName(text, index) {
+    const funcNameRegex = /\s*(?:\\operatorname{)?(?<func>\w+)}?\s*\(/y
+    funcNameRegex.lastIndex = index
+    const match = funcNameRegex.exec(text)
+
+    if (match) {
+      return {
+        func: match.groups.func,
+        nextIndex: funcNameRegex.lastIndex
+      }
+    } else {
+      throw "ParseError: expected function name"
+    }
+  }
+
+  parseDesmos(text, index) {
+    let braceStack = []
+    let desmosLatex = ""
+    for (; !([',',')'].includes(text[index]) && braceStack.length == 0); index++) {
+      if (index >= text.length) {
+        throw "ParseError: EOF before matched brace in DesmosLatex"
+      }
+      const c = text[index]
+      if ("([{".includes(c)) {
+        braceStack.push(c)
+      } else if (")]}".includes(c)) {
+        if ("([{"[")]}".indexOf(c)] != braceStack.pop()) {
+          throw "ParseError: mismatched braces"
         }
       }
+      desmosLatex += c
+    }
+    return {
+      latex: desmosLatex.trim(),
+      nextIndex: index,
+    }
+  }
+
+  parseDesThreeVariable(text, index) {
+    const variableRegex = /\s*(?<variable>\w+)\s*(?=\)|,)/y
+    variableRegex.lastIndex = index
+    const match = variableRegex.exec(text)
+
+    if (match) {
+      return {
+        variable: match.groups.variable,
+        nextIndex: variableRegex.lastIndex,
+      }
+    } else {
+      return null
+    }
+  }
+
+  parseDesThree(text, index) {
+    const desVariable = this.parseDesThreeVariable(text, index)
+    if (desVariable) {
+      return {
+        defs: [
+          {
+            variable: desVariable.variable,
+            func: null,
+            args: null,
+          }
+        ],
+        nextIndex: desVariable.nextIndex,
+      }
+    }
+
+    const {variable, nextIndex: i1} = this.parseAssignment(text, index)
+    const {func, nextIndex: i2} = this.parseFuncName(text, i1)
+    index = i2
+
+    if (!func in this.funcs) {
+      throw `Unidentified function: ${func}`
+    }
+    const expectedArgs = this.funcs[func].expectedArgs()
+    let defs = []
+    let args = []
+
+    // 0-argument function
+    const zeroArgument = text[index] == ')'
+    for (; !zeroArgument && text[index-1] != ')'; index++) {
+      if (index >= text.length) {
+        throw "ParseError: EOF before closing DesThree matched brace"
+      }
+      const expectedType = expectedArgs[args.length].type
+      if (expectedType === Type.NUM || expectedType === Type.LIST) {
+        const {latex, nextIndex: i3} = this.parseDesmos(text, index)
+        index = i3
+        args.push(latex)
+      } else {
+        const {defs: argDefs, nextIndex: i4} = this.parseDesThree(text, index)
+        index = i4
+        defs.push(...argDefs)
+        args.push(argDefs[argDefs.length-1].variable)
+      }
+    }
+
+    defs.push({
+      variable,
+      func,
+      args,
     })
+
+    // return this function's definition preceded by all arguments' definitions
+    return {
+      defs,
+      nextIndex: index,
+    }
+  }
+
+  graphChanged() {
+    // TODO: pass expression id into inner argument variable generator
+    let threeExprs = new Set()
+    let nextDefinitions = {} // {[expression id]: rawLatex}
+    let nextExprVariables = {} // {[expression id]: [list of affected variables]}
+    let nextVariables = new Set()
+    Calc.getState().expressions.list.map(expr => {
+    // try{
+      const rawLatex = expr.latex || ""
+      if (expr.type == "expression" && rawLatex.startsWith(this.exprPrefix)) {
+        nextDefinitions[expr.id] = rawLatex
+        threeExprs.add(expr.id)
+        if (this.definitions[expr.id] == rawLatex) {
+          // definition remains same; no change
+          nextExprVariables[expr.id] = this.exprVariables[expr.id]
+          this.exprVariables[expr.id].forEach(v => nextVariables.add(v))
+        } else {
+          // definition changed to a new definition
+          const latex = rawLatex
+            .slice(this.exprPrefix.length)
+            .replaceAll(/\\left|\\right/g, "")
+            .replaceAll(/\\ /g, " ")
+          const {defs} = this.parseDesThree(latex, 0)
+          nextExprVariables[expr.id] = []
+          defs.forEach(newDef => {
+            if (!newDef.func) return
+            const variable = newDef.variable;
+            if (nextVariables.has(variable)) {
+              throw `Duplicate variable: ${variable}`
+            }
+            nextVariables.add(variable)
+            nextExprVariables[expr.id].push(variable)
+            // TODO: know this is a fresh variable?
+            this.changeVariable(variable, () => this.generateObject(newDef))
+          })
+        }
+      }
+    // } catch {console.warn("ParseError. Proper handling TODO")}
+    })
+
     // TODO: check for cyclic definitions
     // TODO: check for two+ cameras defined
     this.setThreeExprs(threeExprs)
-    let changedDefinitions = {}
-    let nextVariables = new Set()
-    parsed.forEach(newDef => {
-      const variable = newDef.variable;
-      const oldDef = this.definitions[variable]
-      if (nextVariables.has(variable)) {
-        throw `Duplicate variable: ${variable}`
-      }
-      nextVariables.add(variable)
-      if (!this.isDefinitionEqual(newDef, oldDef)) {
-        changedDefinitions[variable] = newDef
-      }
-    })
-    for (let variable in this.definitions) {
+    for (let variable in this.values) {
       if (!nextVariables.has(variable)) {
+        // this variable was deleted from use
         this.changeVariable(variable, null)
       }
     }
-    for (let variable in changedDefinitions) {
-      this.changeVariable(variable, () => this.generateObject(changedDefinitions[variable]))
-      this.definitions[variable] = changedDefinitions[variable]
-    }
+    this.definitions = nextDefinitions
+    this.exprVariables = nextExprVariables
   }
 
   observeGraph() {
@@ -337,24 +406,21 @@ class DesThree {
 }
 
 class IntermediateObject {
-  constructor(expectedArgs, args, threeObject) {
+  constructor(args, threeObject) {
     this.threeObject = threeObject
     this.isDefined = false
     this.values = {}
     this.dependencies = {}
     this.helpers = {}
-    if (args.length > expectedArgs.length) {
-      throw "Too many arguments"
-    }
-    if (expectedArgs.length === 0) {
+    if (this.constructor.expectedArgs().length === 0) {
       this.setDefined(true)
     }
-    this.expectedArgs = expectedArgs
     this.args = args
   }
 
   init() {
-    this.expectedArgs.forEach((expectedArg, i) => {
+    console.log("Initializing", this)
+    this.constructor.expectedArgs().forEach((expectedArg, i) => {
       if (i < this.args.length) {
         const expr = this.args[i]
         this.values[expectedArg.name] = null;
@@ -411,7 +477,7 @@ class IntermediateObject {
   }
 
   dispose() {
-    console.log("disposing", this)
+    console.log("Disposing", this)
     // this.values.forEach((value, i) => {
     //   value.helper && value.helper.unObserve(value.type)
     // })
@@ -422,14 +488,17 @@ class IntermediateObject {
 class Color extends IntermediateObject {
   static type = Type.COLOR
 
-  // forced to do this while there is no observe on advancedStyling colors
-  constructor(args) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'r', type: Type.NUM},
       {name: 'g', type: Type.NUM},
       {name: 'b', type: Type.NUM},
     ]
-    super(expectedArgs, args, new THREE.Color())
+  }
+
+  // forced to do this while there is no observe on advancedStyling colors
+  constructor(args) {
+    super(args, new THREE.Color())
   }
 
   static clampMapRGBComponent(x) {
@@ -452,11 +521,14 @@ class Color extends IntermediateObject {
 class MeshMaterial extends IntermediateObject {
   static type = Type.MATERIAL
 
-  constructor(args, threeObject) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'color', type: Type.COLOR, default: {threeObject: new THREE.Color(255,255,255)}},
     ]
-    super(expectedArgs, args, new threeObject())
+  }
+
+  constructor(args, threeObject) {
+    super(args, new threeObject())
   }
 
   argChanged(name, value) {
@@ -495,30 +567,43 @@ class MeshToonMaterial extends MeshMaterial {
 }
 
 class MeshNormalMaterial extends IntermediateObject {
+  static type = Type.MATERIAL
+
+  static expectedArgs() {
+    return []
+  }
+
   constructor(args) {
-    super([], args, new THREE.MeshNormalMaterial())
+    super(args, new THREE.MeshNormalMaterial())
   }
 }
 
 class MeshDepthMaterial extends IntermediateObject {
+  static expectedArgs() {
+    return []
+  }
+
   // Because we use a logarithmic depth buffer, camera has to be *very*
   // close to the object to get any lightness (close to near value of clipping plane)
   constructor(args) {
-    super([], args, new THREE.MeshDepthMaterial())
+    super(args, new THREE.MeshDepthMaterial())
   }
 }
 
 class Light extends IntermediateObject {
   static type = Type.OBJECT
 
-  constructor(args, threeObject) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'intensity', type: Type.NUM, default: 1},
       {name: 'color', type: Type.COLOR, default: {threeObject: new THREE.Color(255,255,255)}},
       // TODO: additional args (distance, decay)
       // https://threejs.org/docs/index.html#api/en/lights/PointLight
     ]
-    super(expectedArgs, args, new threeObject())
+  }
+
+  constructor(args, threeObject) {
+    super(args, new threeObject())
   }
 
   argChanged(name, value) {
@@ -548,14 +633,17 @@ class AmbientLight extends Light {
 class Position extends IntermediateObject {
   static type = Type.OBJECT
 
-  constructor(args) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'object', type: Type.OBJECT},
       {name: 'x', type: Type.NUM},
       {name: 'y', type: Type.NUM},
       {name: 'z', type: Type.NUM},
     ]
-    super(expectedArgs, args, new THREE.Group())
+  }
+
+  constructor(args) {
+    super(args, new THREE.Group())
   }
 
   argChanged(name, value) {
@@ -576,17 +664,21 @@ class Position extends IntermediateObject {
 class PassthroughGeometry extends IntermediateObject {
   static type = Type.GEOMETRY
 
-  constructor(expectedArgs, args, threeConstructor) {
-    super(expectedArgs, args, new threeConstructor())
+  static expectedArgs() {
+    let expectedArgs = this._expectedArgs()
     expectedArgs.order = expectedArgs.order || expectedArgs.map(({name}) => name)
-    this.expectedArgs = expectedArgs
+    return expectedArgs
+  }
+
+  constructor(args, threeConstructor) {
+    super(args, new threeConstructor())
     this.threeConstructor = threeConstructor
   }
 
   argChanged(name, value) {
     this.threeObject.dispose()
     this.threeObject = new this.threeConstructor(
-      ...this.expectedArgs.order.map(name => this.values[name])
+      ...this.constructor.expectedArgs().order.map(name => this.values[name])
     )
   }
 
@@ -596,12 +688,15 @@ class PassthroughGeometry extends IntermediateObject {
 }
 
 class PolyhedronGeometry extends PassthroughGeometry {
-  constructor(args, threeConstructor) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'radius', type: Type.NUM},
       {name: 'detail', type: Type.NUM, default: 0},
     ]
-    super(expectedArgs, args, threeConstructor)
+  }
+
+  constructor(args, threeConstructor) {
+    super(args, threeConstructor)
   }
 }
 
@@ -630,33 +725,39 @@ class TetrahedronGeometry extends PolyhedronGeometry {
 }
 
 class SphereGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'radius', type: Type.NUM},
       {name: 'widthSegments', type: Type.NUM, default: 16},
       {name: 'heightSegments', type: Type.NUM, default: 12},
       // TODO: more args
     ]
-    super(expectedArgs, args, THREE.SphereGeometry)
+  }
+
+  constructor(args) {
+    super(args, THREE.SphereGeometry)
   }
 }
 
 class TorusGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'radius', type: Type.NUM},
       {name: 'tube', type: Type.NUM},
       {name: 'radialSegments', type: Type.NUM, default: 8},
       {name: 'tubularSegments', type: Type.NUM, default: 32},
       {name: 'arc', type: Type.NUM, default: 2*Math.PI},
     ]
-    super(expectedArgs, args, THREE.TorusGeometry)
+  }
+
+  constructor(args) {
+    super(args, THREE.TorusGeometry)
   }
 }
 
 class TorusKnotGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'radius', type: Type.NUM},
       {name: 'tube', type: Type.NUM},
       // note that this is in the reverse order of TorusGeometry
@@ -665,38 +766,45 @@ class TorusKnotGeometry extends PassthroughGeometry {
       {name: 'p', type: Type.NUM, default: 2},
       {name: 'q', type: Type.NUM, default: 3},
     ]
-    super(expectedArgs, args, THREE.TorusKnotGeometry)
+  }
+
+  constructor(args) {
+    super(args, THREE.TorusKnotGeometry)
   }
 }
 
 class BoxGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'width', type: Type.NUM},
       {name: 'height', type: Type.NUM},
       {name: 'depth', type: Type.NUM},
       // TODO: more args
     ]
-    super(expectedArgs, args, THREE.BoxGeometry)
+  }
+  constructor(args) {
+    super(args, THREE.BoxGeometry)
   }
 }
 
 class ConeGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'radius', type: Type.NUM},
       {name: 'height', type: Type.NUM},
       {name: 'radialSegments', type: Type.NUM, default: 16},
       {name: 'heightSegments', type: Type.NUM, default: 1},
       // TODO: more args (see FrustumGeometry)
     ]
-    super(expectedArgs, args, THREE.ConeGeometry)
+  }
+  constructor(args) {
+    super(args, THREE.ConeGeometry)
   }
 }
 
 class FrustumGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    return [
       {name: 'radiusTop', type: Type.NUM},
       {name: 'radiusBottom', type: Type.NUM},
       {name: 'height', type: Type.NUM},
@@ -704,13 +812,16 @@ class FrustumGeometry extends PassthroughGeometry {
       {name: 'heightSegments', type: Type.NUM, default: 1},
       // TODO: more args (update ConeGeometry & CylinderGeometry)
     ]
-    super(expectedArgs, args, THREE.CylinderGeometry)
+  }
+
+  constructor(args) {
+    super(args, THREE.CylinderGeometry)
   }
 }
 
 class CylinderGeometry extends PassthroughGeometry {
-  constructor(args) {
-    const expectedArgs = [
+  static _expectedArgs() {
+    let expectedArgs = [
       {name: 'radius', type: Type.NUM},
       {name: 'height', type: Type.NUM},
       {name: 'radialSegments', type: Type.NUM, default: 16},
@@ -718,19 +829,26 @@ class CylinderGeometry extends PassthroughGeometry {
       // TODO: more args (see FrustumGeometry)
     ]
     expectedArgs.order = ['radius', 'radius', 'height', 'radialSegments', 'heightSegments']
-    super(expectedArgs, args, THREE.CylinderGeometry)
+    return expectedArgs
+  }
+
+  constructor(args) {
+    super(args, THREE.CylinderGeometry)
   }
 }
 
 class Mesh extends IntermediateObject {
   static type = Type.OBJECT
 
-  constructor(args) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'geometry', type: Type.GEOMETRY},
       {name: 'material', type: Type.MATERIAL}
     ]
-    super(expectedArgs, args, new THREE.Mesh())
+  }
+
+  constructor(args) {
+    super(args, new THREE.Mesh())
   }
 
   argChanged(name, value) {
@@ -751,11 +869,14 @@ class Mesh extends IntermediateObject {
 class Show extends IntermediateObject {
   static type = Type.NULL
 
-  constructor(args) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'object', type: Type.OBJECT},
     ]
-    super(expectedArgs, args, null)
+  }
+
+  constructor(args) {
+    super(args, null)
   }
 
   argChanged(name, value) {
@@ -779,8 +900,8 @@ class Show extends IntermediateObject {
 class PerspectiveCamera extends IntermediateObject {
   static type = Type.CAMERA
 
-  constructor(args) {
-    const expectedArgs = [
+  static expectedArgs() {
+    return [
       {name: 'x', type: Type.NUM},
       {name: 'y', type: Type.NUM},
       {name: 'z', type: Type.NUM},
@@ -791,7 +912,10 @@ class PerspectiveCamera extends IntermediateObject {
       {name: 'near', type: Type.NUM, default: 0.1},
       {name: 'far', type: Type.NUM, default: 1000},
     ]
-    super(expectedArgs, args, new THREE.PerspectiveCamera(75, CalcThree.camera.aspect, 0.1, 1000))
+  }
+
+  constructor(args) {
+    super(args, new THREE.PerspectiveCamera(75, CalcThree.camera.aspect, 0.1, 1000))
     // this.controls = new OrbitControls(this.threeObject, renderer.domElement)
     this.lookAt = new THREE.Vector3(0, 0, 0)
     this.threeObject.lookAt(this.lookAt)
@@ -842,6 +966,7 @@ const waitInterval = setInterval(() => {
     clearInterval(waitInterval)
     THREE = window.THREE
     Calc = window.Calc
+    // TODO: remove references to CalcThree elsewhere in the code
     CalcThree = new DesThree()
     CalcThree.init()
     window.CalcThree = CalcThree
