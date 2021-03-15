@@ -11,7 +11,7 @@
 
 // TODO: change the @require build of three.js to point to a specific version
 
-// latest graph: https://www.desmos.com/calculator/oqacytx08i
+// latest graph: https://www.desmos.com/calculator/ev2o7jmfbj
 
 (function() {
 'use strict';
@@ -23,18 +23,27 @@ let CalcThree
 const Type = Object.freeze({
   NUM: 'numericValue',
   LIST: 'listValue',
-  COLOR: {},
-  MATERIAL: {},
-  GEOMETRY: {},
-  OBJECT: {}, // subclass of THREE.Object3D; includes light and mesh; anything that can move in 3D
-  CAMERA: {},
-  NULL: {},
+  COLOR: 'Color',
+  MATERIAL: 'Material',
+  GEOMETRY: 'Geometry',
+  OBJECT: 'Object', // subclass of THREE.Object3D; includes light and mesh; anything that can move in 3D
+  CAMERA: 'Camera',
+  NULL: 'Null',
 })
+
+function applyToEntries(object, func) {
+  return Object.fromEntries(
+    Object.entries(object)
+      .map(([k,v]) => [k, func(v)])
+  )
+}
 
 function helperExpression(expr, type, callback) {
   let helper = Calc.HelperExpression({latex: expr})
   helper.observe(type, () => {
-    const val = isNaN(helper.numericValue) ? parseFloat(expr) : helper.numericValue
+    // check for isNaN to get around HelperExpression({latex: "5"})
+    // having a numericValue of NaN (Desmos request #77875). Bug does not occur for lists
+    const val = helper.listValue ?? (isNaN(helper.numericValue) ? parseFloat(expr) : helper.numericValue)
     callback(val)
   })
   return helper
@@ -135,8 +144,7 @@ class DesThree {
 
   generateObject(def) {
     if (def.func in this.funcs) {
-      let object = new this.funcs[def.func](def.args)
-      object.init()
+      let object = new IntermediateObjectList(this.funcs[def.func], def.args)
       object.variable = def.variable
       return object
     } else {
@@ -277,7 +285,7 @@ class DesThree {
     const {func, nextIndex: i2} = this.parseFuncName(text, i1)
     index = i2
 
-    if (!func in this.funcs) {
+    if (this.funcs[func] === undefined) {
       throw `Unidentified function: ${func}`
     }
     const expectedArgs = this.funcs[func].expectedArgs()
@@ -289,6 +297,9 @@ class DesThree {
     for (; !zeroArgument && text[index-1] != ')'; index++) {
       if (index >= text.length) {
         throw "ParseError: EOF before closing DesThree matched brace"
+      }
+      if (args.length >= expectedArgs.length) {
+        throw `ParseError: too many arguments in call to ${func}`
       }
       const expectedType = expectedArgs[args.length].type
       if (expectedType === Type.NUM || expectedType === Type.LIST) {
@@ -375,14 +386,12 @@ class DesThree {
   }
 
   rerender() {
-    // console.groupCollapsed("rerender", performance.now())
-    // console.log(scene)
-    // console.log(camera)
-    // console.log(values)
-    // console.log("defined:", Object.entries(values).filter(([e, v]) => v.isDefined).map(([e,v]) => e))
-    // console.log("undefined:", Object.entries(values).filter(([e, v]) => !v.isDefined).map(([e,v]) => e))
-    // console.groupEnd()
-    this.renderer.render(this.scene, this.camera);
+    console.groupCollapsed("rerender", performance.now())
+    console.log(this.scene)
+    console.log(this.camera)
+    console.log(this.values)
+    console.groupEnd()
+    this.renderer.render(this.scene, this.camera)
   }
 
   initDefaultCamera() {
@@ -405,33 +414,38 @@ class DesThree {
   }
 }
 
-class IntermediateObject {
-  constructor(args, threeObject) {
-    this.threeObject = threeObject
+class IntermediateObjectList {
+  constructor(func, args) {
     this.isDefined = false
-    this.values = {}
+    // childObjects is a list or a single object
+    this.childObjects = []
+    this.argValues = {}
+    this.func = func
     this.dependencies = {}
-    this.helpers = {}
-    if (this.constructor.expectedArgs().length === 0) {
+    this.type = func.type
+
+    console.log("Initializing", func.name, args)
+
+    if (func.expectedArgs().length === 0) {
+      this.childObjects = new func(this.argValues)
       this.setDefined(true)
     }
-    this.args = args
-  }
 
-  init() {
-    console.log("Initializing", this)
-    this.constructor.expectedArgs().forEach((expectedArg, i) => {
-      if (i < this.args.length) {
-        const expr = this.args[i]
-        this.values[expectedArg.name] = null;
+    func.expectedArgs().forEach((expectedArg, i) => {
+      if (i < args.length) {
+        const expr = args[i]
+        this.argValues[expectedArg.name] = expectedArg.default ?? null;
         if (expectedArg.type == Type.NUM || expectedArg.type == Type.LIST) {
-          const helper = helperExpression(expr, expectedArg.type, value => {
+          // Desmos request #78115: 'numericValue' event is triggered for both
+          // numeric and list values in some cases. May cause issues.
+          const helper = helperExpression(expr, 'listValue', value => {
             this.changeArg(expectedArg.name, value)
           })
-          this.helpers[expectedArg.name] = {
-            type: expectedArg.type,
-            helper,
-          }
+          const helper0 = helperExpression(expr, 'numericValue', value => {
+            if (expectedArg.type !== Type.LIST && !isNaN(value)) {
+              this.changeArg(expectedArg.name, value)
+            }
+          })
         } else {
           this.dependencies[expr] = expectedArg.name
           if (CalcThree.values[expr]) {
@@ -440,10 +454,10 @@ class IntermediateObject {
           CalcThree.dependents[expr] = CalcThree.dependents[expr] || new Set()
           CalcThree.dependents[expr].add(this)
         }
-      } else if (i >= this.args.length && expectedArg.default !== undefined) {
+      } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
       } else {
-        throw `Not enough arguments in call to ${this.constructor.name}: ${this.args.length}`
+        throw `Not enough arguments in call to ${this.constructor.name}: ${args.length}`
       }
     })
   }
@@ -453,36 +467,114 @@ class IntermediateObject {
     this.changeArg(argName, CalcThree.values[variable])
   }
 
+  static index(v, i) {
+    return (v.childObjects && v.childObjects[i]) // IntermediateObjectList with several values
+      ?? v.childObjects // IntermediateObjectList with one value
+      ?? v[i] // List of numbers
+      ?? v // Single number
+  }
+
   changeArg(argName, value) {
-    // TODO: check type of arguments and map over lists
-    this.values[argName] = value
+    // value is either a list of (argument type) or a single (argument type)
+    const oldValue = this.argValues[argName]
     if (value === undefined) {
+      // simply mark undefined; don't dispose until later
+      if (this.isDefined) this.setDefined(false)
+      return
+    }
+
+    const expectedType = this.func.expectedArgs().filter(({name}) => name === argName)[0].type;
+    if (expectedType === Type.LIST && value.length === undefined) {
+      throw "Expected a list but received a number"
+    }
+    if (expectedType !== Type.LIST && expectedType !== Type.NUM && expectedType !== value.type) {
+      throw `TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`
+    }
+
+    this.argValues[argName] = value
+
+    if (Object.values(this.argValues).some(e => e === null || e === undefined || e.isDefined === false)) {
       if (this.isDefined) this.setDefined(false)
     } else {
-      this.argChanged(argName, value)
-      if (Object.values(this.values).some(e => e === null || e === undefined || e.isDefined === false)) {
-        if (this.isDefined) this.setDefined(false)
+      const minLength = Math.min(...Object.values(this.argValues).map(e => e.childObjects?.length ?? e.length ?? Infinity))
+      if (minLength === this.childObjects.length) {
+        // number of children stayed same, so just change their args
+        if (minLength !== Infinity) {
+          console.log("List value changed: ", argName, value)
+          this.forEach((obj, i) => {
+            obj.argChanged(argName, IntermediateObjectList.index(value, i))
+          })
+        } else {
+          console.log("Single value changed: ", argName, value)
+          this.childObjects.argChanged(argName, value)
+        }
       } else {
-        this.setDefined(true)
+        // number of children changed, so reinitialize
+        this.dispose()
+
+        this.childObjects = []
+        for (let i=0; i < (minLength === Infinity ? 1 : minLength); i++) {
+          let object = new this.func(
+            applyToEntries(this.argValues, v => IntermediateObjectList.index(v, i))
+          )
+          this.childObjects.push(object)
+        }
+        if (minLength === Infinity) {
+          // all arguments are a single value, not a list
+          this.childObjects = this.childObjects[0]
+        }
       }
+      this.setDefined(true)
     }
   }
 
   setDefined(defined) {
     this.isDefined = defined
-    if (this.type === Type.OBJECT3D) {
-      this.threeObject.visible = defined
+    if (defined) {
+      console.log("Now defined: ", this)
     }
+    this.forEach(obj => {
+      if (obj.type === Type.OBJECT3D) {
+        obj.threeObject.visible = defined
+      }
+    })
     CalcThree.variableChanged(this.variable)
+  }
+
+  forEach(func) {
+    if (this.childObjects.length !== undefined) {
+      this.childObjects.forEach(func)
+    } else {
+      func(this.childObjects)
+    }
   }
 
   dispose() {
     console.log("Disposing", this)
-    // this.values.forEach((value, i) => {
-    //   value.helper && value.helper.unObserve(value.type)
-    // })
-    this._dispose && this._dispose()
+    this.forEach(e => e.dispose())
+    this.childObjects = null
   }
+}
+
+class IntermediateObject {
+  constructor(threeObject) {
+    this.threeObject = threeObject
+  }
+
+  dispose() {
+    this.threeObject.dispose && this.threeObject.dispose()
+  }
+
+  applyArgs(args) {
+    Object.entries(args)
+      .map(([k, v]) => v !== undefined && this.argChanged(k, v))
+  }
+}
+
+
+class White {
+  type = Type.COLOR
+  threeObject = new THREE.Color(1, 1, 1)
 }
 
 class Color extends IntermediateObject {
@@ -498,7 +590,12 @@ class Color extends IntermediateObject {
 
   // forced to do this while there is no observe on advancedStyling colors
   constructor(args) {
-    super(args, new THREE.Color())
+    super(
+      new THREE.Color(
+        ...['r','g','b']
+        .map(c => Color.clampMapRGBComponent(args[c]))
+      )
+    )
   }
 
   static clampMapRGBComponent(x) {
@@ -523,12 +620,12 @@ class MeshMaterial extends IntermediateObject {
 
   static expectedArgs() {
     return [
-      {name: 'color', type: Type.COLOR, default: {threeObject: new THREE.Color(255,255,255)}},
+      {name: 'color', type: Type.COLOR, default: new White()},
     ]
   }
 
   constructor(args, threeObject) {
-    super(args, new threeObject())
+    super(new threeObject({color: args.color.threeObject}))
   }
 
   argChanged(name, value) {
@@ -574,7 +671,7 @@ class MeshNormalMaterial extends IntermediateObject {
   }
 
   constructor(args) {
-    super(args, new THREE.MeshNormalMaterial())
+    super(new THREE.MeshNormalMaterial())
   }
 }
 
@@ -586,7 +683,7 @@ class MeshDepthMaterial extends IntermediateObject {
   // Because we use a logarithmic depth buffer, camera has to be *very*
   // close to the object to get any lightness (close to near value of clipping plane)
   constructor(args) {
-    super(args, new THREE.MeshDepthMaterial())
+    super(new THREE.MeshDepthMaterial())
   }
 }
 
@@ -596,14 +693,14 @@ class Light extends IntermediateObject {
   static expectedArgs() {
     return [
       {name: 'intensity', type: Type.NUM, default: 1},
-      {name: 'color', type: Type.COLOR, default: {threeObject: new THREE.Color(255,255,255)}},
+      {name: 'color', type: Type.COLOR, default: new White()},
       // TODO: additional args (distance, decay)
       // https://threejs.org/docs/index.html#api/en/lights/PointLight
     ]
   }
 
   constructor(args, threeObject) {
-    super(args, new threeObject())
+    super(new threeObject(args.color.threeObject, args.intensity))
   }
 
   argChanged(name, value) {
@@ -631,6 +728,7 @@ class AmbientLight extends Light {
 }
 
 class Position extends IntermediateObject {
+  // https://threejs.org/docs/index.html#api/en/objects/Group
   static type = Type.OBJECT
 
   static expectedArgs() {
@@ -643,7 +741,9 @@ class Position extends IntermediateObject {
   }
 
   constructor(args) {
-    super(args, new THREE.Group())
+    // TODO: InstancedMesh ("Use InstancedMesh if you have to render a large number of objects with the same geometry and material but with different world transformations.")
+    super(new THREE.Group())
+    this.applyArgs(args)
   }
 
   argChanged(name, value) {
@@ -656,7 +756,9 @@ class Position extends IntermediateObject {
       case 'object':
         // replace the current object
         this.threeObject.clear()
-        this.threeObject.add(value.threeObject)
+        // need to add to a group instead of just setting position of clone
+        // in case there is an offset position of a position
+        this.threeObject.add(value.threeObject.clone())
     }
   }
 }
@@ -671,19 +773,18 @@ class PassthroughGeometry extends IntermediateObject {
   }
 
   constructor(args, threeConstructor) {
-    super(args, new threeConstructor())
+    super(new threeConstructor())
+    this.values = {}
     this.threeConstructor = threeConstructor
+    this.applyArgs(args)
   }
 
   argChanged(name, value) {
+    this.values[name] = value
     this.threeObject.dispose()
     this.threeObject = new this.threeConstructor(
       ...this.constructor.expectedArgs().order.map(name => this.values[name])
     )
-  }
-
-  _dispose() {
-    this.threeObject.dispose()
   }
 }
 
@@ -848,14 +949,13 @@ class Mesh extends IntermediateObject {
   }
 
   constructor(args) {
-    super(args, new THREE.Mesh())
+    super(new THREE.Mesh(args.geometry?.threeObject, args.material?.threeObject))
   }
 
   argChanged(name, value) {
     switch (name) {
       case 'geometry':
         // TODO; point by reference, so don't always need to change?
-        // argChanged → changeArg
         // conditionally call `variableChanged` above
         this.threeObject.geometry = value.threeObject
         break
@@ -876,7 +976,8 @@ class Show extends IntermediateObject {
   }
 
   constructor(args) {
-    super(args, null)
+    super(null)
+    this.applyArgs(args)
   }
 
   argChanged(name, value) {
@@ -892,7 +993,7 @@ class Show extends IntermediateObject {
     CalcThree.rerender()
   }
 
-  _dispose() {
+  dispose() {
     CalcThree.scene.remove(this.threeObject)
   }
 }
@@ -915,10 +1016,10 @@ class PerspectiveCamera extends IntermediateObject {
   }
 
   constructor(args) {
-    super(args, new THREE.PerspectiveCamera(75, CalcThree.camera.aspect, 0.1, 1000))
+    super(new THREE.PerspectiveCamera(args.fov, CalcThree.camera.aspect, args.near, args.far))
     // this.controls = new OrbitControls(this.threeObject, renderer.domElement)
     this.lookAt = new THREE.Vector3(0, 0, 0)
-    this.threeObject.lookAt(this.lookAt)
+    this.applyArgs(args)
     CalcThree.camera = this.threeObject
     CalcThree.applyGraphpaperBounds()
   }
@@ -956,7 +1057,7 @@ class PerspectiveCamera extends IntermediateObject {
     // camera = this.threeObject
   }
 
-  _dispose() {
+  dispose() {
     CalcThree.initDefaultCamera()
   }
 }
