@@ -327,7 +327,7 @@ class DesThree {
     // return this function's definition preceded by all arguments' definitions
     return {
       defs,
-      nextIndex: index,
+      nextIndex: index + zeroArgument,
     }
   }
 
