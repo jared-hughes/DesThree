@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.2.1
+// @version      0.2.2
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
 // @match        https://www.desmos.com/calculator
 // @downloadURL  https://github.com/jared-hughes/desmos3d/raw/feat-auto-reinstall/desThree.user.js
+// @updateURL    https://github.com/jared-hughes/desmos3d/raw/feat-auto-reinstall/desThree.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js
 // ==/UserScript==
 
