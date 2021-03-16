@@ -122,7 +122,6 @@ Show(meshp)
 ```
 
 - <kbd>Planned:</kbd> Allow dragging the canvas to move the camera
-- <kbd>Planned:</kbd> Use `visiblity:hidden` to disable other adverse dragging.
 
 ### Example 5: Materials and Lights
 

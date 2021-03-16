@@ -23,6 +23,7 @@ const Type = Object.freeze({
   NUM: 'numericValue',
   LIST: 'listValue',
   COLOR: 'Color',
+  'VECTOR3': 'Vector3',
   MATERIAL: 'Material',
   GEOMETRY: 'Geometry',
   OBJECT: 'Object', // subclass of THREE.Object3D; includes light and mesh; anything that can move in 3D
@@ -53,6 +54,7 @@ class DesThree {
 
   funcs = {
     'ColorRGB': Color,
+    '': Vector3,
     // materials
     MeshBasicMaterial,
     MeshLambertMaterial,
@@ -229,7 +231,7 @@ class DesThree {
   }
 
   parseFuncName(text, index) {
-    const funcNameRegex = /\s*(?:\\operatorname{)?(?<func>\w+)}?\s*\(/y
+    const funcNameRegex = /\s*(?:\\operatorname{)?(?<func>\w*)}?\s*\(/y
     funcNameRegex.lastIndex = index
     const match = funcNameRegex.exec(text)
 
@@ -367,7 +369,7 @@ class DesThree {
             const {defs} = this.parseDesThree(latex, 0)
             nextExprVariables[expr.id] = []
             defs.forEach(newDef => {
-              if (!newDef.func) return
+              if (newDef.func === null || newDef.func === undefined) return
               const variable = newDef.variable;
               if (nextVariables.has(variable)) {
                 this.throw(`Duplicate variable: ${variable}`)
@@ -596,6 +598,31 @@ class IntermediateObject {
   }
 }
 
+class Vector3 extends IntermediateObject {
+  static type = Type.VECTOR3
+
+  static expectedArgs() {
+    return [
+      {name: 'x', type: Type.NUM},
+      {name: 'y', type: Type.NUM},
+      {name: 'z', type: Type.NUM},
+    ]
+  }
+
+  constructor(args) {
+    super(new THREE.Vector3(args.x, args.y, args.z))
+  }
+
+  argChanged(name, value) {
+    switch (name) {
+      case 'x':
+      case 'y':
+      case 'z':
+        this.threeObject[name] = value
+        break
+    }
+  }
+}
 
 class White {
   type = Type.COLOR
