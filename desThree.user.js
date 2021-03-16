@@ -141,13 +141,18 @@ class DesThree {
     .forEach(object => object.afterDepChanged(variable))
   }
 
+  throw(msg) {
+    this.errorMessage = msg
+    throw msg
+  }
+
   generateObject(def) {
     if (def.func in this.funcs) {
       let object = new IntermediateObjectList(this.funcs[def.func], def.args)
       object.variable = def.variable
       return object
     } else {
-      throw `Function ${def.func} not supported`
+      this.throw(`Function ${def.func} not supported`)
     }
   }
 
@@ -223,7 +228,7 @@ class DesThree {
         nextIndex: funcNameRegex.lastIndex
       }
     } else {
-      throw "ParseError: expected function name"
+      this.throw("ParseError: expected function name")
     }
   }
 
@@ -232,14 +237,14 @@ class DesThree {
     let desmosLatex = ""
     for (; !([',',')'].includes(text[index]) && braceStack.length == 0); index++) {
       if (index >= text.length) {
-        throw "ParseError: EOF before matched brace in DesmosLatex"
+        this.throw("ParseError: EOF before matched brace in DesmosLatex")
       }
       const c = text[index]
       if ("([{".includes(c)) {
         braceStack.push(c)
       } else if (")]}".includes(c)) {
         if ("([{"[")]}".indexOf(c)] != braceStack.pop()) {
-          throw "ParseError: mismatched braces"
+          this.throw("ParseError: mismatched braces")
         }
       }
       desmosLatex += c
@@ -285,7 +290,7 @@ class DesThree {
     index = i2
 
     if (this.funcs[func] === undefined) {
-      throw `Unidentified function: ${func}`
+      this.throw(`Unidentified function: ${func}`)
     }
     const expectedArgs = this.funcs[func].expectedArgs()
     let defs = []
@@ -295,10 +300,10 @@ class DesThree {
     const zeroArgument = text[index] == ')'
     for (; !zeroArgument && text[index-1] != ')'; index++) {
       if (index >= text.length) {
-        throw "ParseError: EOF before closing DesThree matched brace"
+        this.throw("ParseError: EOF before closing DesThree matched brace")
       }
       if (args.length >= expectedArgs.length) {
-        throw `ParseError: too many arguments in call to ${func}`
+        this.throw(`ParseError: too many arguments in call to ${func}`)
       }
       const expectedType = expectedArgs[args.length].type
       if (expectedType === Type.NUM || expectedType === Type.LIST) {
@@ -333,7 +338,7 @@ class DesThree {
     let nextExprVariables = {} // {[expression id]: [list of affected variables]}
     let nextVariables = new Set()
     Calc.getState().expressions.list.map(expr => {
-    // try{
+    try{
       const rawLatex = expr.latex || ""
       if (expr.type == "expression" && rawLatex.startsWith(this.exprPrefix)) {
         nextDefinitions[expr.id] = rawLatex
@@ -354,7 +359,7 @@ class DesThree {
             if (!newDef.func) return
             const variable = newDef.variable;
             if (nextVariables.has(variable)) {
-              throw `Duplicate variable: ${variable}`
+              this.throw(`Duplicate variable: ${variable}`)
             }
             nextVariables.add(variable)
             nextExprVariables[expr.id].push(variable)
@@ -363,7 +368,9 @@ class DesThree {
           })
         }
       }
-    // } catch {console.warn("ParseError. Proper handling TODO")}
+    } catch {
+      console.warn(this.errorMessage)
+    }
     })
 
     this.setCanvasVisible(Object.keys(nextDefinitions).length > 0)
@@ -462,7 +469,7 @@ class IntermediateObjectList {
       } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
       } else {
-        throw `Not enough arguments in call to ${this.constructor.name}: ${args.length}`
+        this.throw(`Not enough arguments in call to ${this.constructor.name}: ${args.length}`)
       }
     })
   }
@@ -490,10 +497,10 @@ class IntermediateObjectList {
 
     const expectedType = this.func.expectedArgs().filter(({name}) => name === argName)[0].type;
     if (expectedType === Type.LIST && value.length === undefined) {
-      throw "Expected a list but received a number"
+      this.throw("Expected a list but received a number")
     }
     if (expectedType !== Type.LIST && expectedType !== Type.NUM && expectedType !== value.type) {
-      throw `TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`
+      this.throw(`TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`)
     }
 
     this.argValues[argName] = value
