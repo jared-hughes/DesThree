@@ -23,9 +23,9 @@ This project is unofficial, so it may break at any time due to changes in the De
 
 DesThree will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
 
-DesThree expressions are stored inside normal Desmos expressions. Write `@3` at the beginning of an expression field to switch it to 3D mode. The icon to the left should switch to the shape of a cube.
+To create a DesThree expression, insert it from the <kbd>➕</kbd> menu in the top-left as you might insert a folder or an image. You can also type `@3` at the start of a normal expression to begin a DesThree expression; the icon to the left should switch to the shape of a cube.
 
-If DesThree ever stops showing anything or stops being responsive, save and reload the page. If it still doesn't work, it's probably the fault of your expressions.
+If DesThree ever stops showing something or stops being responsive, save and reload the page. If it still doesn't work, it's probably the fault of your expressions.
   - <kbd>Planned:</kbd> Show better errors without opening console
 
 If you ever can't type something (e.g. `PointLight` automatically replaces `int` with an integral), type it in some other tab/program and copy-paste into Desmos.
