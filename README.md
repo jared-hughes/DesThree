@@ -22,16 +22,16 @@ This project is unofficial, so it may break at any time due to changes in the De
 ## Usage
 
 DesThree will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
-  - <kbd>Planned:</kbd> Disable covering the graph with no 3D features are used.
 
 DesThree expressions are stored inside normal Desmos expressions. Write `@3` at the beginning of an expression field to switch it to 3D mode. The icon to the left should switch to the shape of a cube.
-  - <kbd>Planned:</kbd> Be forgiving and switch icon before a function is written.
+  - <kbd>Planned:</kbd> Easier way to add the `@3`
 
 If DesThree ever stops showing anything or stops being responsive, save and reload the page. If it still doesn't work, it's probably the fault of your expressions.
-  - <kbd>Planned:</kbd> Give better errors.
+  - <kbd>Planned:</kbd> Show better errors without opening console
 
 If you ever can't type something (e.g. `PointLight` automatically replaces `int` with an integral), type it in some other tab/program and copy-paste into Desmos.
   - <kbd>Planned:</kbd> Fix this issue (convenience).
+  - <kbd>Planned:</kbd> Allow operatornames to work on graph reload
 
 ### Example 1: Setting Camera Position
 

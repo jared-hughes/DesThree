@@ -141,25 +141,33 @@ class DesThree {
     .forEach(object => object.afterDepChanged(variable))
   }
 
+  throw(msg) {
+    this.errorMessage = msg
+    throw msg
+  }
+
   generateObject(def) {
     if (def.func in this.funcs) {
       let object = new IntermediateObjectList(this.funcs[def.func], def.args)
       object.variable = def.variable
       return object
     } else {
-      throw `Function ${def.func} not supported`
+      this.throw(`Function ${def.func} not supported`)
     }
   }
 
+  getExprElement(id) {
+    return document.querySelector(".dcg-expressionlist")
+      .querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
+  }
+
   setThreeExprs(ids) {
-    // TODO
     document.querySelectorAll('.three-expr')
     .forEach(el => {
       el.classList.remove('three-expr')
     })
-    const exprList = document.querySelector(".dcg-expressionlist")
     ids.forEach(id => {
-      const outerDomNode = exprList.querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
+      const outerDomNode = this.getExprElement(id)
       let autoOperatorNames = outerDomNode.querySelector(".dcg-mq-math-mode")._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
       Object.keys(this.funcs).forEach(c => {
         autoOperatorNames[c] = c
@@ -169,15 +177,23 @@ class DesThree {
     })
   }
 
+  setExprError(id) {
+    this.getExprElement(id).classList.add('three-error')
+  }
+
+  clearExprError(id) {
+    this.getExprElement(id).classList.remove('three-error')
+  }
+
   injectStyle() {
     const styleEl = document.createElement('style')
     // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
     // Data URI with https://websemantics.uk/tools/image-to-data-uri-converter/
     styleEl.innerHTML = `
-      .three-expr .dcg-tab-interior .dcg-tooltip-hit-area-container {
+      .three-expr:not(.three-error) .dcg-tab-interior .dcg-tooltip-hit-area-container {
         display: none
       }
-      .three-expr .dcg-tab-interior .dcg-expression-icon-container::before {
+      .three-expr:not(.three-error) .dcg-tab-interior .dcg-expression-icon-container::before {
         content: "";
         background-image: url(data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjN2I3YjdiIiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
         position: absolute;
@@ -223,7 +239,7 @@ class DesThree {
         nextIndex: funcNameRegex.lastIndex
       }
     } else {
-      throw "ParseError: expected function name"
+      this.throw("ParseError: expected function name")
     }
   }
 
@@ -232,14 +248,14 @@ class DesThree {
     let desmosLatex = ""
     for (; !([',',')'].includes(text[index]) && braceStack.length == 0); index++) {
       if (index >= text.length) {
-        throw "ParseError: EOF before matched brace in DesmosLatex"
+        this.throw("ParseError: EOF before matched brace in DesmosLatex")
       }
       const c = text[index]
       if ("([{".includes(c)) {
         braceStack.push(c)
       } else if (")]}".includes(c)) {
         if ("([{"[")]}".indexOf(c)] != braceStack.pop()) {
-          throw "ParseError: mismatched braces"
+          this.throw("ParseError: mismatched braces")
         }
       }
       desmosLatex += c
@@ -285,7 +301,7 @@ class DesThree {
     index = i2
 
     if (this.funcs[func] === undefined) {
-      throw `Unidentified function: ${func}`
+      this.throw(`Unidentified function: ${func}`)
     }
     const expectedArgs = this.funcs[func].expectedArgs()
     let defs = []
@@ -295,10 +311,10 @@ class DesThree {
     const zeroArgument = text[index] == ')'
     for (; !zeroArgument && text[index-1] != ')'; index++) {
       if (index >= text.length) {
-        throw "ParseError: EOF before closing DesThree matched brace"
+        this.throw("ParseError: EOF before closing DesThree matched brace")
       }
       if (args.length >= expectedArgs.length) {
-        throw `ParseError: too many arguments in call to ${func}`
+        this.throw(`ParseError: too many arguments in call to ${func}`)
       }
       const expectedType = expectedArgs[args.length].type
       if (expectedType === Type.NUM || expectedType === Type.LIST) {
@@ -322,7 +338,7 @@ class DesThree {
     // return this function's definition preceded by all arguments' definitions
     return {
       defs,
-      nextIndex: index,
+      nextIndex: index + zeroArgument,
     }
   }
 
@@ -333,7 +349,6 @@ class DesThree {
     let nextExprVariables = {} // {[expression id]: [list of affected variables]}
     let nextVariables = new Set()
     Calc.getState().expressions.list.map(expr => {
-    // try{
       const rawLatex = expr.latex || ""
       if (expr.type == "expression" && rawLatex.startsWith(this.exprPrefix)) {
         nextDefinitions[expr.id] = rawLatex
@@ -348,22 +363,27 @@ class DesThree {
             .slice(this.exprPrefix.length)
             .replaceAll(/\\left|\\right/g, "")
             .replaceAll(/\\ /g, " ")
-          const {defs} = this.parseDesThree(latex, 0)
-          nextExprVariables[expr.id] = []
-          defs.forEach(newDef => {
-            if (!newDef.func) return
-            const variable = newDef.variable;
-            if (nextVariables.has(variable)) {
-              throw `Duplicate variable: ${variable}`
-            }
-            nextVariables.add(variable)
-            nextExprVariables[expr.id].push(variable)
-            // TODO: know this is a fresh variable?
-            this.changeVariable(variable, () => this.generateObject(newDef))
-          })
+          try {
+            const {defs} = this.parseDesThree(latex, 0)
+            nextExprVariables[expr.id] = []
+            defs.forEach(newDef => {
+              if (!newDef.func) return
+              const variable = newDef.variable;
+              if (nextVariables.has(variable)) {
+                this.throw(`Duplicate variable: ${variable}`)
+              }
+              nextVariables.add(variable)
+              nextExprVariables[expr.id].push(variable)
+              // TODO: know this is a fresh variable?
+              this.changeVariable(variable, () => this.generateObject(newDef))
+            })
+            this.clearExprError(expr.id)
+          } catch {
+            console.warn(this.errorMessage)
+            this.setExprError(expr.id)
+          }
         }
       }
-    // } catch {console.warn("ParseError. Proper handling TODO")}
     })
 
     this.setCanvasVisible(Object.keys(nextDefinitions).length > 0)
@@ -462,7 +482,7 @@ class IntermediateObjectList {
       } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
       } else {
-        throw `Not enough arguments in call to ${this.constructor.name}: ${args.length}`
+        this.throw(`Not enough arguments in call to ${this.constructor.name}: ${args.length}`)
       }
     })
   }
@@ -490,10 +510,10 @@ class IntermediateObjectList {
 
     const expectedType = this.func.expectedArgs().filter(({name}) => name === argName)[0].type;
     if (expectedType === Type.LIST && value.length === undefined) {
-      throw "Expected a list but received a number"
+      this.throw("Expected a list but received a number")
     }
     if (expectedType !== Type.LIST && expectedType !== Type.NUM && expectedType !== value.type) {
-      throw `TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`
+      this.throw(`TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`)
     }
 
     this.argValues[argName] = value
