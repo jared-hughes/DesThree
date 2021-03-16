@@ -50,8 +50,6 @@ function helperExpression(expr, type, callback) {
 }
 
 class DesThree {
-  exprPrefix = "@3"
-
   funcs = {
     'ColorRGB': Color,
     '': Vector3,
@@ -119,7 +117,7 @@ class DesThree {
           newNode.querySelector('i').nextSibling.nodeValue = 'three'
           newNode.addEventListener('click', () => {
             let d = Calc.controller.createItemModel({
-              latex: this.exprPrefix,
+              latex: "@3",
               type: 'expression',
               id: Calc.controller.generateId(),
               color: Calc.controller.getNextColor(),
@@ -208,7 +206,14 @@ class DesThree {
     })
     ids.forEach(id => {
       const outerDomNode = this.getExprElement(id)
-      let autoOperatorNames = outerDomNode.querySelector(".dcg-mq-math-mode")._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
+      const mqField = outerDomNode.querySelector(".dcg-mq-editable-field")
+      const atElement = mqField.querySelector('.dcg-mq-nonSymbola')
+      if (atElement && atElement.innerHTML == "@") {
+        atElement.remove()
+        const digit3Element = mqField.querySelector('.dcg-mq-digit')
+        digit3Element?.remove()
+      }
+      let autoOperatorNames = mqField._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
       Object.keys(this.funcs).forEach(c => {
         autoOperatorNames[c] = c
       })
@@ -249,9 +254,6 @@ class DesThree {
       .three-action-newexpression .dcg-icon-new-expression::before {
         color: rgba(0,0,0,0);
         background-size: cover;
-      }
-      .three-expr .dcg-expression-mathquill .dcg-mq-root-block > span:nth-child(-n+2) {
-        display: none;
       }
     `
     document.head.appendChild(styleEl)
@@ -397,7 +399,7 @@ class DesThree {
     let nextVariables = new Set()
     Calc.getState().expressions.list.map(expr => {
       const rawLatex = expr.latex || ""
-      if (expr.type == "expression" && rawLatex.startsWith(this.exprPrefix)) {
+      if (expr.type == 'expression' && rawLatex.startsWith('@3')) {
         nextDefinitions[expr.id] = rawLatex
         threeExprs.add(expr.id)
         if (this.definitions[expr.id] == rawLatex) {
@@ -407,7 +409,7 @@ class DesThree {
         } else {
           // definition changed to a new definition
           const latex = rawLatex
-            .slice(this.exprPrefix.length)
+            .slice(2) // slice off the '@3'
             .replaceAll(/\\left|\\right/g, "")
             .replaceAll(/\\ /g, " ")
           try {
