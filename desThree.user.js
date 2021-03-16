@@ -6,8 +6,8 @@
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
 // @match        https://www.desmos.com/calculator
+// @downloadURL  https://github.com/jared-hughes/desmos3d/raw/feat-auto-reinstall/desThree.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js
-// @grant        none
 // ==/UserScript==
 
 (function() {
