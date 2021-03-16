@@ -156,15 +156,18 @@ class DesThree {
     }
   }
 
+  getExprElement(id) {
+    return document.querySelector(".dcg-expressionlist")
+      .querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
+  }
+
   setThreeExprs(ids) {
-    // TODO
     document.querySelectorAll('.three-expr')
     .forEach(el => {
       el.classList.remove('three-expr')
     })
-    const exprList = document.querySelector(".dcg-expressionlist")
     ids.forEach(id => {
-      const outerDomNode = exprList.querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
+      const outerDomNode = this.getExprElement(id)
       let autoOperatorNames = outerDomNode.querySelector(".dcg-mq-math-mode")._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
       Object.keys(this.funcs).forEach(c => {
         autoOperatorNames[c] = c
@@ -174,15 +177,23 @@ class DesThree {
     })
   }
 
+  setExprError(id) {
+    this.getExprElement(id).classList.add('three-error')
+  }
+
+  clearExprError(id) {
+    this.getExprElement(id).classList.remove('three-error')
+  }
+
   injectStyle() {
     const styleEl = document.createElement('style')
     // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
     // Data URI with https://websemantics.uk/tools/image-to-data-uri-converter/
     styleEl.innerHTML = `
-      .three-expr .dcg-tab-interior .dcg-tooltip-hit-area-container {
+      .three-expr:not(.three-error) .dcg-tab-interior .dcg-tooltip-hit-area-container {
         display: none
       }
-      .three-expr .dcg-tab-interior .dcg-expression-icon-container::before {
+      .three-expr:not(.three-error) .dcg-tab-interior .dcg-expression-icon-container::before {
         content: "";
         background-image: url(data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjN2I3YjdiIiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
         position: absolute;
@@ -338,7 +349,6 @@ class DesThree {
     let nextExprVariables = {} // {[expression id]: [list of affected variables]}
     let nextVariables = new Set()
     Calc.getState().expressions.list.map(expr => {
-    try{
       const rawLatex = expr.latex || ""
       if (expr.type == "expression" && rawLatex.startsWith(this.exprPrefix)) {
         nextDefinitions[expr.id] = rawLatex
@@ -353,24 +363,27 @@ class DesThree {
             .slice(this.exprPrefix.length)
             .replaceAll(/\\left|\\right/g, "")
             .replaceAll(/\\ /g, " ")
-          const {defs} = this.parseDesThree(latex, 0)
-          nextExprVariables[expr.id] = []
-          defs.forEach(newDef => {
-            if (!newDef.func) return
-            const variable = newDef.variable;
-            if (nextVariables.has(variable)) {
-              this.throw(`Duplicate variable: ${variable}`)
-            }
-            nextVariables.add(variable)
-            nextExprVariables[expr.id].push(variable)
-            // TODO: know this is a fresh variable?
-            this.changeVariable(variable, () => this.generateObject(newDef))
-          })
+          try {
+            const {defs} = this.parseDesThree(latex, 0)
+            nextExprVariables[expr.id] = []
+            defs.forEach(newDef => {
+              if (!newDef.func) return
+              const variable = newDef.variable;
+              if (nextVariables.has(variable)) {
+                this.throw(`Duplicate variable: ${variable}`)
+              }
+              nextVariables.add(variable)
+              nextExprVariables[expr.id].push(variable)
+              // TODO: know this is a fresh variable?
+              this.changeVariable(variable, () => this.generateObject(newDef))
+            })
+            this.clearExprError(expr.id)
+          } catch {
+            console.warn(this.errorMessage)
+            this.setExprError(expr.id)
+          }
         }
       }
-    } catch {
-      console.warn(this.errorMessage)
-    }
     })
 
     this.setCanvasVisible(Object.keys(nextDefinitions).length > 0)
