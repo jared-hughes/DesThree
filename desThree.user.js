@@ -1,16 +1,14 @@
 // ==UserScript==
-// @name         Desmos Three.js
-// @namespace    http://tampermonkey.net/
+// @name         DesThree
+// @namespace    http://github.com/jared-hughes
 // @version      0.1
-// @description  Use three.js directly in Desmos
-// @author       You
+// @description  Desmos bindings for three.js
+// @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
 // @match        https://www.desmos.com/calculator
-// @require      https://threejs.org/build/three.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js
 // @grant        none
 // ==/UserScript==
-
-// TODO: change the @require build of three.js to point to a specific version
 
 (function() {
 'use strict';
