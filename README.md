@@ -13,11 +13,11 @@ This project is unofficial, so it may break at any time due to changes in the De
 
 ## Installation
 
-1. Install Tampermonkey
-2. Open the Tampermonkey dashboard
-3. Copy-paste the contents of `desmos3d.js` into a new UserScript
-  - <kbd>Planned:</kbd> hotlink + handle versioning to allow automatic updates.
-4. Open https://www.desmos.com/calculator/rv3omhi0re to test it! You should see 9 blue-ish boxes moving up and down.
+1. Install the TamperMonkey browser extension
+2. Click https://github.com/jared-hughes/desmos3d/raw/master/desThree.user.js, then hit <kbd>Install</kbd>.
+  - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
+3. Open https://www.desmos.com/calculator/rv3omhi0re to test it! You should see 9 blue-ish boxes moving up and down.
+4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
 ## Usage
 
