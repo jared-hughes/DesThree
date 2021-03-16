@@ -1,4 +1,4 @@
-# Desmos 3D
+# DesThree
 
 [Desmos](https://www.desmos.com/calculator) is a wonderful user-friendly calculator for graphing in two dimensions. However, creating three-dimensional projects can be confusing at first, but more importantly they are slow due to essentially having to recompute meshes and projections on every frame.
 
@@ -14,20 +14,20 @@ This project is unofficial, so it may break at any time due to changes in the De
 ## Installation
 
 1. Install the TamperMonkey browser extension
-2. Click https://github.com/jared-hughes/desmos3d/raw/master/desThree.user.js, then hit <kbd>Install</kbd>.
+2. Click https://github.com/jared-hughes/DesThree/raw/master/desThree.user.js, then hit <kbd>Install</kbd>.
   - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
 3. Open https://www.desmos.com/calculator/rv3omhi0re to test it! You should see 9 blue-ish boxes moving up and down.
 4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
 ## Usage
 
-Desmos 3D will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
+DesThree will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
   - <kbd>Planned:</kbd> Disable covering the graph with no 3D features are used.
 
-Desmos 3D expressions are stored inside normal Desmos expressions. Write `@3` at the beginning of an expression field to switch it to 3D mode. The icon to the left should switch to the shape of a cube.
+DesThree expressions are stored inside normal Desmos expressions. Write `@3` at the beginning of an expression field to switch it to 3D mode. The icon to the left should switch to the shape of a cube.
   - <kbd>Planned:</kbd> Be forgiving and switch icon before a function is written.
 
-If Desmos 3D ever stops showing anything or stops being responsive, save and reload the page. If it still doesn't work, it's probably the fault of your expressions.
+If DesThree ever stops showing anything or stops being responsive, save and reload the page. If it still doesn't work, it's probably the fault of your expressions.
   - <kbd>Planned:</kbd> Give better errors.
 
 If you ever can't type something (e.g. `PointLight` automatically replaces `int` with an integral), type it in some other tab/program and copy-paste into Desmos.
