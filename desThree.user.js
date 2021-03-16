@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.2.3
+// @version      0.2.4
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
@@ -366,6 +366,8 @@ class DesThree {
     // } catch {console.warn("ParseError. Proper handling TODO")}
     })
 
+    this.setCanvasVisible(Object.keys(nextDefinitions).length > 0)
+
     // TODO: check for cyclic definitions
     // TODO: check for two+ cameras defined
     this.setThreeExprs(threeExprs)
@@ -407,9 +409,13 @@ class DesThree {
   initRenderer() {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.domElement.style.position = 'absolute';
-    const container = document.querySelector(".dcg-container")
-    container.prepend(this.renderer.domElement);
-    container.querySelector(".dcg-grapher").style.opacity = 0
+    this.container = document.querySelector(".dcg-container")
+    this.container.prepend(this.renderer.domElement);
+  }
+
+  setCanvasVisible(isVisible) {
+    this.renderer.domElement.style.visibility = isVisible ? "" : "hidden"
+    this.container.querySelector(".dcg-grapher").style.visibility = isVisible ? "hidden" : ""
   }
 }
 
