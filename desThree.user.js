@@ -100,8 +100,46 @@ class DesThree {
     this.initDefaultCamera()
     this.injectStyle()
     this.initRenderer()
+    this.initDropdownListener()
     this.observeGraphpaperBounds()
     this.observeGraph()
+  }
+
+  initDropdownListener() {
+    const targetNode = document.querySelector('.dcg-add-expression-container')
+    const config = { attributes: false, childList: true, subtree: true }
+    const observer = new MutationObserver((mutationsList, observer) => {
+      for (const mutation of mutationsList) {
+        const newExpressionNode = targetNode.querySelector('.dcg-action-newexpression')
+        const newThreeNode = targetNode.querySelector('.three-action-newexpression')
+        if (targetNode.querySelector('.dcg-icon-new-expression') && !newThreeNode) {
+          const newNode = newExpressionNode.cloneNode(true)
+          newNode.classList.remove('dcg-action-newexpression')
+          newNode.classList.add('three-action-newexpression')
+          newNode.querySelector('i').nextSibling.nodeValue = 'three'
+          newNode.addEventListener('click', () => {
+            let d = Calc.controller.createItemModel({
+              latex: this.exprPrefix,
+              type: 'expression',
+              id: Calc.controller.generateId(),
+              color: Calc.controller.getNextColor(),
+            })
+            Calc.controller.setEditListMode(false)
+            Calc.controller._toplevelNewItemAtSelection(d, {
+              shouldFocus: true,
+            })
+            Calc.controller._closeAddExpression()
+            Calc.controller.updateRenderShellsBeforePaint()
+            Calc.controller.updateViews()
+            Calc.controller.scrollSelectedItemIntoView()
+            Calc.controller.updateRenderShellsAfterDispatch()
+          })
+          console.log(newNode, newExpressionNode)
+          newExpressionNode.after(newNode)
+        }
+      }
+    })
+    observer.observe(targetNode, config)
   }
 
   applyGraphpaperBounds() {
@@ -197,13 +235,20 @@ class DesThree {
       }
       .three-expr:not(.three-error) .dcg-tab-interior .dcg-expression-icon-container::before {
         content: "";
-        background-image: url(data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjN2I3YjdiIiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
         position: absolute;
         width: 20px;
         height: 20px;
         top: 2px;
         left: 50%;
         transform: translateX(-50%)
+      }
+      .three-expr:not(.three-error) .dcg-tab-interior .dcg-expression-icon-container::before,
+      .three-action-newexpression .dcg-icon-new-expression::before {
+        background-image: url(data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjN2I3YjdiIiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItMzAgMCA1MTEgNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MzYuMjIyNjU2IDEyMS4zNTkzNzUtMjEwLjIwNzAzMS0xMjEuMzU5Mzc1LTIxMC4yMDMxMjUgMTIxLjM1OTM3NSAyMTAuMjAzMTI1IDEyMS4zNjMyODF6bTAgMCIvPjxwYXRoIGQ9Im0yNDEuMjczNDM4IDUxMiAyMTAuMjYxNzE4LTEyMS4zOTQ1MzF2LTI0Mi44NDc2NTdsLTIxMC4yNjE3MTggMTIxLjM5MDYyNnptMCAwIi8+PHBhdGggZD0ibS41IDE0Ny43NTc4MTJ2MjQyLjg0NzY1N2wyMTAuMjU3ODEyIDEyMS4zOTQ1MzF2LTI0Mi44NTE1NjJ6bTAgMCIvPjwvc3ZnPgo=);
+      }
+      .three-action-newexpression .dcg-icon-new-expression::before {
+        color: rgba(0,0,0,0);
+        background-size: cover;
       }
       .three-expr .dcg-expression-mathquill .dcg-mq-root-block > span:nth-child(-n+2) {
         display: none;
