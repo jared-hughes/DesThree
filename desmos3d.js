@@ -5,13 +5,12 @@
 // @description  Use three.js directly in Desmos
 // @author       You
 // @match        https://www.desmos.com/calculator/*
+// @match        https://www.desmos.com/calculator
 // @require      https://threejs.org/build/three.js
 // @grant        none
 // ==/UserScript==
 
 // TODO: change the @require build of three.js to point to a specific version
-
-// latest graph: https://www.desmos.com/calculator/ev2o7jmfbj
 
 (function() {
 'use strict';
@@ -858,15 +857,16 @@ class TorusGeometry extends PassthroughGeometry {
 
 class TorusKnotGeometry extends PassthroughGeometry {
   static _expectedArgs() {
-    return [
+    let expectedArgs = [
       {name: 'radius', type: Type.NUM},
       {name: 'tube', type: Type.NUM},
-      // note that this is in the reverse order of TorusGeometry
-      {name: 'tubularSegments', type: Type.NUM, default: 64},
       {name: 'radialSegments', type: Type.NUM, default: 8},
+      {name: 'tubularSegments', type: Type.NUM, default: 64},
       {name: 'p', type: Type.NUM, default: 2},
       {name: 'q', type: Type.NUM, default: 3},
     ]
+    expectedArgs.order = ['radius', 'tube', 'tubularSegments', 'radialSegments', 'p', 'q']
+    return expectedArgs
   }
 
   constructor(args) {
