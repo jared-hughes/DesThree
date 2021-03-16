@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.2.4
+// @version      0.3.0
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
@@ -23,6 +23,7 @@ const Type = Object.freeze({
   NUM: 'numericValue',
   LIST: 'listValue',
   COLOR: 'Color',
+  'VECTOR3': 'Vector3',
   MATERIAL: 'Material',
   GEOMETRY: 'Geometry',
   OBJECT: 'Object', // subclass of THREE.Object3D; includes light and mesh; anything that can move in 3D
@@ -53,6 +54,7 @@ class DesThree {
 
   funcs = {
     'ColorRGB': Color,
+    '': Vector3,
     // materials
     MeshBasicMaterial,
     MeshLambertMaterial,
@@ -229,7 +231,7 @@ class DesThree {
   }
 
   parseFuncName(text, index) {
-    const funcNameRegex = /\s*(?:\\operatorname{)?(?<func>\w+)}?\s*\(/y
+    const funcNameRegex = /\s*(?:\\operatorname{)?(?<func>\w*)}?\s*\(/y
     funcNameRegex.lastIndex = index
     const match = funcNameRegex.exec(text)
 
@@ -367,7 +369,7 @@ class DesThree {
             const {defs} = this.parseDesThree(latex, 0)
             nextExprVariables[expr.id] = []
             defs.forEach(newDef => {
-              if (!newDef.func) return
+              if (newDef.func === null || newDef.func === undefined) return
               const variable = newDef.variable;
               if (nextVariables.has(variable)) {
                 this.throw(`Duplicate variable: ${variable}`)
@@ -596,6 +598,36 @@ class IntermediateObject {
   }
 }
 
+class ZeroVector3 extends IntermediateObject {
+  type = Type.VECTOR3
+  threeObject = new THREE.Vector3(0, 0, 0)
+}
+
+class Vector3 extends IntermediateObject {
+  static type = Type.VECTOR3
+
+  static expectedArgs() {
+    return [
+      {name: 'x', type: Type.NUM},
+      {name: 'y', type: Type.NUM},
+      {name: 'z', type: Type.NUM},
+    ]
+  }
+
+  constructor(args) {
+    super(new THREE.Vector3(args.x, args.y, args.z))
+  }
+
+  argChanged(name, value) {
+    switch (name) {
+      case 'x':
+      case 'y':
+      case 'z':
+        this.threeObject[name] = value
+        break
+    }
+  }
+}
 
 class White {
   type = Type.COLOR
@@ -759,9 +791,7 @@ class Position extends IntermediateObject {
   static expectedArgs() {
     return [
       {name: 'object', type: Type.OBJECT},
-      {name: 'x', type: Type.NUM},
-      {name: 'y', type: Type.NUM},
-      {name: 'z', type: Type.NUM},
+      {name: 'position', type: Type.VECTOR3},
     ]
   }
 
@@ -773,10 +803,8 @@ class Position extends IntermediateObject {
 
   argChanged(name, value) {
     switch (name) {
-      case 'x':
-      case 'y':
-      case 'z':
-        this.threeObject.position[name] = value
+      case 'position':
+        this.threeObject.position.copy(value.threeObject)
         break
       case 'object':
         // replace the current object
@@ -1029,12 +1057,8 @@ class PerspectiveCamera extends IntermediateObject {
 
   static expectedArgs() {
     return [
-      {name: 'x', type: Type.NUM},
-      {name: 'y', type: Type.NUM},
-      {name: 'z', type: Type.NUM},
-      {name: 'lx', type: Type.NUM, default: 0},
-      {name: 'ly', type: Type.NUM, default: 0},
-      {name: 'lz', type: Type.NUM, default: 0},
+      {name: 'position', type: Type.VECTOR3},
+      {name: 'lookAt', type: Type.VECTOR3, default: new ZeroVector3()},
       {name: 'fov', type: Type.NUM, default: 75},
       {name: 'near', type: Type.NUM, default: 0.1},
       {name: 'far', type: Type.NUM, default: 1000},
@@ -1043,7 +1067,6 @@ class PerspectiveCamera extends IntermediateObject {
 
   constructor(args) {
     super(new THREE.PerspectiveCamera(args.fov, CalcThree.camera.aspect, args.near, args.far))
-    // this.controls = new OrbitControls(this.threeObject, renderer.domElement)
     this.lookAt = new THREE.Vector3(0, 0, 0)
     this.applyArgs(args)
     CalcThree.camera = this.threeObject
@@ -1052,20 +1075,11 @@ class PerspectiveCamera extends IntermediateObject {
 
   argChanged(name, value) {
     switch (name) {
-      case 'x':
-      case 'y':
-      case 'z':
-        this.threeObject.position[name] = value
+      case 'position':
+        this.threeObject.position.copy(value.threeObject)
         break
-      case 'lx':
-        this.lookAt.setX(value)
-        break
-      case 'ly':
-        this.lookAt.setY(value)
-        break
-      case 'lz':
-        this.lookAt.setZ(value)
-        break
+      case 'lookAt':
+        this.lookAt.copy(value.threeObject)
       case 'fov':
         this.threeObject.fov = value
         break

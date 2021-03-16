@@ -16,7 +16,7 @@ This project is unofficial, so it may break at any time due to changes in the De
 1. Install the TamperMonkey browser extension
 2. Click https://github.com/jared-hughes/DesThree/raw/master/desThree.user.js, then hit <kbd>Install</kbd>.
   - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
-3. Open https://www.desmos.com/calculator/rv3omhi0re to test it! You should see 9 blue-ish boxes moving up and down.
+3. Open https://www.desmos.com/calculator/nsc51uz3v1 to test it! You should see 9 blue-ish boxes moving up and down.
 4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
 ## Usage
@@ -35,17 +35,17 @@ If you ever can't type something (e.g. `PointLight` automatically replaces `int`
 
 ### Example 1: Setting Camera Position
 
-The simplest expression you can write simply sets the position of the camera as `(x,y,z)=(1,2,5)` (https://www.desmos.com/calculator/z4fn1drk3n):
+The simplest expression you can write simply sets the position of the camera as `(x,y,z)=(1,2,5)` (https://www.desmos.com/calculator/41c8uy2xoo):
 
 ```js
-PerspectiveCamera(1,2,5)
+pos = (1,2,5)
+PerspectiveCamera(pos)
 ```
   - You can't see anything because we didn't place anything in the scene.
     - <kbd>Planned:</kbd> Allow coordinate axes to exist by default
   - All functions start with capital letters
   - The y-axis points up by default.
   - The camera points to `(0,0,0)` by default.
-  - <kbd>Planned:</kbd> Use a `Vector3` function instead of passing in three different arguments — maybe abbreviate to `V`?
 
 ### Example 2: Showing a Cube
 
@@ -56,23 +56,25 @@ Showing a cube may be more complicated than what you expect. The process goes as
   - Create a mesh, which combines the material and geometry into one object. Meshes default to being placed at `(0,0,0)`.
   - Show the mesh
 
-These steps can be done as follows (https://www.desmos.com/calculator/t0dmozi7qb):
+These steps can be done as follows (https://www.desmos.com/calculator/gk0thz9bpi):
 
 ```js
-PerspectiveCamera(1,2,5)
+pos = (1,2,5)
+PerspectiveCamera(pos)
 cubeGeometry = BoxGeometry(1,1,1)
 material = MeshNormalMaterial()
 mesh = Mesh(cubeGeometry, material)
 Show(mesh)
 ```
 
-Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/cvrzsn8s8j):
+Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/siim5wicud):
 
 ```js
-PerspectiveCamera(1,2,5)
+PerspectiveCamera((1,2,5))
 Show(Mesh(BoxGeometry(1,1,1), MeshNormalMaterial()))
 ```
 
+- Be careful: `PerspectiveCamera` seems to have double parentheses, but the inner ones are for the point `(1,2,5)`—only the outer ones are for the function call.
 - `BoxGeometry` takes three arguments: width, height, length. To make a cube, we use the same value for all three
 - `MeshNormalMaterial` takes no arguments. Example 5 will go over the different kinds of materials
 - `Mesh` simply takes the geometry and material and arguments.
@@ -84,17 +86,17 @@ Show(Mesh(BoxGeometry(1,1,1), MeshNormalMaterial()))
 
 A great part about using Desmos is that we can use sliders and math in the expressions.
 
-To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/lwasbljchh):
+To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/8kthukjcva):
 
 ```js
-PerspectiveCamera(1,2,5)
+PerspectiveCamera((1,2,5))
 cubeGeometry = BoxGeometry(1,1,1)
 material = MeshNormalMaterial()
 mesh = Mesh(cubeGeometry, material)
 x_0 = 0
 y_0 = 0
 z_0 = 0
-meshp = Position(mesh, x_0, y_0, z_0)
+meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
   - <kbd>Planned:</kbd> specify position in the `Mesh` function
@@ -105,24 +107,24 @@ Show(meshp)
 
 To improve our future viewing, we will orbit the camera using equations of [spherical coordinates](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
 
-This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/oicbxuc7xf):
+This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/m2iphzn6a0):
 ```js
 r_c = 5
 theta_c = 0
 phi_c = 0
-PerspectiveCamera(r_c·cos(phi_c)cos(theta_c), r_c·sin(phi_c), r_c·cos(phi_c)sin(theta_c))
+pos = (r_c·cos(phi_c)cos(theta_c), r_c·sin(phi_c), r_c·cos(phi_c)sin(theta_c))
+PerspectiveCamera(pos)
 cubeGeometry = BoxGeometry(1,1,1)
 material = MeshNormalMaterial()
 mesh = Mesh(cubeGeometry, material)
 x_0 = 0
 y_0 = 0
 z_0 = 0
-meshp = Position(mesh, x_0, y_0, z_0)
+meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
 
 - <kbd>Planned:</kbd> Allow dragging the canvas to move the camera
-- <kbd>Planned:</kbd> Use `visiblity:hidden` to disable other adverse dragging.
 
 ### Example 5: Materials and Lights
 
@@ -150,18 +152,18 @@ show(mesh)
 
 With these last few materials, you need to add lights if you want to see anything.
 
-Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/9hmkduxkdl):
+Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/jt6rxasofh):
 
 ```js
-Show(Position(PointLight(1), -7, 6, 2))
+Show(Position(PointLight(1), (-7, 6, 2)))
 ```
 
-Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/0fcdm4ubps). Ugh, that's too dark.
+Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/f7bfwcjkwr). Ugh, that's too dark.
 
-One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/ikewwa3i4x):
+One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/fcw3cwckvc):
 
 ```js
-Show(AmbientLight(1))
+Show(AmbientLight(0.3))
 ```
 
 - Ambient lights have no position
@@ -175,41 +177,41 @@ Anywhere a number can be accepted, a list of values can be accepted instead.
 
 - <kbd>Planned:</kbd> allow for lists of objects like `[OctahedronGeometry(2), BoxGeometry(4,3,2)]`
 
-Let's make a sphere with radius `1` and place it at x-coordinates `-10, -5, 0, 5, 10` (https://www.desmos.com/calculator/ayy6arutzm):
+Let's make a sphere with radius `1` and place it at x-coordinates `-10, -5, 0, 5, 10` (https://www.desmos.com/calculator/0lsvp6lqgy):
 
 ```js
 geometry = SphereGeometry(1)
 mesh = Mesh(geometry, material)
-meshp = Position(mesh, [-10,-5,...,10], 0, 0)
+meshp = Position(mesh, ([-10,-5,...,10], 0, 0))
 Show(meshp)
 ```
 
-Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/9tn7soxmg0):
+Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/pjmjzden0z):
 
 ```js
 L_x = [-10,-5,...,10]
 mesh = Mesh(geometry, material)
-meshp = Position(mesh, L_x, 0.05*L_x^2, 0)
+meshp = Position(mesh, L_x, (0.05*L_x^2, 0))
 Show(meshp)
 ```
 
-You can even make a list of geometries (https://www.desmos.com/calculator/rey62vakt0)
+You can even make a list of geometries (https://www.desmos.com/calculator/5e0tdluixf)
 
 ```js
 L_x = [-12.5,-7.5,...,12.5]
 geometry = SphereGeometry(0.02*L_x^2+0.5)
 mesh = Mesh(geometry, material)
-meshp = Position(mesh, L_x, 0.02*L_x^2, 0)
+meshp = Position(mesh, L_x, (0.02*L_x^2, 0))
 Show(meshp)
 ```
 
-Go crazy, and have fun! https://www.desmos.com/calculator/fcnpdwqrte.
+Go crazy, and have fun!
 
 ## Function Reference
 
 <kbd>Planned:</kbd> Shorten some function names. `colorRGB → RGB`, `IcosahedronGeometry → Icosahedron`, `MeshLambertMaterial → LambertMaterial`
 
-<kbd>Planned:</kbd> Examples of each function
+<kbd>Planned:</kbd> Examples of each function in practice
 
 ### Functions that return a Geometry
 
@@ -342,8 +344,8 @@ color | Color | white |
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-object | Object3D | | `Geometry` not accepted, only others in this "Functions that return an Object3D" seciton.
-color | Color | white |
+object | Object3D | | `Geometry` not accepted, only others in this "Functions that return an Object3D" section.
+position | Vector3 | | Vector by which to translate the object.
 
 ### Functions that directly affect the scene
 
@@ -351,12 +353,8 @@ color | Color | white |
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-x | number | | x coordinate of the point the camera is positioned
-y | number | | y coordinate of the point the camera is positioned
-z | number | | z coordinate of the point the camera is positioned
-lx | number | 0 | x coordinate of the point it looks at
-ly | number | 0 | y coordinate of the point it looks at
-lz | number | 0 | z coordinate of the point it looks at
+position | Vector3 | | Position of the camera
+lookAt | Vector3 | (0,0,0) | Position of the point the camera looks at
 fov | number | 75 | field of view (degrees, <kbd>planned:</kbd> Change treatment based on radian mode of calculator)
 near | number | 0.1 | near clipping plane of [camera frustum](https://en.wikipedia.org/wiki/Viewing_frustum)
 far | number | 1000 | far clipping plane of [camera frustum](https://en.wikipedia.org/wiki/Viewing_frustum)
