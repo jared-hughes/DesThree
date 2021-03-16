@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.1
+// @version      0.2.0
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
