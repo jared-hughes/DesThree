@@ -80,7 +80,6 @@ Show(Mesh(BoxGeometry(1,1,1), MeshNormalMaterial()))
 - `BoxGeometry` takes three arguments: width, height, length. To make a cube, we use the same value for all three
 - `MeshNormalMaterial` takes no arguments. Example 5 will go over the different kinds of materials
 - `Mesh` simply takes the geometry and material and arguments.
-  - <kbd>Planned:</kbd> Default the material to be a `MeshNormalMaterial`
 - `Show` takes the mesh and shows it. This does not occur automatically because we sometimes want to store a mesh in a variable and not show it until after some transformations
 
 
@@ -333,7 +332,7 @@ Looks like a cartoon drawing.
 Property | Type | Default | Description
 --- | --- | --- | ---
 geometry | Geometry | |
-material | Material | |
+material | Material | MeshNormalMaterial |
 
 #### [PointLight](https://threejs.org/docs/index.html#api/en/lights/PointLight), [AmbientLight](https://threejs.org/docs/index.html#api/en/lights/AmbientLight)
 

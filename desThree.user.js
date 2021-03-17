@@ -767,6 +767,11 @@ class MeshToonMaterial extends MeshMaterial {
   }
 }
 
+class MeshNormalMaterialStatic extends IntermediateObject {
+  type = Type.MATERIAL
+  threeObject = new THREE.MeshNormalMaterial()
+}
+
 class MeshNormalMaterial extends IntermediateObject {
   static type = Type.MATERIAL
 
@@ -1045,7 +1050,7 @@ class Mesh extends IntermediateObject {
   static expectedArgs() {
     return [
       {name: 'geometry', type: Type.GEOMETRY},
-      {name: 'material', type: Type.MATERIAL}
+      {name: 'material', type: Type.MATERIAL, default: new MeshNormalMaterialStatic()},
     ]
   }
 
