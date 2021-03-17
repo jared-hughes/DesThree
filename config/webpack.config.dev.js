@@ -9,7 +9,8 @@ const webpackConfig = require("./webpack.config.base");
 
 metadata.require.push(
   "file://" + path.resolve(__dirname, "../dist/index.prod.user.js")
-);
+)
+metadata.name += '-dev'
 
 const cfg = merge(webpackConfig, {
   entry: {

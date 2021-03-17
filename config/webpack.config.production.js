@@ -13,7 +13,7 @@ const cfg = merge({}, webpackConfig, {
     new UserScriptMetaDataPlugin({
       metadata
     })
-  ]
+  ],
 })
 
 if (process.env.npm_config_report) {
