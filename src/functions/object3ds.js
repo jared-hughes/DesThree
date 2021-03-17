@@ -1,8 +1,8 @@
+import { Type, FunctionApplication } from './functionSupers.js'
+import { MeshNormalMaterialStatic } from './meshMaterials'
 
-class Position extends IntermediateObject {
+export class Position extends FunctionApplication {
   // https://threejs.org/docs/index.html#api/en/objects/Group
-  static type = Type.OBJECT
-
   static expectedArgs() {
     return [
       {name: 'object', type: Type.OBJECT},
@@ -30,10 +30,9 @@ class Position extends IntermediateObject {
     }
   }
 }
+Position.type = Type.OBJECT
 
-class Mesh extends IntermediateObject {
-  static type = Type.OBJECT
-
+export class Mesh extends FunctionApplication {
   static expectedArgs() {
     return [
       {name: 'geometry', type: Type.GEOMETRY},
@@ -61,3 +60,4 @@ class Mesh extends IntermediateObject {
     }
   }
 }
+Mesh.type = Type.OBJECT

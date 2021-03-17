@@ -20,7 +20,9 @@
     "type": "git",
     "url": "https://github.com/jared-hughes/DesThree"
   },
-  "dependencies": {},
+  "dependencies": {
+    "three": "^0.126.1"
+  },
   "devDependencies": {
     "userscript-metadata-webpack-plugin": "^0.1.0",
     "webpack": "^5.26.2",

@@ -1,4 +1,4 @@
-const Type = Object.freeze({
+export const Type = Object.freeze({
   NUM: 'numericValue',
   LIST: 'listValue',
   COLOR: 'Color',
@@ -10,7 +10,7 @@ const Type = Object.freeze({
   NULL: 'Null',
 })
 
-class IntermediateObjectList {
+export class FunctionApplicationList {
   constructor(func, args) {
     this.isDefined = false
     // childObjects is a list or a single object
@@ -64,8 +64,8 @@ class IntermediateObjectList {
   }
 
   static index(v, i) {
-    return (v.childObjects && v.childObjects[i]) // IntermediateObjectList with several values
-      ?? v.childObjects // IntermediateObjectList with one value
+    return (v.childObjects && v.childObjects[i]) // FunctionApplicationList with several values
+      ?? v.childObjects // FunctionApplicationList with one value
       ?? v[i] // List of numbers
       ?? v // Single number
   }
@@ -98,7 +98,7 @@ class IntermediateObjectList {
         if (minLength !== Infinity) {
           console.log("List value changed: ", argName, value)
           this.forEach((obj, i) => {
-            obj.argChanged(argName, IntermediateObjectList.index(value, i))
+            obj.argChanged(argName, FunctionApplicationList.index(value, i))
           })
         } else {
           console.log("Single value changed: ", argName, value)
@@ -111,7 +111,7 @@ class IntermediateObjectList {
         this.childObjects = []
         for (let i=0; i < (minLength === Infinity ? 1 : minLength); i++) {
           let object = new this.func(
-            applyToEntries(this.argValues, v => IntermediateObjectList.index(v, i))
+            applyToEntries(this.argValues, v => FunctionApplicationList.index(v, i))
           )
           this.childObjects.push(object)
         }
@@ -152,7 +152,7 @@ class IntermediateObjectList {
   }
 }
 
-class IntermediateObject {
+export class FunctionApplication {
   constructor(threeObject) {
     this.threeObject = threeObject
   }

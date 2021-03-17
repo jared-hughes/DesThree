@@ -1,6 +1,8 @@
-class Light extends IntermediateObject {
-  static type = Type.OBJECT
+import { Type, FunctionApplication } from './functionSupers.js'
+import * as THREE from 'three';
+import { White } from './misc'
 
+class Light extends FunctionApplication {
   static expectedArgs() {
     return [
       {name: 'intensity', type: Type.NUM, default: 1},
@@ -30,14 +32,15 @@ class Light extends IntermediateObject {
     }
   }
 }
+Light.type = Type.OBJECT
 
-class PointLight extends Light {
+export class PointLight extends Light {
   constructor(args) {
     super(args, THREE.PointLight)
   }
 }
 
-class AmbientLight extends Light {
+export class AmbientLight extends Light {
   constructor(args) {
     super(args, THREE.AmbientLight)
   }

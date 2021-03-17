@@ -1,6 +1,12 @@
-class PassthroughGeometry extends IntermediateObject {
-  static type = Type.GEOMETRY
+import { Type, FunctionApplication } from './functionSupers.js'
+import * as THREE from 'three';
 
+class Geometry extends FunctionApplication {
+
+}
+Geometry.type = Type.GEOMETRY
+
+class PassthroughGeometry extends Geometry {
   static expectedArgs() {
     let expectedArgs = this._expectedArgs()
     expectedArgs.order = expectedArgs.order || expectedArgs.map(({name}) => name)
@@ -36,31 +42,31 @@ class PolyhedronGeometry extends PassthroughGeometry {
   }
 }
 
-class IcosahedronGeometry extends PolyhedronGeometry {
+export class IcosahedronGeometry extends PolyhedronGeometry {
   constructor(args) {
     super(args, THREE.IcosahedronGeometry)
   }
 }
 
-class DodecahedronGeometry extends PolyhedronGeometry {
+export class DodecahedronGeometry extends PolyhedronGeometry {
   constructor(args) {
     super(args, THREE.DodecahedronGeometry)
   }
 }
 
-class OctahedronGeometry extends PolyhedronGeometry {
+export class OctahedronGeometry extends PolyhedronGeometry {
   constructor(args) {
     super(args, THREE.OctahedronGeometry)
   }
 }
 
-class TetrahedronGeometry extends PolyhedronGeometry {
+export class TetrahedronGeometry extends PolyhedronGeometry {
   constructor(args) {
     super(args, THREE.TetrahedronGeometry)
   }
 }
 
-class SphereGeometry extends PassthroughGeometry {
+export class SphereGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     return [
       {name: 'radius', type: Type.NUM},
@@ -75,7 +81,7 @@ class SphereGeometry extends PassthroughGeometry {
   }
 }
 
-class TorusGeometry extends PassthroughGeometry {
+export class TorusGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     return [
       {name: 'radius', type: Type.NUM},
@@ -91,7 +97,7 @@ class TorusGeometry extends PassthroughGeometry {
   }
 }
 
-class TorusKnotGeometry extends PassthroughGeometry {
+export class TorusKnotGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     let expectedArgs = [
       {name: 'radius', type: Type.NUM},
@@ -110,7 +116,7 @@ class TorusKnotGeometry extends PassthroughGeometry {
   }
 }
 
-class BoxGeometry extends PassthroughGeometry {
+export class BoxGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     return [
       {name: 'width', type: Type.NUM},
@@ -124,7 +130,7 @@ class BoxGeometry extends PassthroughGeometry {
   }
 }
 
-class ConeGeometry extends PassthroughGeometry {
+export class ConeGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     return [
       {name: 'radius', type: Type.NUM},
@@ -139,7 +145,7 @@ class ConeGeometry extends PassthroughGeometry {
   }
 }
 
-class FrustumGeometry extends PassthroughGeometry {
+export class FrustumGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     return [
       {name: 'radiusTop', type: Type.NUM},
@@ -156,7 +162,7 @@ class FrustumGeometry extends PassthroughGeometry {
   }
 }
 
-class CylinderGeometry extends PassthroughGeometry {
+export class CylinderGeometry extends PassthroughGeometry {
   static _expectedArgs() {
     let expectedArgs = [
       {name: 'radius', type: Type.NUM},

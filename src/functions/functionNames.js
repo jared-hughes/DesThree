@@ -1,5 +1,19 @@
-export const funcs = {
-  RGB: Color,
+import {
+  MeshLambertMaterial, MeshNormalMaterial, MeshBasicMaterial, MeshDepthMaterial,
+  MeshPhongMaterial, MeshToonMaterial
+} from './meshMaterials'
+import {
+  DodecahedronGeometry, IcosahedronGeometry, TetrahedronGeometry,
+  OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
+  SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry
+} from './geometries.js'
+import { Mesh, Position } from './object3ds'
+import { PointLight, AmbientLight } from './lights'
+import { PerspectiveCamera } from './cameras'
+import { ColorRGB, Vector3, Show } from './misc'
+
+const functionNames = {
+  RGB: ColorRGB,
   '': Vector3,
   // materials
   LambertMaterial: MeshLambertMaterial,
@@ -31,3 +45,5 @@ export const funcs = {
   Position,
   Show,
 }
+
+export default functionNames

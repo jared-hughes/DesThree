@@ -1,6 +1,12 @@
-class PerspectiveCamera extends IntermediateObject {
-  static type = Type.CAMERA
+import { Type, FunctionApplication } from './functionSupers.js'
+import * as THREE from 'three';
 
+class Camera extends FunctionApplication {
+
+}
+Camera.type = Type.CAMERA
+
+export class PerspectiveCamera extends Camera {
   static expectedArgs() {
     return [
       {name: 'position', type: Type.VECTOR3},

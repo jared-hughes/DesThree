@@ -1,3 +1,6 @@
+import functionNames from './functions/functionNames'
+import * as THREE from 'three'
+
 export default class DesThree {
   constructor() {
     this.renderer = null
@@ -6,7 +9,7 @@ export default class DesThree {
     this.definitions = {}
     this.values = {}
     this.dependents = {}
-    this.maxFuncNameLength = Math.max(...Object.keys(this.funcs).map(c => c.length))
+    this.maxFuncNameLength = Math.max(...Object.keys(functionNames).map(c => c.length))
   }
 
   init() {
@@ -100,8 +103,8 @@ export default class DesThree {
   }
 
   generateObject(def) {
-    if (def.func in this.funcs) {
-      let object = new IntermediateObjectList(this.funcs[def.func], def.args)
+    if (def.func in functionNames) {
+      let object = new FunctionApplicationList(functionNames[def.func], def.args)
       object.variable = def.variable
       return object
     } else {
@@ -129,7 +132,7 @@ export default class DesThree {
         digit3Element?.remove()
       }
       let autoOperatorNames = mqField._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
-      Object.keys(this.funcs).forEach(c => {
+      Object.keys(functionNames).forEach(c => {
         autoOperatorNames[c] = c
       })
       autoOperatorNames._maxLength = Math.max(this.maxFuncNameLength, autoOperatorNames._maxLength)
@@ -264,10 +267,10 @@ export default class DesThree {
     const {func, nextIndex: i2} = this.parseFuncName(text, i1)
     index = i2
 
-    if (this.funcs[func] === undefined) {
+    if (functionNames[func] === undefined) {
       this.throw(`Unidentified function: ${func}`)
     }
-    const expectedArgs = this.funcs[func].expectedArgs()
+    const expectedArgs = functionNames[func].expectedArgs()
     let defs = []
     let args = []
 

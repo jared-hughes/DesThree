@@ -1,11 +1,20 @@
-class ZeroVector3 extends IntermediateObject {
-  type = Type.VECTOR3
-  threeObject = new THREE.Vector3(0, 0, 0)
+import { Type, FunctionApplication } from './functionSupers.js'
+import * as THREE from 'three';
+
+class Vector extends FunctionApplication {
+  constructor(x, y, z) {
+    super(new THREE.Vector3(x, y, z))
+  }
+}
+Vector.type = Type.VECTOR3
+
+export class ZeroVector3 extends Vector {
+  constructor() {
+    super(0, 0, 0)
+  }
 }
 
-class Vector3 extends IntermediateObject {
-  static type = Type.VECTOR3
-
+export class Vector3 extends Vector {
   static expectedArgs() {
     return [
       {name: 'x', type: Type.NUM},
@@ -15,7 +24,7 @@ class Vector3 extends IntermediateObject {
   }
 
   constructor(args) {
-    super(new THREE.Vector3(args.x, args.y, args.z))
+    super(args.x, args.y, args.z)
   }
 
   argChanged(name, value) {
@@ -29,14 +38,20 @@ class Vector3 extends IntermediateObject {
   }
 }
 
-class White {
-  type = Type.COLOR
-  threeObject = new THREE.Color(1, 1, 1)
+export class Color extends FunctionApplication {
+  constructor(r, g, b) {
+    super(new THREE.Color(clampMap255(r), clampMap255(g), clampMap255(b)))
+  }
+}
+Color.type = Type.COLOR
+
+function clampMap255(c) {
+  if (x < 0) return 0
+  else if (x > 255) return 1
+  else return x / 255
 }
 
-class Color extends IntermediateObject {
-  static type = Type.COLOR
-
+export class ColorRGB extends Color {
   static expectedArgs() {
     return [
       {name: 'r', type: Type.NUM},
@@ -47,18 +62,7 @@ class Color extends IntermediateObject {
 
   // forced to do this while there is no observe on advancedStyling colors
   constructor(args) {
-    super(
-      new THREE.Color(
-        ...['r','g','b']
-        .map(c => Color.clampMapRGBComponent(args[c]))
-      )
-    )
-  }
-
-  static clampMapRGBComponent(x) {
-    if (x < 0) return 0
-    else if (x > 255) return 1
-    else return x / 255
+    super(...['r','g','b'].map(c => args[c]))
   }
 
   argChanged(name, value) {
@@ -66,16 +70,19 @@ class Color extends IntermediateObject {
       case 'r':
       case 'g':
       case 'b':
-        this.threeObject[name] = Color.clampMapRGBComponent(value)
+        this.threeObject[name] = clampMap255(value)
         break
     }
   }
 }
 
+export class White extends Color {
+  constructor() {
+    super(0, 0, 0)
+  }
+}
 
-class Show extends IntermediateObject {
-  static type = Type.NULL
-
+export class Show extends FunctionApplication {
   static expectedArgs() {
     return [
       {name: 'object', type: Type.OBJECT},
@@ -104,3 +111,4 @@ class Show extends IntermediateObject {
     CalcThree.scene.remove(this.threeObject)
   }
 }
+Show.type = Type.NULL

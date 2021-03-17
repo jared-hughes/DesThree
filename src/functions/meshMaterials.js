@@ -1,6 +1,13 @@
-class MeshMaterial extends IntermediateObject {
-  static type = Type.MATERIAL
+import { Type, FunctionApplication } from './functionSupers.js'
+import * as THREE from 'three';
+import { White } from './misc'
 
+class MeshMaterial extends FunctionApplication {
+
+}
+MeshMaterial.type = Type.MATERIAL
+
+class MeshColorMaterial extends MeshMaterial {
   static expectedArgs() {
     return [
       {name: 'color', type: Type.COLOR, default: new White()},
@@ -20,40 +27,40 @@ class MeshMaterial extends IntermediateObject {
   }
 }
 
-class MeshBasicMaterial extends MeshMaterial {
+
+export class MeshBasicMaterial extends MeshColorMaterial {
   // consistent color regardless of lighting
   constructor(args) {
     super(args, THREE.MeshBasicMaterial)
   }
 }
 
-class MeshLambertMaterial extends MeshMaterial {
+export class MeshLambertMaterial extends MeshColorMaterial {
   // needs lights
   constructor(args) {
     super(args, THREE.MeshLambertMaterial)
   }
 }
 
-class MeshPhongMaterial extends MeshMaterial {
+export class MeshPhongMaterial extends MeshColorMaterial {
   constructor(args) {
     super(args, THREE.MeshPhongMaterial)
   }
 }
 
-class MeshToonMaterial extends MeshMaterial {
+export class MeshToonMaterial extends MeshColorMaterial {
   constructor(args) {
     super(args, THREE.MeshToonMaterial)
   }
 }
 
-class MeshNormalMaterialStatic extends IntermediateObject {
-  type = Type.MATERIAL
-  threeObject = new THREE.MeshNormalMaterial()
+export class MeshNormalMaterialStatic extends MeshMaterial {
+  constructor() {
+    threeObject = new THREE.MeshNormalMaterial()
+  }
 }
 
-class MeshNormalMaterial extends IntermediateObject {
-  static type = Type.MATERIAL
-
+export class MeshNormalMaterial extends MeshMaterial {
   static expectedArgs() {
     return []
   }
@@ -63,7 +70,7 @@ class MeshNormalMaterial extends IntermediateObject {
   }
 }
 
-class MeshDepthMaterial extends IntermediateObject {
+export class MeshDepthMaterial extends MeshMaterial {
   static expectedArgs() {
     return []
   }

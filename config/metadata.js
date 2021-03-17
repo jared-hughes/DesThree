@@ -11,9 +11,7 @@ module.exports = {
     'https://www.desmos.com/calculator/*',
     'https://www.desmos.com/calculator'
   ],
-  require: [
-    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js'
-  ],
+  require: [],
   supportURL: 'https://github.com/jared-hughes/DesThree/issues',
   // TODO: downloadURL and updateURL
   grant: [
