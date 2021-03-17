@@ -19,6 +19,8 @@ This project is unofficial, so it may break at any time due to changes in the De
 3. Open https://www.desmos.com/calculator/nsc51uz3v1 to test it! You should see 9 blue-ish boxes moving up and down.
 4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
+Please report any bugs here on the [Github issues tracker](https://github.com/jared-hughes/DesThree/issues/) or discuss on the [Unofficial Desmos Discord](https://discord.gg/vCBupKs9sB) at #programming.
+
 ## Usage
 
 DesThree will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
@@ -26,11 +28,8 @@ DesThree will automatically load in *every* graph you load with the userscript e
 To create a DesThree expression, insert it from the <kbd>➕</kbd> menu in the top-left as you might insert a folder or an image. You can also type `@3` at the start of a normal expression to begin a DesThree expression; the icon to the left should switch to the shape of a cube.
 
 If DesThree ever stops showing something or stops being responsive, save and reload the page. If it still doesn't work, it's probably the fault of your expressions.
-  - <kbd>Planned:</kbd> Show better errors without opening console
 
 If you ever can't type something (e.g. `PointLight` automatically replaces `int` with an integral), type it in some other tab/program and copy-paste into Desmos.
-  - <kbd>Planned:</kbd> Fix this issue (convenience).
-  - <kbd>Planned:</kbd> Allow operatornames to work on graph reload
 
 ### Example 1: Setting Camera Position
 
@@ -41,7 +40,6 @@ pos = (1,2,5)
 PerspectiveCamera(pos)
 ```
   - You can't see anything because we didn't place anything in the scene.
-    - <kbd>Planned:</kbd> Allow coordinate axes to exist by default
   - All functions start with capital letters
   - Variable names must start with a letter but can have letters, digits, or underscores elsewhere:
     - Valid: `cameraPos`, `camera_pos`, `cube_1`, `thr33js`
@@ -130,8 +128,6 @@ meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
 
-- <kbd>Planned:</kbd> Allow dragging the canvas to move the camera
-
 ### Example 5: Materials and Lights
 
 Remember how we're using `MeshNormalMaterial` above? That is the simplest material (and the default if none is given to the `Mesh` function): there are no arguments, and we don't have to deal with lights. Each face is simply colored based on its normal vector.
@@ -183,8 +179,6 @@ Show(AmbientLight(0.3))
 
 Anywhere a number can be accepted, a list of values can be accepted instead.
 
-- <kbd>Planned:</kbd> allow for lists of objects like `[OctahedronGeometry(2), BoxGeometry(4,3,2)]`
-
 Let's make a sphere with radius `1` and place it at x-coordinates `-10, -5, 0, 5, 10` (https://www.desmos.com/calculator/0lsvp6lqgy):
 
 ```js
@@ -216,10 +210,6 @@ Show(meshp)
 Go crazy, and have fun!
 
 ## Function Reference
-
-<kbd>Planned:</kbd> Shorten some function names. `colorRGB → RGB`, `IcosahedronGeometry → Icosahedron`, `MeshLambertMaterial → LambertMaterial`
-
-<kbd>Planned:</kbd> Examples of each function in practice
 
 ### Functions that return a Geometry
 
