@@ -5,38 +5,17 @@ const webpackConfig = {
   resolve: {
     extensions: ['.js']
   },
-  // performance: {
-  // hints: false
-  // },
   optimization: {
     minimize: false
   },
-  entry: './src/js/index.js',
+  entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, '../dist')
   },
   module: {
     rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader'
-      },
-      {
-        test: /\.less$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'less-loader',
-        ]
-      },
-      {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-        ]
-      },
+      // js uses the default loader
+      // other loaders would go here, but there is no need for any
     ]
   },
   plugins: [

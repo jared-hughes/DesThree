@@ -20,6 +20,8 @@ const cfg = merge(webpackConfig, {
     filename: "index.[name].user.js",
     path: path.resolve(__dirname, "../dist"),
   },
+  // https://webpack.js.org/configuration/devtool claims this is the slowest option
+  // no reason to change for now though
   devtool: "inline-source-map",
   watch: true,
   watchOptions: {

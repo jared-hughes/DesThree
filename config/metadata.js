@@ -14,6 +14,7 @@ module.exports = {
   require: [
     'https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js'
   ],
+  supportURL: 'https://github.com/jared-hughes/DesThree/issues',
   // TODO: downloadURL and updateURL
   grant: [
     'none'
