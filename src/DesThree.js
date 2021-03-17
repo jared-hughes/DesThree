@@ -52,7 +52,6 @@ export default class DesThree {
             this.calculator.controller.scrollSelectedItemIntoView()
             this.calculator.controller.updateRenderShellsAfterDispatch()
           })
-          console.log(newNode, newExpressionNode)
           newExpressionNode.after(newNode)
         }
       }
@@ -380,11 +379,13 @@ export default class DesThree {
   }
 
   rerender() {
+    /* DEV-START */
     console.groupCollapsed("rerender", performance.now())
     console.log(this.scene)
     console.log(this.camera)
     console.log(this.values)
     console.groupEnd()
+    /* DEV-END */
     this.renderer.render(this.scene, this.camera)
   }
 

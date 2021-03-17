@@ -23,7 +23,9 @@ export class FunctionApplicationList {
     this.dependencies = {}
     this.type = func.type
 
+    /* DEV-START */
     console.log("Initializing", func.name, args)
+    /* DEV-END */
 
     if (func.expectedArgs().length === 0) {
       this.childObjects = new func(this.argValues)
@@ -106,12 +108,16 @@ export class FunctionApplicationList {
       if (minLength === this.childObjects.length) {
         // number of children stayed same, so just change their args
         if (minLength !== Infinity) {
+          /* DEV-START */
           console.log("List value changed: ", argName, value)
+          /* DEV-END */
           this.forEach((obj, i) => {
             obj.argChanged(argName, FunctionApplicationList.index(value, i))
           })
         } else {
+          /* DEV-START */
           console.log("Single value changed: ", argName, value)
+          /* DEV-END */
           this.childObjects.argChanged(argName, value)
         }
       } else {
@@ -137,9 +143,11 @@ export class FunctionApplicationList {
 
   setDefined(defined) {
     this.isDefined = defined
+    /* DEV-START */
     if (defined) {
       console.log("Now defined: ", this)
     }
+    /* DEV-END */
     this.forEach(obj => {
       if (obj.type === Type.OBJECT3D) {
         obj.threeObject.visible = defined
@@ -157,9 +165,10 @@ export class FunctionApplicationList {
   }
 
   dispose() {
+    /* DEV-START */
     console.log("Disposing", this)
+    /* DEV-END */
     this.forEach(e => e.dispose())
-    // this.childObjects = null
   }
 }
 

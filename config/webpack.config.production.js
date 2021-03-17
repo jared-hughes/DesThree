@@ -9,6 +9,22 @@ const cfg = merge({}, webpackConfig, {
   output: {
     filename: 'index.prod.user.js'
   },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: 'webpack-strip-block',
+            options: {
+              start: 'DEV-START',
+              end: 'DEV-END',
+            }
+          }
+        ]
+      }
+    ]
+  },
   plugins: [
     new UserScriptMetaDataPlugin({
       metadata
