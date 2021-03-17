@@ -80,7 +80,6 @@ Show(Mesh(BoxGeometry(1,1,1), MeshNormalMaterial()))
 - `BoxGeometry` takes three arguments: width, height, length. To make a cube, we use the same value for all three
 - `MeshNormalMaterial` takes no arguments. Example 5 will go over the different kinds of materials
 - `Mesh` simply takes the geometry and material and arguments.
-  - <kbd>Planned:</kbd> Default the material to be a `MeshNormalMaterial`
 - `Show` takes the mesh and shows it. This does not occur automatically because we sometimes want to store a mesh in a variable and not show it until after some transformations
 
 
@@ -101,7 +100,12 @@ z_0 = 0
 meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
-  - <kbd>Planned:</kbd> specify position in the `Mesh` function
+
+Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/nkll87ulax):
+```js
+meshp = Mesh(cubeGeometry, material, (x_0, y_0, z_0))
+Show(meshp)
+```
   - Desmos generates sliders for each position variable, which we can use in the function. Try dragging the sliders!
   - Note that we are now showing `meshp`, the `mesh` correctly positioned in 3D.
 
@@ -130,7 +134,7 @@ Show(meshp)
 
 ### Example 5: Materials and Lights
 
-Remember how we're using `MeshNormalMaterial` above? That is the simplest material: there are no arguments, and we don't have to deal with lights. Each face is simply colored based on its normal vector.
+Remember how we're using `MeshNormalMaterial` above? That is the simplest material (and the default if none is given to the `Mesh` function): there are no arguments, and we don't have to deal with lights. Each face is simply colored based on its normal vector.
 
 Two other materials exist that are always visible regardless of lights:
   - `MeshDepthMaterial`: also takes no arguments
@@ -159,6 +163,8 @@ Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of
 ```js
 Show(Position(PointLight(1), (-7, 6, 2)))
 ```
+
+(Alternatively, you can use `Show(PointLight(1, ColorRGB(255,255,255), (-7,6,2)))`, which avoids the `Position` function).
 
 Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/f7bfwcjkwr). Ugh, that's too dark.
 
@@ -333,7 +339,8 @@ Looks like a cartoon drawing.
 Property | Type | Default | Description
 --- | --- | --- | ---
 geometry | Geometry | |
-material | Material | |
+material | Material | MeshNormalMaterial |
+position | Vector3 | (0,0,0) |
 
 #### [PointLight](https://threejs.org/docs/index.html#api/en/lights/PointLight), [AmbientLight](https://threejs.org/docs/index.html#api/en/lights/AmbientLight)
 
@@ -341,6 +348,7 @@ Property | Type | Default | Description
 --- | --- | --- | ---
 intensity | number | 1 | Brightness
 color | Color | white |
+position | Vector3 | (0,0,0) | ignored for `AmbientLight`s
 
 #### Position
 

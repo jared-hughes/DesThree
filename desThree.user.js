@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.3.1
+// @version      0.3.2
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
@@ -767,6 +767,11 @@ class MeshToonMaterial extends MeshMaterial {
   }
 }
 
+class MeshNormalMaterialStatic extends IntermediateObject {
+  type = Type.MATERIAL
+  threeObject = new THREE.MeshNormalMaterial()
+}
+
 class MeshNormalMaterial extends IntermediateObject {
   static type = Type.MATERIAL
 
@@ -798,13 +803,15 @@ class Light extends IntermediateObject {
     return [
       {name: 'intensity', type: Type.NUM, default: 1},
       {name: 'color', type: Type.COLOR, default: new White()},
+      {name: 'position', type: Type.VECTOR3, default: new ZeroVector3()},
       // TODO: additional args (distance, decay)
       // https://threejs.org/docs/index.html#api/en/lights/PointLight
     ]
   }
 
   constructor(args, threeObject) {
-    super(new threeObject(args.color.threeObject, args.intensity))
+    super(new threeObject())
+    this.applyArgs(args)
   }
 
   argChanged(name, value) {
@@ -814,6 +821,9 @@ class Light extends IntermediateObject {
         break
       case 'intensity':
         this.threeObject.intensity = value
+        break
+      case 'position':
+        this.threeObject.position.copy(value.threeObject)
         break
     }
   }
@@ -1045,23 +1055,26 @@ class Mesh extends IntermediateObject {
   static expectedArgs() {
     return [
       {name: 'geometry', type: Type.GEOMETRY},
-      {name: 'material', type: Type.MATERIAL}
+      {name: 'material', type: Type.MATERIAL, default: new MeshNormalMaterialStatic()},
+      {name: 'position', type: Type.VECTOR3, default: new ZeroVector3()},
     ]
   }
 
   constructor(args) {
-    super(new THREE.Mesh(args.geometry?.threeObject, args.material?.threeObject))
+    super(new THREE.Mesh())
+    this.applyArgs(args)
   }
 
   argChanged(name, value) {
     switch (name) {
       case 'geometry':
-        // TODO; point by reference, so don't always need to change?
-        // conditionally call `variableChanged` above
         this.threeObject.geometry = value.threeObject
         break
       case 'material':
         this.threeObject.material = value.threeObject
+        break
+      case 'position':
+        this.threeObject.position.copy(value.threeObject)
         break
     }
   }
