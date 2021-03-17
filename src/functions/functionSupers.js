@@ -1,3 +1,5 @@
+import { helperExpression, applyToEntries } from '../utils'
+
 export const Type = Object.freeze({
   NUM: 'numericValue',
   LIST: 'listValue',
@@ -11,7 +13,8 @@ export const Type = Object.freeze({
 })
 
 export class FunctionApplicationList {
-  constructor(func, args) {
+  constructor(calculatorThree, func, args) {
+    this.calculatorThree = calculatorThree
     this.isDefined = false
     // childObjects is a list or a single object
     this.childObjects = []
@@ -24,6 +27,7 @@ export class FunctionApplicationList {
 
     if (func.expectedArgs().length === 0) {
       this.childObjects = new func(this.argValues)
+      this.childObjects.init(this.calculatorThree)
       this.setDefined(true)
     }
 
@@ -34,33 +38,39 @@ export class FunctionApplicationList {
         if (expectedArg.type == Type.NUM || expectedArg.type == Type.LIST) {
           // Desmos request #78115: 'numericValue' event is triggered for both
           // numeric and list values in some cases. May cause issues.
-          const helper = helperExpression(expr, 'listValue', value => {
-            this.changeArg(expectedArg.name, value)
-          })
-          const helper0 = helperExpression(expr, 'numericValue', value => {
-            if (expectedArg.type !== Type.LIST && !isNaN(value)) {
+          const helper = helperExpression(
+            this.calculatorThree.calculator, expr, 'listValue',
+            value => {
               this.changeArg(expectedArg.name, value)
             }
-          })
+          )
+          const helper0 = helperExpression(
+            this.calculatorThree.calculator, expr, 'numericValue',
+            value => {
+              if (expectedArg.type !== Type.LIST && !isNaN(value)) {
+                this.changeArg(expectedArg.name, value)
+              }
+            }
+          )
         } else {
           this.dependencies[expr] = expectedArg.name
-          if (CalcThree.values[expr]) {
+          if (this.calculatorThree.values[expr]) {
             this.afterDepChanged(expr)
           }
-          CalcThree.dependents[expr] = CalcThree.dependents[expr] || new Set()
-          CalcThree.dependents[expr].add(this)
+          this.calculatorThree.dependents[expr] = this.calculatorThree.dependents[expr] || new Set()
+          this.calculatorThree.dependents[expr].add(this)
         }
       } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
       } else {
-        this.throw(`Not enough arguments in call to ${this.constructor.name}: ${args.length}`)
+        // this.throw(`Not enough arguments in call to ${this.constructor.name}: ${args.length}`)
       }
     })
   }
 
   afterDepChanged(variable) {
     const argName = this.dependencies[variable]
-    this.changeArg(argName, CalcThree.values[variable])
+    this.changeArg(argName, this.calculatorThree.values[variable])
   }
 
   static index(v, i) {
@@ -81,10 +91,10 @@ export class FunctionApplicationList {
 
     const expectedType = this.func.expectedArgs().filter(({name}) => name === argName)[0].type;
     if (expectedType === Type.LIST && value.length === undefined) {
-      this.throw("Expected a list but received a number")
+      // this.throw("Expected a list but received a number")
     }
     if (expectedType !== Type.LIST && expectedType !== Type.NUM && expectedType !== value.type) {
-      this.throw(`TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`)
+      // this.throw(`TypeError in function ${this.func.name}: Expected ${expectedType} but received ${value.type}`)
     }
 
     this.argValues[argName] = value
@@ -113,6 +123,7 @@ export class FunctionApplicationList {
           let object = new this.func(
             applyToEntries(this.argValues, v => FunctionApplicationList.index(v, i))
           )
+          object.init(this.calculatorThree)
           this.childObjects.push(object)
         }
         if (minLength === Infinity) {
@@ -134,7 +145,7 @@ export class FunctionApplicationList {
         obj.threeObject.visible = defined
       }
     })
-    CalcThree.variableChanged(this.variable)
+    this.calculatorThree.variableChanged(this.variable)
   }
 
   forEach(func) {
@@ -148,13 +159,17 @@ export class FunctionApplicationList {
   dispose() {
     console.log("Disposing", this)
     this.forEach(e => e.dispose())
-    this.childObjects = null
+    // this.childObjects = null
   }
 }
 
 export class FunctionApplication {
   constructor(threeObject) {
     this.threeObject = threeObject
+  }
+
+  init(calculatorThree) {
+
   }
 
   dispose() {

@@ -1,5 +1,6 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three';
+import { ZeroVector3 } from './misc'
 
 class Camera extends FunctionApplication {
 
@@ -18,11 +19,17 @@ export class PerspectiveCamera extends Camera {
   }
 
   constructor(args) {
-    super(new THREE.PerspectiveCamera(args.fov, CalcThree.camera.aspect, args.near, args.far))
+    // aspect ratio is set as 1 temporarily
+    super(new THREE.PerspectiveCamera(args.fov, 1, args.near, args.far))
+    this.args = args
+  }
+
+  init(calculatorThree) {
+    this.calculatorThree = calculatorThree
     this.lookAt = new THREE.Vector3(0, 0, 0)
-    this.applyArgs(args)
-    CalcThree.camera = this.threeObject
-    CalcThree.applyGraphpaperBounds()
+    this.applyArgs(this.args)
+    calculatorThree.camera = this.threeObject
+    calculatorThree.applyGraphpaperBounds()
   }
 
   argChanged(name, value) {
@@ -43,13 +50,13 @@ export class PerspectiveCamera extends Camera {
         break
     }
     this.threeObject.lookAt(this.lookAt)
-    CalcThree.camera.updateProjectionMatrix();
+    this.calculatorThree.camera.updateProjectionMatrix();
     // this.controls.update()
-    CalcThree.rerender()
+    this.calculatorThree.rerender()
     // camera = this.threeObject
   }
 
   dispose() {
-    CalcThree.initDefaultCamera()
+    this.calculatorThree.initDefaultCamera()
   }
 }

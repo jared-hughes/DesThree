@@ -1,6 +1,6 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three';
-import { White } from './misc'
+import { ZeroVector3, White } from './misc'
 
 class Light extends FunctionApplication {
   static expectedArgs() {

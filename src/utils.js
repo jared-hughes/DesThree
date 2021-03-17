@@ -1,12 +1,12 @@
-function applyToEntries(object, func) {
+export function applyToEntries(object, func) {
   return Object.fromEntries(
     Object.entries(object)
       .map(([k,v]) => [k, func(v)])
   )
 }
 
-function helperExpression(expr, type, callback) {
-  let helper = Calc.HelperExpression({latex: expr})
+export function helperExpression(calculator, expr, type, callback) {
+  let helper = calculator.HelperExpression({latex: expr})
   helper.observe(type, () => {
     // check for isNaN to get around HelperExpression({latex: "5"})
     // having a numericValue of NaN (Desmos request #77875). Bug does not occur for lists

@@ -56,7 +56,7 @@ export class MeshToonMaterial extends MeshColorMaterial {
 
 export class MeshNormalMaterialStatic extends MeshMaterial {
   constructor() {
-    threeObject = new THREE.MeshNormalMaterial()
+    super(new THREE.MeshNormalMaterial())
   }
 }
 

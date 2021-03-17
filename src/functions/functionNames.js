@@ -6,7 +6,7 @@ import {
   DodecahedronGeometry, IcosahedronGeometry, TetrahedronGeometry,
   OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
   SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry
-} from './geometries.js'
+} from './geometries'
 import { Mesh, Position } from './object3ds'
 import { PointLight, AmbientLight } from './lights'
 import { PerspectiveCamera } from './cameras'

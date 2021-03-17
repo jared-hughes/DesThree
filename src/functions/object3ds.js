@@ -1,5 +1,6 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import { MeshNormalMaterialStatic } from './meshMaterials'
+import { ZeroVector3 } from './misc'
 
 export class Position extends FunctionApplication {
   // https://threejs.org/docs/index.html#api/en/objects/Group

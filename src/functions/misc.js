@@ -45,7 +45,7 @@ export class Color extends FunctionApplication {
 }
 Color.type = Type.COLOR
 
-function clampMap255(c) {
+function clampMap255(x) {
   if (x < 0) return 0
   else if (x > 255) return 1
   else return x / 255
@@ -78,7 +78,7 @@ export class ColorRGB extends Color {
 
 export class White extends Color {
   constructor() {
-    super(0, 0, 0)
+    super(255, 255, 255)
   }
 }
 
@@ -91,24 +91,29 @@ export class Show extends FunctionApplication {
 
   constructor(args) {
     super(null)
-    this.applyArgs(args)
+    this.args = args
+  }
+
+  init(calculatorThree) {
+    this.calculatorThree = calculatorThree
+    this.applyArgs(this.args)
   }
 
   argChanged(name, value) {
     switch (name) {
       case 'object':
         if (this.threeObject) {
-          CalcThree.scene.remove(this.threeObject)
+          this.calculatorThree.scene.remove(this.threeObject)
         }
         this.threeObject = value.threeObject
-        CalcThree.scene.add(this.threeObject)
+        this.calculatorThree.scene.add(this.threeObject)
         break
     }
-    CalcThree.rerender()
+    this.calculatorThree.rerender()
   }
 
   dispose() {
-    CalcThree.scene.remove(this.threeObject)
+    this.calculatorThree.scene.remove(this.threeObject)
   }
 }
 Show.type = Type.NULL

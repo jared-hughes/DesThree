@@ -1,8 +1,10 @@
 import functionNames from './functions/functionNames'
+import { Type, FunctionApplicationList } from './functions/functionSupers'
 import * as THREE from 'three'
 
 export default class DesThree {
-  constructor() {
+  constructor(calculator) {
+    this.calculator = calculator
     this.renderer = null
     this.scene = new THREE.Scene()
     this.camera = null
@@ -34,21 +36,21 @@ export default class DesThree {
           newNode.classList.add('three-action-newexpression')
           newNode.querySelector('i').nextSibling.nodeValue = 'three'
           newNode.addEventListener('click', () => {
-            let d = Calc.controller.createItemModel({
+            let d = this.calculator.controller.createItemModel({
               latex: "@3",
               type: 'expression',
-              id: Calc.controller.generateId(),
-              color: Calc.controller.getNextColor(),
+              id: this.calculator.controller.generateId(),
+              color: this.calculator.controller.getNextColor(),
             })
-            Calc.controller.setEditListMode(false)
-            Calc.controller._toplevelNewItemAtSelection(d, {
+            this.calculator.controller.setEditListMode(false)
+            this.calculator.controller._toplevelNewItemAtSelection(d, {
               shouldFocus: true,
             })
-            Calc.controller._closeAddExpression()
-            Calc.controller.updateRenderShellsBeforePaint()
-            Calc.controller.updateViews()
-            Calc.controller.scrollSelectedItemIntoView()
-            Calc.controller.updateRenderShellsAfterDispatch()
+            this.calculator.controller._closeAddExpression()
+            this.calculator.controller.updateRenderShellsBeforePaint()
+            this.calculator.controller.updateViews()
+            this.calculator.controller.scrollSelectedItemIntoView()
+            this.calculator.controller.updateRenderShellsAfterDispatch()
           })
           console.log(newNode, newExpressionNode)
           newExpressionNode.after(newNode)
@@ -59,7 +61,7 @@ export default class DesThree {
   }
 
   applyGraphpaperBounds() {
-    const bounds = Calc.graphpaperBounds.pixelCoordinates;
+    const bounds = this.calculator.graphpaperBounds.pixelCoordinates;
     this.renderer.setSize(bounds.width, bounds.height);
     this.renderer.domElement.width = bounds.width;
     this.renderer.domElement.height = bounds.height;
@@ -73,7 +75,7 @@ export default class DesThree {
   observeGraphpaperBounds() {
     // the observer doesn't get called the first time
     this.applyGraphpaperBounds()
-    Calc.observe('graphpaperBounds', () => this.applyGraphpaperBounds());
+    this.calculator.observe('graphpaperBounds', () => this.applyGraphpaperBounds());
   }
 
   deleteVariable(variable) {
@@ -104,7 +106,7 @@ export default class DesThree {
 
   generateObject(def) {
     if (def.func in functionNames) {
-      let object = new FunctionApplicationList(functionNames[def.func], def.args)
+      let object = new FunctionApplicationList(this, functionNames[def.func], def.args)
       object.variable = def.variable
       return object
     } else {
@@ -124,7 +126,11 @@ export default class DesThree {
     })
     ids.forEach(id => {
       const outerDomNode = this.getExprElement(id)
-      const mqField = outerDomNode.querySelector(".dcg-mq-editable-field")
+      const mqField = outerDomNode?.querySelector(".dcg-mq-editable-field")
+      if (!mqField) {
+        console.warn(`Could not find mqField for expression id ${id}.`)
+        return
+      }
       const atElement = mqField.querySelector('.dcg-mq-nonSymbola')
       if (atElement && atElement.innerHTML == "@") {
         atElement.remove()
@@ -315,7 +321,7 @@ export default class DesThree {
     let nextDefinitions = {} // {[expression id]: rawLatex}
     let nextExprVariables = {} // {[expression id]: [list of affected variables]}
     let nextVariables = new Set()
-    Calc.getState().expressions.list.map(expr => {
+    this.calculator.getState().expressions.list.map(expr => {
       const rawLatex = expr.latex || ""
       if (expr.type == 'expression' && rawLatex.startsWith('@3')) {
         nextDefinitions[expr.id] = rawLatex
@@ -369,7 +375,7 @@ export default class DesThree {
   }
 
   observeGraph() {
-    Calc.observeEvent('change', () => this.graphChanged());
+    this.calculator.observeEvent('change', () => this.graphChanged());
     this.graphChanged();
   }
 
