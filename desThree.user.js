@@ -316,7 +316,7 @@ class DesThree {
   }
 
   parseDesThreeVariable(text, index) {
-    const variableRegex = /\s*(?<variable>\w+)\s*(?=\)|,)/y
+    const variableRegex = /\s*(?<variable>[a-zA-Z]\w*)\s*(?=\)|,)/y
     variableRegex.lastIndex = index
     const match = variableRegex.exec(text)
 

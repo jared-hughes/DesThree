@@ -43,6 +43,9 @@ PerspectiveCamera(pos)
   - You can't see anything because we didn't place anything in the scene.
     - <kbd>Planned:</kbd> Allow coordinate axes to exist by default
   - All functions start with capital letters
+  - Variable names must start with a letter but can have letters, digits, or underscores elsewhere:
+    - Valid: `cameraPos`, `camera_pos`, `cube_1`, `thr33js`
+    - Invalid: `12cube`, `_moo`
   - The y-axis points up by default.
   - The camera points to `(0,0,0)` by default.
 
