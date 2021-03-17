@@ -16,7 +16,7 @@ This project is unofficial, so it may break at any time due to changes in the De
 1. Install the TamperMonkey browser extension
 2. Click https://github.com/jared-hughes/DesThree/raw/master/desThree.user.js, then hit <kbd>Install</kbd>.
   - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
-3. Open https://www.desmos.com/calculator/nsc51uz3v1 to test it! You should see 9 blue-ish boxes moving up and down.
+3. Open https://www.desmos.com/calculator/znvwjvv8wg to test it! You should see 9 blue-ish boxes moving up and down.
 4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
 Please report any bugs here on the [Github issues tracker](https://github.com/jared-hughes/DesThree/issues/) or discuss on the [Unofficial Desmos Discord](https://discord.gg/vCBupKs9sB) at #programming.
@@ -56,27 +56,27 @@ Showing a cube may be more complicated than what you expect. The process goes as
   - Create a mesh, which combines the material and geometry into one object. Meshes default to being placed at `(0,0,0)`.
   - Show the mesh
 
-These steps can be done as follows (https://www.desmos.com/calculator/gk0thz9bpi):
+These steps can be done as follows (https://www.desmos.com/calculator/xa2jew0a9n):
 
 ```js
 pos = (1,2,5)
 PerspectiveCamera(pos)
-cubeGeometry = BoxGeometry(1,1,1)
-material = MeshNormalMaterial()
+cubeGeometry = Box(1,1,1)
+material = NormalMaterial()
 mesh = Mesh(cubeGeometry, material)
 Show(mesh)
 ```
 
-Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/siim5wicud):
+Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/dw3c2jbczi):
 
 ```js
 PerspectiveCamera((1,2,5))
-Show(Mesh(BoxGeometry(1,1,1), MeshNormalMaterial()))
+Show(Mesh(Box(1,1,1), NormalMaterial()))
 ```
 
 - Be careful: `PerspectiveCamera` seems to have double parentheses, but the inner ones are for the point `(1,2,5)`—only the outer ones are for the function call.
-- `BoxGeometry` takes three arguments: width, height, length. To make a cube, we use the same value for all three
-- `MeshNormalMaterial` takes no arguments. Example 5 will go over the different kinds of materials
+- `Box` takes three arguments: width, height, length. To make a cube, we use the same value for all three
+- `NormalMaterial` takes no arguments. Example 5 will go over the different kinds of materials
 - `Mesh` simply takes the geometry and material and arguments.
 - `Show` takes the mesh and shows it. This does not occur automatically because we sometimes want to store a mesh in a variable and not show it until after some transformations
 
@@ -85,12 +85,12 @@ Show(Mesh(BoxGeometry(1,1,1), MeshNormalMaterial()))
 
 A great part about using Desmos is that we can use sliders and math in the expressions.
 
-To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/8kthukjcva):
+To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/rdn9xsm0ai):
 
 ```js
 PerspectiveCamera((1,2,5))
-cubeGeometry = BoxGeometry(1,1,1)
-material = MeshNormalMaterial()
+cubeGeometry = Box(1,1,1)
+material = NormalMaterial()
 mesh = Mesh(cubeGeometry, material)
 x_0 = 0
 y_0 = 0
@@ -99,7 +99,7 @@ meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
 
-Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/nkll87ulax):
+Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/wsyb0l9fpy):
 ```js
 meshp = Mesh(cubeGeometry, material, (x_0, y_0, z_0))
 Show(meshp)
@@ -111,15 +111,15 @@ Show(meshp)
 
 To improve our future viewing, we will orbit the camera using equations of [spherical coordinates](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
 
-This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/m2iphzn6a0):
+This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/ietknqkjsr):
 ```js
 r_c = 5
 theta_c = 0
 phi_c = 0
 pos = (r_c·cos(phi_c)cos(theta_c), r_c·sin(phi_c), r_c·cos(phi_c)sin(theta_c))
 PerspectiveCamera(pos)
-cubeGeometry = BoxGeometry(1,1,1)
-material = MeshNormalMaterial()
+cubeGeometry = Box(1,1,1)
+material = NormalMaterial()
 mesh = Mesh(cubeGeometry, material)
 x_0 = 0
 y_0 = 0
@@ -130,41 +130,41 @@ Show(meshp)
 
 ### Example 5: Materials and Lights
 
-Remember how we're using `MeshNormalMaterial` above? That is the simplest material (and the default if none is given to the `Mesh` function): there are no arguments, and we don't have to deal with lights. Each face is simply colored based on its normal vector.
+Remember how we're using `NormalMaterial` above? That is the simplest material (and the default if none is given to the `Mesh` function): there are no arguments, and we don't have to deal with lights. Each face is simply colored based on its normal vector.
 
 Two other materials exist that are always visible regardless of lights:
-  - `MeshDepthMaterial`: also takes no arguments
-  - `MeshBasicMaterial`: takes a color as argument and always shows that color regardless of lighting
+  - `DepthMaterial`: also takes no arguments
+  - `BasicMaterial`: takes a color as argument and always shows that color regardless of lighting
 
 Other materials exist for shading meshes, and these handle lights:
 
-  - `MeshLambertMaterial`
-  - `MeshPhongMaterial`
-  - `MeshToonMaterial`
+  - `LambertMaterial`
+  - `PhongMaterial`
+  - `ToonMaterial`
 
 Each of these take color as their only argument.
 
 Use them as follows:
 
 ```js
-material = MeshLambertMaterial(ColorRGB(10, 80, 180))
+material = LambertMaterial(RGB(10, 80, 180))
 mesh = Mesh(geometry, material)
 show(mesh)
 ```
 
 With these last few materials, you need to add lights if you want to see anything.
 
-Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/jt6rxasofh):
+Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/utlbo3ifrx):
 
 ```js
 Show(Position(PointLight(1), (-7, 6, 2)))
 ```
 
-(Alternatively, you can use `Show(PointLight(1, ColorRGB(255,255,255), (-7,6,2)))`, which avoids the `Position` function).
+(Alternatively, you can use `Show(PointLight(1, RGB(255,255,255), (-7,6,2)))`, which avoids the `Position` function).
 
-Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/f7bfwcjkwr). Ugh, that's too dark.
+Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/b2i93iyk0l). Ugh, that's too dark.
 
-One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/fcw3cwckvc):
+One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/4c7ktmyhxe):
 
 ```js
 Show(AmbientLight(0.3))
@@ -179,16 +179,16 @@ Show(AmbientLight(0.3))
 
 Anywhere a number can be accepted, a list of values can be accepted instead.
 
-Let's make a sphere with radius `1` and place it at x-coordinates `-10, -5, 0, 5, 10` (https://www.desmos.com/calculator/0lsvp6lqgy):
+Let's make a sphere with radius `1` and place it at x-coordinates `[-10, -5, 0, 5, 10]` (https://www.desmos.com/calculator/n51emwwmly):
 
 ```js
-geometry = SphereGeometry(1)
+geometry = Sphere(1)
 mesh = Mesh(geometry, material)
 meshp = Position(mesh, ([-10,-5,...,10], 0, 0))
 Show(meshp)
 ```
 
-Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/pjmjzden0z):
+Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/fkta2c4gzj):
 
 ```js
 L_x = [-10,-5,...,10]
@@ -197,11 +197,11 @@ meshp = Position(mesh, L_x, (0.05*L_x^2, 0))
 Show(meshp)
 ```
 
-You can even make a list of geometries (https://www.desmos.com/calculator/5e0tdluixf)
+You can even make a list of geometries (https://www.desmos.com/calculator/sbk9q2p8ft)
 
 ```js
 L_x = [-12.5,-7.5,...,12.5]
-geometry = SphereGeometry(0.02*L_x^2+0.5)
+geometry = Sphere(0.02*L_x^2+0.5)
 mesh = Mesh(geometry, material)
 meshp = Position(mesh, L_x, (0.02*L_x^2, 0))
 Show(meshp)
@@ -214,14 +214,14 @@ Go crazy, and have fun!
 ### Functions that return a Geometry
 
 
-#### [IcosahedronGeometry](https://threejs.org/docs/#api/en/geometries/IcosahedronGeometry), [DodecahedronGeometry](https://threejs.org/docs/#api/en/geometries/DodecahedronGeometry), [OctahedronGeometry](https://threejs.org/docs/#api/en/geometries/OctahedronGeometry), [TetrahedronGeometry](https://threejs.org/docs/#api/en/geometries/TetrahedronGeometry)
+#### [Icosahedron](https://threejs.org/docs/#api/en/geometries/IcosahedronGeometry), [Dodecahedron](https://threejs.org/docs/#api/en/geometries/DodecahedronGeometry), [Octahedron](https://threejs.org/docs/#api/en/geometries/OctahedronGeometry), [Tetrahedron](https://threejs.org/docs/#api/en/geometries/TetrahedronGeometry)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
 radius | number | | Radius of circumscribing sphere
 detail | number | 0 | If `detail > 0`, the polyhedron becomes more rounded towards a sphere
 
-#### [SphereGeometry](https://threejs.org/docs/#api/en/geometries/SphereGeometry)
+#### [Sphere](https://threejs.org/docs/#api/en/geometries/SphereGeometry)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -229,7 +229,7 @@ radius | number | | Radius of circumscribing sphere
 widthSegments | number | 16 | Greater = smoother
 heightSegments | number | 12 | Greater = smoother
 
-#### [TorusGeometry](https://threejs.org/docs/#api/en/geometries/TorusGeometry)
+#### [Torus](https://threejs.org/docs/#api/en/geometries/TorusGeometry)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -239,7 +239,7 @@ radialSegments | number | 16 | Greater = smoother
 tubularSegments | number | 12 | Greater = smoother
 arc | number | 2π | Arc angle
 
-#### [TorusKnotGeometry](https://threejs.org/docs/#api/en/geometries/TorusKnotGeometry)
+#### [TorusKnot](https://threejs.org/docs/#api/en/geometries/TorusKnotGeometry)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -250,7 +250,7 @@ tubularSegments | number | 8 | Greater = smoother
 p | number | 2 | How many times the geometry winds around its axis of rotational symmetry
 q | number | 3 | How many times the geometry winds around a circle in the interior of the torus
 
-#### [ConeGeometry](https://threejs.org/docs/#api/en/geometries/ConeGeometry)
+#### [Cone](https://threejs.org/docs/#api/en/geometries/ConeGeometry)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -259,7 +259,7 @@ height | number | |
 radialSegments | number | 16 | Greater = smoother
 heightSegments | number | 1 |
 
-#### [FrustumGeometry](https://threejs.org/docs/#api/en/geometries/CylinderGeometry)
+#### [Frustum](https://threejs.org/docs/#api/en/geometries/CylinderGeometry)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -269,9 +269,9 @@ height | number | |
 radialSegments | number | 16 | Greater = smoother
 heightSegments | number | 1 |
 
-#### [CylinderGeometry](https://threejs.org/docs/#api/en/geometries/CylinderGeometry)
+#### [Cylinder](https://threejs.org/docs/#api/en/geometries/CylinderGeometry)
 
-Just a convenience to avoid having to pass the same value for `radiusTop` and `radiusBottom` in `FrustumGeometry`.
+Just a convenience to avoid having to pass the same value for `radiusTop` and `radiusBottom` in `Frustum`.
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -282,7 +282,7 @@ heightSegments | number | 1 |
 
 ### Functions that return a Material
 
-#### [MeshBasicMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial)
+#### [BasicMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -290,15 +290,15 @@ color | Color | white |
 
 Always colored as the given color, ignoring lighting.
 
-#### [MeshNormalMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshNormalMaterial)
+#### [NormalMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshNormalMaterial)
 
 No arguments. Each face is colored based on its normal vector.
 
-#### [MeshDepthMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshDepthMaterial)
+#### [DepthMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshDepthMaterial)
 
 No arguments. Colors each point in gray-scale based on its depth from the camera. This is not very useful for general rendering and usually shows up mostly black unless the object is very close to the camera.
 
-#### [MeshLambertMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshLambertMaterial)
+#### [LambertMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshLambertMaterial)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -306,7 +306,7 @@ color | Color | white |
 
 This uses [Gourand shading](https://en.wikipedia.org/wiki/Gouraud_shading), which calculates shading for each vertex and does linear interpolation to find pixel shading. As such, it only tends to look best for low-poly objects like cubes/boxes.
 
-#### [MeshPhongMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshPhongMaterial)
+#### [PhongMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshPhongMaterial)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -314,7 +314,7 @@ color | Color | white |
 
 This uses [Phong shading](https://en.wikipedia.org/wiki/Phong_shading), which calculates shading on each pixel and additionally includes specular highlights (shiny surfaces). This tends to look better than MeshLambertMaterial for rounded objects like spheres but is slower.
 
-#### [MeshToonMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshPhongMaterial)
+#### [ToonMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshPhongMaterial)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
@@ -329,7 +329,7 @@ Looks like a cartoon drawing.
 Property | Type | Default | Description
 --- | --- | --- | ---
 geometry | Geometry | |
-material | Material | MeshNormalMaterial |
+material | Material | `NormalMaterial()` |
 position | Vector3 | (0,0,0) |
 
 #### [PointLight](https://threejs.org/docs/index.html#api/en/lights/PointLight), [AmbientLight](https://threejs.org/docs/index.html#api/en/lights/AmbientLight)
@@ -367,7 +367,7 @@ object | Object3D | |
 
 ### Miscellaneous
 
-#### [ColorRGB](https://threejs.org/docs/#api/en/math/Color)
+#### [RGB](https://threejs.org/docs/#api/en/math/Color)
 
 Property | Type | Default | Description
 --- | --- | --- | ---

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.3.2
+// @version      0.4.0
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
@@ -51,27 +51,27 @@ function helperExpression(expr, type, callback) {
 
 class DesThree {
   funcs = {
-    'ColorRGB': Color,
+    RGB: Color,
     '': Vector3,
     // materials
-    MeshBasicMaterial,
-    MeshLambertMaterial,
-    MeshToonMaterial,
-    MeshNormalMaterial,
-    MeshDepthMaterial,
-    MeshPhongMaterial,
+    BasicMaterial: MeshBasicMaterial,
+    LambertMaterial: MeshLambertMaterial,
+    ToonMaterial: MeshToonMaterial,
+    NormalMaterial: MeshNormalMaterial,
+    DepthMaterial: MeshDepthMaterial,
+    PhongMaterial: MeshPhongMaterial,
     // geometries
-    IcosahedronGeometry,
-    DodecahedronGeometry,
-    OctahedronGeometry,
-    TetrahedronGeometry,
-    SphereGeometry,
-    TorusGeometry,
-    TorusKnotGeometry,
-    CylinderGeometry,
-    FrustumGeometry,
-    ConeGeometry,
-    BoxGeometry,
+    Icosahedron: IcosahedronGeometry,
+    Dodeahedron: DodecahedronGeometry,
+    Octahedron: OctahedronGeometry,
+    Tetrahedron: TetrahedronGeometry,
+    Sphere: SphereGeometry,
+    Torus: TorusGeometry,
+    TorusKnot: TorusKnotGeometry,
+    Cylinder: CylinderGeometry,
+    Frustum: FrustumGeometry,
+    Cone: ConeGeometry,
+    Box: BoxGeometry,
     // objects
     Mesh,
     // lights
