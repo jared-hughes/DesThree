@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DesThree
 // @namespace    http://github.com/jared-hughes
-// @version      0.4.0
+// @version      0.4.1
 // @description  Desmos bindings for three.js
 // @author       Jared Hughes (fireflame241)
 // @match        https://www.desmos.com/calculator/*
@@ -62,7 +62,7 @@ class DesThree {
     PhongMaterial: MeshPhongMaterial,
     // geometries
     Icosahedron: IcosahedronGeometry,
-    Dodeahedron: DodecahedronGeometry,
+    Dodecahedron: DodecahedronGeometry,
     Octahedron: OctahedronGeometry,
     Tetrahedron: TetrahedronGeometry,
     Sphere: SphereGeometry,
