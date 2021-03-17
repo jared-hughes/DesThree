@@ -1,20 +1,3 @@
-// ==UserScript==
-// @name         DesThree
-// @namespace    http://github.com/jared-hughes
-// @version      0.4.1
-// @description  Desmos bindings for three.js
-// @author       Jared Hughes (fireflame241)
-// @match        https://www.desmos.com/calculator/*
-// @match        https://www.desmos.com/calculator
-// @downloadURL  https://github.com/jared-hughes/DesThree/raw/master/desThree.user.js
-// @updateURL    https://github.com/jared-hughes/DesThree/raw/master/desThree.user.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js
-// @grant        none
-// ==/UserScript==
-
-(function() {
-'use strict';
-
 let Calc
 let THREE
 let CalcThree
@@ -1173,4 +1156,3 @@ const waitInterval = setInterval(() => {
     window.CalcThree = CalcThree
   }
 }, 50)
-})();
