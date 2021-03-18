@@ -1,33 +1,33 @@
 import { Type, FunctionApplication } from './functionSupers.js'
-import * as THREE from 'three';
+import * as THREE from 'three'
 
 class Vector extends FunctionApplication {
-  constructor(x, y, z) {
+  constructor (x, y, z) {
     super(new THREE.Vector3(x, y, z))
   }
 }
 Vector.type = Type.VECTOR3
 
 export class ZeroVector3 extends Vector {
-  constructor() {
+  constructor () {
     super(0, 0, 0)
   }
 }
 
 export class Vector3 extends Vector {
-  static expectedArgs() {
+  static expectedArgs () {
     return [
-      {name: 'x', type: Type.NUM},
-      {name: 'y', type: Type.NUM},
-      {name: 'z', type: Type.NUM},
+      { name: 'x', type: Type.NUM },
+      { name: 'y', type: Type.NUM },
+      { name: 'z', type: Type.NUM }
     ]
   }
 
-  constructor(args) {
+  constructor (args) {
     super(args.x, args.y, args.z)
   }
 
-  argChanged(name, value) {
+  argChanged (name, value) {
     switch (name) {
       case 'x':
       case 'y':
@@ -39,33 +39,33 @@ export class Vector3 extends Vector {
 }
 
 export class Color extends FunctionApplication {
-  constructor(r, g, b) {
+  constructor (r, g, b) {
     super(new THREE.Color(clampMap255(r), clampMap255(g), clampMap255(b)))
   }
 }
 Color.type = Type.COLOR
 
-function clampMap255(x) {
+function clampMap255 (x) {
   if (x < 0) return 0
   else if (x > 255) return 1
   else return x / 255
 }
 
 export class ColorRGB extends Color {
-  static expectedArgs() {
+  static expectedArgs () {
     return [
-      {name: 'r', type: Type.NUM},
-      {name: 'g', type: Type.NUM},
-      {name: 'b', type: Type.NUM},
+      { name: 'r', type: Type.NUM },
+      { name: 'g', type: Type.NUM },
+      { name: 'b', type: Type.NUM }
     ]
   }
 
   // forced to do this while there is no observe on advancedStyling colors
-  constructor(args) {
-    super(...['r','g','b'].map(c => args[c]))
+  constructor (args) {
+    super(...['r', 'g', 'b'].map(c => args[c]))
   }
 
-  argChanged(name, value) {
+  argChanged (name, value) {
     switch (name) {
       case 'r':
       case 'g':
@@ -77,29 +77,29 @@ export class ColorRGB extends Color {
 }
 
 export class White extends Color {
-  constructor() {
+  constructor () {
     super(255, 255, 255)
   }
 }
 
 export class Show extends FunctionApplication {
-  static expectedArgs() {
+  static expectedArgs () {
     return [
-      {name: 'object', type: Type.OBJECT},
+      { name: 'object', type: Type.OBJECT }
     ]
   }
 
-  constructor(args) {
+  constructor (args) {
     super(null)
     this.args = args
   }
 
-  init(calculatorThree) {
+  init (calculatorThree) {
     this.calculatorThree = calculatorThree
     this.applyArgs(this.args)
   }
 
-  argChanged(name, value) {
+  argChanged (name, value) {
     switch (name) {
       case 'object':
         if (this.threeObject) {
@@ -112,7 +112,7 @@ export class Show extends FunctionApplication {
     this.calculatorThree.rerender()
   }
 
-  dispose() {
+  dispose () {
     this.calculatorThree.scene.remove(this.threeObject)
   }
 }

@@ -11,7 +11,8 @@
     "dist/*.js"
   ],
   "scripts": {
-    "lint": "eslint src",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
     "analyze": "npm_config_report=true npm run build",
     "build": "webpack --mode production --config config/webpack.config.production.js",
     "dev": "webpack --mode development --config config/webpack.config.dev.js"
@@ -24,6 +25,7 @@
     "three": "^0.126.1"
   },
   "devDependencies": {
+    "standard": "^16.0.3",
     "userscript-metadata-webpack-plugin": "^0.1.0",
     "webpack": "^5.26.2",
     "webpack-bundle-analyzer": "^4.4.0",

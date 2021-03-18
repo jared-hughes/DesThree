@@ -1,4 +1,4 @@
-const { merge } = require("webpack-merge");
+const { merge } = require('webpack-merge')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const UserScriptMetaDataPlugin = require('userscript-metadata-webpack-plugin')
@@ -18,7 +18,7 @@ const cfg = merge({}, webpackConfig, {
             loader: 'webpack-strip-block',
             options: {
               start: 'DEV-START',
-              end: 'DEV-END',
+              end: 'DEV-END'
             }
           }
         ]
@@ -29,7 +29,7 @@ const cfg = merge({}, webpackConfig, {
     new UserScriptMetaDataPlugin({
       metadata
     })
-  ],
+  ]
 })
 
 if (process.env.npm_config_report) {

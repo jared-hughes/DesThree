@@ -20,6 +20,8 @@ This project is unofficial, so it may break at any time due to changes in the De
 5. Load `dist/DesThree-dev.user.js` into TamperMonkey
 6. The script should automatically update (except for metadata changes) because `dist/DesThree-dev.user.js` loads `dist/DesThree.user.js` through file URL
 
+Use `npm run lint` or `npm run lint-fix` before a commit to adhere to Standard style. You may also want the packages `linter-js-standard` and `atom-standard-formatter` for convenience, though `npm run lint-fix` is more thorough than whatever `atom-standard-formatter` does.
+
 To build once for production, use `npm run build` instead of `npm run dev`. The built script should be available in `dist/DesThree.user.js`, which can be pasted directly into TamperMonkey.
 
 ## Installation

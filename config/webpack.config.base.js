@@ -19,13 +19,9 @@ const webpackConfig = {
     ]
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      // https://gist.github.com/cecilemuller/0be98dcbb0c7efff64762919ca486a59
-      THREE: "three"
-    }),
     new webpack.ids.HashedModuleIdsPlugin({
-      context: __dirname,
-    }),
+      context: __dirname
+    })
   ]
 }
 

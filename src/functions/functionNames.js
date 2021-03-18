@@ -43,7 +43,7 @@ const functionNames = {
   PerspectiveCamera,
   // setup
   Position,
-  Show,
+  Show
 }
 
 export default functionNames
