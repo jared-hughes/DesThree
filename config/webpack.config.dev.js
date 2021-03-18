@@ -8,17 +8,17 @@ const metadata = require("./metadata");
 const webpackConfig = require("./webpack.config.base");
 
 metadata.require.push(
-  "file://" + path.resolve(__dirname, "../dist/index.prod.user.js")
+  "file://" + path.resolve(__dirname, "../dist/DesThree.user.js")
 )
 metadata.name += '-dev'
 
 const cfg = merge(webpackConfig, {
   entry: {
-    prod: webpackConfig.entry,
-    dev: path.resolve(__dirname, "./empty.js"),
+    "DesThree": webpackConfig.entry,
+    "DesThree-dev": path.resolve(__dirname, "./empty.js"),
   },
   output: {
-    filename: "index.[name].user.js",
+    filename: "[name].user.js",
     path: path.resolve(__dirname, "../dist"),
   },
   // https://webpack.js.org/configuration/devtool claims this is the slowest option

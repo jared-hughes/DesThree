@@ -7,7 +7,7 @@ const metadata = require('./metadata')
 const webpackConfig = require('./webpack.config.base')
 const cfg = merge({}, webpackConfig, {
   output: {
-    filename: 'index.prod.user.js'
+    filename: 'DesThree.user.js'
   },
   module: {
     rules: [

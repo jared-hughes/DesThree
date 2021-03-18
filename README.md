@@ -17,8 +17,10 @@ This project is unofficial, so it may break at any time due to changes in the De
 2. [Allow TamperMonkey access to file URLs](https://www.tampermonkey.net/faq.php?ext=dhdg#Q204)
 3. `npm install`
 4. `npm run dev`
-5. Load `dist/index.dev.user.js` into TamperMonkey
-6. The script should automatically update (except for metadata changes) because `dist/index.dev.user.js` loads `dist/index.prod.user.js` through file URL
+5. Load `dist/DesThree-dev.user.js` into TamperMonkey
+6. The script should automatically update (except for metadata changes) because `dist/DesThree-dev.user.js` loads `dist/DesThree.user.js` through file URL
+
+To build once for production, use `npm run build` instead of `npm run dev`. The built script should be available in `dist/DesThree.user.js`, which can be pasted directly into TamperMonkey.
 
 ## Installation
 

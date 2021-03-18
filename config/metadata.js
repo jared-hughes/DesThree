@@ -13,7 +13,8 @@ module.exports = {
   ],
   require: [],
   supportURL: 'https://github.com/jared-hughes/DesThree/issues',
-  // TODO: downloadURL and updateURL
+  downloadURL: 'https://github.com/jared-hughes/DesThree/releases/latest/download/DesThree.user.js',
+  updateURL: 'https://github.com/jared-hughes/DesThree/releases/latest/download/DesThree.user.js',
   grant: [
     'none'
   ],
