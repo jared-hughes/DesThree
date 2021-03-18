@@ -16,7 +16,7 @@
     "analyze": "npm_config_report=true npm run build",
     "build": "webpack --mode production --config config/webpack.config.production.js",
     "build-tests": "webpack --mode production --config config/webpack.config.test.js",
-    "test": "npm run lint && xdg-open https://desmos.com/calculator?testDesThree",
+    "test": "npm run lint && xdg-open https://desmos.com/calculator?testDesThree=0",
     "dev": "webpack --mode development --config config/webpack.config.dev.js"
   },
   "repository": {
