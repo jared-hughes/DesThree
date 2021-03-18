@@ -17,10 +17,6 @@ const cfg = merge(webpackConfig, {
     DesThree: webpackConfig.entry,
     'DesThree-dev': path.resolve(__dirname, './empty.js')
   },
-  output: {
-    filename: '[name].user.js',
-    path: path.resolve(__dirname, '../dist')
-  },
   // https://webpack.js.org/configuration/devtool claims this is the slowest option
   // no reason to change for now though
   devtool: 'eval-source-map',

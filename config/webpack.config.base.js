@@ -10,6 +10,7 @@ const webpackConfig = {
   },
   entry: './src/index.js',
   output: {
+    filename: '[name].user.js',
     path: path.resolve(__dirname, '../dist')
   },
   module: {

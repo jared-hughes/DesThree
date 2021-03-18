@@ -4,10 +4,13 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const UserScriptMetaDataPlugin = require('userscript-metadata-webpack-plugin')
 const metadata = require('./metadata')
 
+metadata.downloadURL = 'https://github.com/jared-hughes/DesThree/releases/latest/download/DesThree.user.js'
+metadata.updateURL = 'https://github.com/jared-hughes/DesThree/releases/latest/download/DesThree.user.js'
+
 const webpackConfig = require('./webpack.config.base')
 const cfg = merge({}, webpackConfig, {
-  output: {
-    filename: 'DesThree.user.js'
+  entry: {
+    DesThree: webpackConfig.entry
   },
   module: {
     rules: [

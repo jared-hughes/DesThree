@@ -8,13 +8,10 @@ module.exports = {
   author: pkg.author,
   source: pkg.repository.url,
   match: [
-    'https://www.desmos.com/calculator/*',
-    'https://www.desmos.com/calculator'
+    'https://www.desmos.com/calculator*'
   ],
   require: [],
   supportURL: 'https://github.com/jared-hughes/DesThree/issues',
-  downloadURL: 'https://github.com/jared-hughes/DesThree/releases/latest/download/DesThree.user.js',
-  updateURL: 'https://github.com/jared-hughes/DesThree/releases/latest/download/DesThree.user.js',
   grant: [
     'none'
   ],
