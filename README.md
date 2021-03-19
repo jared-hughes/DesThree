@@ -22,6 +22,15 @@ This project is unofficial, so it may break at any time due to changes in the De
 
 Use `npm run lint` or `npm run lint-fix` before a commit to adhere to Standard style. You may also want the packages `linter-js-standard` and `atom-standard-formatter` for convenience, though `npm run lint-fix` is more thorough than whatever `atom-standard-formatter` does.
 
+To test a production build:
+1. Run `npm run build-tests` and paste `dist/DesThree-test.user.js` into a new TamperMonkey script
+2. Run `npm run build` and paste `dist/DesThree.user.js` into a TamperMonkey script
+3. Make sure that these are the only two active userscripts
+4. Run `npm run test`, which lints and opens https://www.desmos.com/calculator?testDesThree=0. If this doesn't work, open the URL manually.
+5. Expected behavior is shown in the browser console. Follow the directions and click <kbd>Pass</kbd> to move on to each next test.
+
+Periodically, update test definitions based on Chrome's code coverage tool.
+
 To build once for production, use `npm run build` instead of `npm run dev`. The built script should be available in `dist/DesThree.user.js`, which can be pasted directly into TamperMonkey.
 
 ## Installation
