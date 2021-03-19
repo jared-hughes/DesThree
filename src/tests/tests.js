@@ -40,14 +40,7 @@ const _expects = [
     expects: [
       'startup: Box is visible',
       'change r_{c}: Camera zooms',
-      'change theta_{c}: Camera orbits around box'
-    ]
-  },
-  {
-    name: 'Lambert material',
-    expects: [
-      'startup: Box is visible with Lambert illuminance',
-      'change theta_{c}: Backside is black',
+      'change theta_{c}: Camera orbits around box, and backside is black',
       'change x_0: Position of light changes'
     ]
   },

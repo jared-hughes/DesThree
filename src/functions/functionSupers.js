@@ -13,8 +13,8 @@ export const Type = Object.freeze({
 })
 
 export class FunctionApplicationList {
-  constructor (calculatorThree, Func, args) {
-    this.calculatorThree = calculatorThree
+  constructor (calc3, Func, args) {
+    this.calc3 = calc3
     this.isDefined = false
     // childObjects is a list or a single object
     this.childObjects = []
@@ -29,7 +29,7 @@ export class FunctionApplicationList {
 
     if (Func.expectedArgs().length === 0) {
       this.childObjects = new Func(this.argValues)
-      this.childObjects.init(this.calculatorThree)
+      this.childObjects.init(this.calc3)
       this.setDefined(true)
     }
 
@@ -41,13 +41,13 @@ export class FunctionApplicationList {
           // Desmos request #78115: 'numericValue' event is triggered for both
           // numeric and list values in some cases. May cause issues.
           helperExpression(
-            this.calculatorThree.calculator, expr, 'listValue',
+            this.calc3.calc, expr, 'listValue',
             value => {
               this.changeArg(expectedArg.name, value)
             }
           )
           helperExpression(
-            this.calculatorThree.calculator, expr, 'numericValue',
+            this.calc3.calc, expr, 'numericValue',
             value => {
               if (expectedArg.type !== Type.LIST && !isNaN(value)) {
                 this.changeArg(expectedArg.name, value)
@@ -56,11 +56,11 @@ export class FunctionApplicationList {
           )
         } else {
           this.dependencies[expr] = expectedArg.name
-          if (this.calculatorThree.values[expr]) {
+          if (this.calc3.model.values[expr]) {
             this.afterDepChanged(expr)
           }
-          this.calculatorThree.dependents[expr] = this.calculatorThree.dependents[expr] || new Set()
-          this.calculatorThree.dependents[expr].add(this)
+          this.calc3.model.dependents[expr] = this.calc3.model.dependents[expr] || new Set()
+          this.calc3.model.dependents[expr].add(this)
         }
       } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
@@ -72,7 +72,7 @@ export class FunctionApplicationList {
 
   afterDepChanged (variable) {
     const argName = this.dependencies[variable]
-    this.changeArg(argName, this.calculatorThree.values[variable])
+    this.changeArg(argName, this.calc3.model.values[variable])
   }
 
   static index (v, i) {
@@ -128,7 +128,7 @@ export class FunctionApplicationList {
           const object = new this.Func(
             applyToEntries(this.argValues, v => FunctionApplicationList.index(v, i))
           )
-          object.init(this.calculatorThree)
+          object.init(this.calc3)
           this.childObjects.push(object)
         }
         if (minLength === Infinity) {
@@ -152,7 +152,7 @@ export class FunctionApplicationList {
         obj.threeObject.visible = defined
       }
     })
-    this.calculatorThree.variableChanged(this.variable)
+    this.calc3.model.variableChanged(this.variable)
   }
 
   forEach (func) {
@@ -176,7 +176,7 @@ export class FunctionApplication {
     this.threeObject = threeObject
   }
 
-  init (calculatorThree) {
+  init (calc3) {
 
   }
 
