@@ -63,7 +63,7 @@ function init () {
     const title = `DesThree test #${index}`
     window.history.pushState({}, title, url.href)
     document.title = title
-    window.Calc.setState(expects[index].state)
+    window.Calc.setState(expects[index].state, { allowUndo: true })
   }
 
   function setTestIndex (index) {

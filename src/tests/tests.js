@@ -14,21 +14,17 @@ const _expects = [
     ]
   },
   {
-    name: 'Shows box',
+    name: 'Shows box from single expression',
     expects: [
-      'startup: Box is visible'
-    ]
-  },
-  {
-    name: 'Shows box from single experssion',
-    expects: [
-      'startup: Box is visible'
+      'startup: Box is visible',
+      'change viewport size: Aspect ratio remains correct'
     ]
   },
   {
     name: 'Movable box',
     expects: [
-      'startup: Box is visible',
+      'add DesThree expression from dropdown: new expression appears with DesThree logo',
+      'type `Show(meshp)` into that expression: Box is visible',
       'change x_{0}: Box moves'
     ]
   },
@@ -80,6 +76,18 @@ const _expects = [
       'startup: 9 boxes moving in and out. Camera orbits around boxes',
       'change n: number of boxes changes',
       'change r_{cam}: zoom level changes'
+    ]
+  },
+  {
+    name: 'All passthrough geometries',
+    expects: [
+      'startup: 11 different geometries visible'
+    ]
+  },
+  {
+    name: 'All materials',
+    expects: [
+      'startup: 6 spheres visible, each with different materials'
     ]
   }
 ]
