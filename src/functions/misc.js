@@ -94,8 +94,8 @@ export class Show extends FunctionApplication {
     this.args = args
   }
 
-  init (calculatorThree) {
-    this.calculatorThree = calculatorThree
+  init (calc3) {
+    this.calc3 = calc3
     this.applyArgs(this.args)
   }
 
@@ -103,17 +103,18 @@ export class Show extends FunctionApplication {
     switch (name) {
       case 'object':
         if (this.threeObject) {
-          this.calculatorThree.scene.remove(this.threeObject)
+          this.calc3.model.scene.remove(this.threeObject)
         }
         this.threeObject = value.threeObject
-        this.calculatorThree.scene.add(this.threeObject)
+        this.calc3.model.scene.add(this.threeObject)
         break
     }
-    this.calculatorThree.rerender()
+    this.calc3.model.rerender()
   }
 
   dispose () {
-    this.calculatorThree.scene.remove(this.threeObject)
+    this.calc3.model.scene.remove(this.threeObject)
+    this.calc3.model.rerender()
   }
 }
 Show.type = Type.NULL

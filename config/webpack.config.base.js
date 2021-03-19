@@ -3,6 +3,7 @@ const webpack = require('webpack')
 
 const webpackConfig = {
   resolve: {
+    modules: ['node_modules', 'src'],
     extensions: ['.js']
   },
   optimization: {

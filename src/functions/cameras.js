@@ -24,12 +24,12 @@ export class PerspectiveCamera extends Camera {
     this.args = args
   }
 
-  init (calculatorThree) {
-    this.calculatorThree = calculatorThree
+  init (calc3) {
+    this.calc3 = calc3
     this.lookAt = new THREE.Vector3(0, 0, 0)
     this.applyArgs(this.args)
-    calculatorThree.camera = this.threeObject
-    calculatorThree.applyGraphpaperBounds()
+    calc3.model.camera = this.threeObject
+    calc3.controller.applyGraphpaperBounds()
   }
 
   argChanged (name, value) {
@@ -51,13 +51,13 @@ export class PerspectiveCamera extends Camera {
         break
     }
     this.threeObject.lookAt(this.lookAt)
-    this.calculatorThree.camera.updateProjectionMatrix()
+    this.calc3.model.camera.updateProjectionMatrix()
     // this.controls.update()
-    this.calculatorThree.rerender()
+    this.calc3.view.rerender()
     // camera = this.threeObject
   }
 
   dispose () {
-    this.calculatorThree.initDefaultCamera()
+    this.calc3.model.initDefaultCamera()
   }
 }

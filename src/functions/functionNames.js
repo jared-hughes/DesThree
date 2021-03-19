@@ -47,3 +47,5 @@ const functionNames = {
 }
 
 export default functionNames
+
+export const maxFuncNameLength = Math.max(...Object.keys(functionNames).map(c => c.length))

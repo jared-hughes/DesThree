@@ -11,10 +11,14 @@ if (paramIndex !== null) {
   }, 100)
 }
 
+function testlog (s) {
+  console.log(`%c${s}`, 'font-weight: bold; border: 1px solid black; border-radius: 999px; padding: 3px 5px 3px 5px')
+}
+
 function init () {
   let currentIndex = -1
   let testIndex = 0
-  console.log('Testing mode enabled')
+  testlog('Testing mode enabled')
 
   const saveButton = document.querySelector('.save-button')
 
@@ -51,7 +55,7 @@ function init () {
     index = Math.min(index, expects.length - 1)
     index = Math.max(index, 0)
     currentIndex = index
-    console.log(`Switching to test graph #${index}`)
+    testlog(`Switching to test graph #${index}`)
     if (index === 0) {
       prevButton.firstChild.classList.remove('dcg-btn-green')
       prevButton.firstChild.classList.add('disabled-save-btn')
@@ -75,12 +79,12 @@ function init () {
       return
     }
     testIndex = index
-    console.log(expects[currentIndex].expects[testIndex])
+    testlog(`Test #${currentIndex}.${testIndex}: ${expects[currentIndex].expects[testIndex]}`)
     title.innerHTML = (`Test #${currentIndex}.${testIndex}: "${expects[currentIndex].name}"`)
   }
 
   function pass () {
-    console.log(`✓ Pass #${currentIndex}.${testIndex}`)
+    testlog(`✓ Pass #${currentIndex}.${testIndex}`)
     setTestIndex(testIndex + 1)
   }
 }
