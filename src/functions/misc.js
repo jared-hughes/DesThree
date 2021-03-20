@@ -109,12 +109,11 @@ export class Show extends FunctionApplication {
         this.calc3.model.scene.add(this.threeObject)
         break
     }
-    this.calc3.model.rerender()
   }
 
   dispose () {
     this.calc3.model.scene.remove(this.threeObject)
-    this.calc3.model.rerender()
   }
 }
 Show.type = Type.NULL
+Show.affectsScene = true
