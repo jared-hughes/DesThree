@@ -52,12 +52,10 @@ export class PerspectiveCamera extends Camera {
     }
     this.threeObject.lookAt(this.lookAt)
     this.calc3.model.camera.updateProjectionMatrix()
-    // this.controls.update()
-    this.calc3.view.rerender()
-    // camera = this.threeObject
   }
 
   dispose () {
     this.calc3.model.initDefaultCamera()
   }
 }
+PerspectiveCamera.affectsScene = true

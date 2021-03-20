@@ -138,6 +138,9 @@ export class FunctionApplicationList {
       }
       this.setDefined(true)
     }
+    if (this.Func.affectsScene) {
+      this.calc3.model.rerender()
+    }
   }
 
   setDefined (defined) {
