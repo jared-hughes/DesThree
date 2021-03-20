@@ -138,13 +138,9 @@ export class FunctionApplicationList {
       }
       this.setDefined(true)
     }
-    if (this.Func.affectsScene) {
-      this.calc3.model.rerender()
-    }
   }
 
   setDefined (defined) {
-    this.isDefined = defined
     /* DEV-START */
     if (defined) {
       console.log('Now defined: ', this)
@@ -155,6 +151,12 @@ export class FunctionApplicationList {
         obj.threeObject.visible = defined
       }
     })
+    // defined: about to be visible, so have to rerender
+    // this.isDefined && !defined: was defined but now is not
+    if ((defined || this.isDefined) && this.Func.affectsScene) {
+      this.calc3.model.rerender()
+    }
+    this.isDefined = defined
     this.calc3.model.variableChanged(this.variable)
   }
 
