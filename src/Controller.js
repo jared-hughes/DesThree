@@ -53,12 +53,12 @@ export default class Controller extends MVCPart {
             .replaceAll(/\\left|\\right/g, '')
             .replaceAll(/\\ /g, ' ')
           const { error, defs } = this.parser.parseDesThree(latex, 0)
+          nextExprVariables[expr.id] = []
           if (error) {
             // TODO: better error handling (GH#7). This is repeated 3+ times
             console.warn(error)
             errorsByExprId[expr.id] = error
           } else {
-            nextExprVariables[expr.id] = []
             defs.forEach(newDef => {
               if (newDef.func === null || newDef.func === undefined) return
               const variable = newDef.variable
