@@ -5,7 +5,8 @@ import {
 import {
   DodecahedronGeometry, IcosahedronGeometry, TetrahedronGeometry,
   OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
-  SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry
+  SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry,
+  CircleGeometry, RingGeometry, PlaneGeometry
 } from './geometries'
 import { Mesh, Position } from './object3ds'
 import { PointLight, AmbientLight } from './lights'
@@ -32,6 +33,9 @@ const functionNames = {
   Frustum: FrustumGeometry,
   Sphere: SphereGeometry,
   Torus: TorusGeometry,
+  Plane: PlaneGeometry,
+  Disc: CircleGeometry,
+  Ring: RingGeometry,
   Cone: ConeGeometry,
   Box: BoxGeometry,
   // objects
