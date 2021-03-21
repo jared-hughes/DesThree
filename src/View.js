@@ -66,7 +66,9 @@ export default class View extends MVCPart {
     }
     const mqField = outerDomNode?.querySelector('.dcg-mq-editable-field')
     if (mqField) {
-      const autoOperatorNames = mqField._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
+      const opt = mqField._mqMathFieldInstance.__controller.root.cursor.options
+      const autoOperatorNames = opt.autoOperatorNames
+      delete opt.autoCommands.int
       Object.keys(functionNames).forEach(c => {
         autoOperatorNames[c] = c
       })
