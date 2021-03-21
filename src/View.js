@@ -10,18 +10,8 @@ export default class View extends MVCPart {
 
   init () {
     this.injectStyle()
-    this.initAutoOperatorNames()
     this.initRenderer()
     this.initDropdownListener()
-  }
-
-  initAutoOperatorNames () {
-    const targetNode = document.querySelector('.dcg-template-expressioneach')
-    const config = { attributes: false, childList: true, subtree: false }
-    const observer = new window.MutationObserver((mutationsList, observer) => {
-      console.log('mutation', mutationsList)
-    })
-    observer.observe(targetNode, config)
   }
 
   initDropdownListener () {
@@ -98,12 +88,6 @@ export default class View extends MVCPart {
         const latex = mqField._mqViewInstance.mathField.latex()
         mqField._mqMathFieldInstance.__controller.renderLatexMath(latex)
       }
-      const atElement = mqField.querySelector('.dcg-mq-nonSymbola')
-      if (atElement && atElement.innerHTML === '@') {
-        atElement.remove()
-        const digit3Element = mqField.querySelector('.dcg-mq-digit')
-        digit3Element?.remove()
-      }
     })
   }
 
@@ -111,6 +95,12 @@ export default class View extends MVCPart {
     const styleEl = document.createElement('style')
     // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
     // Data URI with https://websemantics.uk/tools/image-to-data-uri-converter/
+    function outermostMQ(selector) {
+      return `.three-expr .dcg-expression-mathquill .dcg-mq-root-block
+      > ${selector}:not(.dcg-mq-selection),
+      .three-expr .dcg-expression-mathquill .dcg-mq-root-block
+      > .dcg-mq-selection > ${selector}`
+    }
     styleEl.innerHTML = `
       .three-expr:not(.three-error) .dcg-tab-interior .dcg-tooltip-hit-area-container {
         display: none
@@ -131,6 +121,12 @@ export default class View extends MVCPart {
       .three-action-newexpression .dcg-icon-new-expression::before {
         color: rgba(0,0,0,0);
         background-size: cover;
+      }
+      ${outermostMQ('span:nth-child(-n+2)')} {
+        display: none;
+      }
+      ${outermostMQ('var.dcg-mq-first:nth-child(-n+3)')} {
+        padding-left: 0;
       }
     `
     document.head.appendChild(styleEl)
