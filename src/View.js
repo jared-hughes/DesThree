@@ -61,6 +61,8 @@ export default class View extends MVCPart {
     outerDomNode.classList.add('three-expr')
     if (error) {
       outerDomNode.classList.add('three-error')
+    } else {
+      outerDomNode.classList.remove('three-error')
     }
     const mqField = outerDomNode?.querySelector('.dcg-mq-editable-field')
     if (mqField) {
@@ -87,8 +89,10 @@ export default class View extends MVCPart {
 
   removeThreeExpr (id) {
     const outerDomNode = this.getExprElement(id)
-    outerDomNode.classList.remove('three-expr')
-    outerDomNode.classList.remove('three-error')
+    if (outerDomNode) {
+      outerDomNode.classList.remove('three-expr')
+      outerDomNode.classList.remove('three-error')
+    }
   }
 
   injectStyle () {
@@ -99,7 +103,7 @@ export default class View extends MVCPart {
       return `.three-expr .dcg-expression-mathquill .dcg-mq-root-block
       > ${selector}:not(.dcg-mq-selection),
       .three-expr .dcg-expression-mathquill .dcg-mq-root-block
-      > .dcg-mq-selection > ${selector}`
+      > .dcg-mq-selection:nth-child(-n+2) > ${selector}`
     }
     styleEl.innerHTML = `
       .three-expr:not(.three-error) .dcg-tab-interior .dcg-tooltip-hit-area-container {
@@ -125,7 +129,7 @@ export default class View extends MVCPart {
       ${outermostMQ('span:nth-child(-n+2)')} {
         display: none;
       }
-      ${outermostMQ('var.dcg-mq-first:nth-child(-n+3)')} {
+      ${outermostMQ('var.dcg-mq-first:nth-of-type(-n+3)')} {
         padding-left: 0;
       }
     `
