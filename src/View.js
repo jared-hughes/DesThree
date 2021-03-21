@@ -53,32 +53,22 @@ export default class View extends MVCPart {
       .querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
   }
 
-  clearClass (className) {
-    document.querySelectorAll('.' + className)
-      .forEach(el => {
-        el.classList.remove(className)
-      })
-  }
-
-  applyThreeExprs (ids, errors) {
-    this.clearClass('three-expr')
-    this.clearClass('three-error')
-    ids.forEach(id => {
-      const outerDomNode = this.getExprElement(id)
-      const mqField = outerDomNode?.querySelector('.dcg-mq-editable-field')
-      if (!mqField) {
-        console.warn(`Could not find mqField for expression id ${id}.`)
-        return
-      }
+  updateThreeExpr (outerDomNode, id, error) {
+    if (outerDomNode === null) {
+      // occurs when the node is inside a collapsed folder
+      return
+    }
+    outerDomNode.classList.add('three-expr')
+    if (error) {
+      outerDomNode.classList.add('three-error')
+    }
+    const mqField = outerDomNode?.querySelector('.dcg-mq-editable-field')
+    if (mqField) {
       const autoOperatorNames = mqField._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
       Object.keys(functionNames).forEach(c => {
         autoOperatorNames[c] = c
       })
       autoOperatorNames._maxLength = Math.max(maxFuncNameLength, autoOperatorNames._maxLength)
-      outerDomNode.classList.add('three-expr')
-      if (errors[id]) {
-        outerDomNode.classList.add('three-error')
-      }
       // Don't re-render math on the currently selected expression
       // because that messes with cursor
       if (this.calc.selectedExpressionId !== id) {
@@ -88,14 +78,24 @@ export default class View extends MVCPart {
         const latex = mqField._mqViewInstance.mathField.latex()
         mqField._mqMathFieldInstance.__controller.renderLatexMath(latex)
       }
-    })
+    }
+  }
+
+  addThreeExpr (id, error) {
+    this.updateThreeExpr(this.getExprElement(id), id, error)
+  }
+
+  removeThreeExpr (id) {
+    const outerDomNode = this.getExprElement(id)
+    outerDomNode.classList.remove('three-expr')
+    outerDomNode.classList.remove('three-error')
   }
 
   injectStyle () {
     const styleEl = document.createElement('style')
     // <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
     // Data URI with https://websemantics.uk/tools/image-to-data-uri-converter/
-    function outermostMQ(selector) {
+    function outermostMQ (selector) {
       return `.three-expr .dcg-expression-mathquill .dcg-mq-root-block
       > ${selector}:not(.dcg-mq-selection),
       .three-expr .dcg-expression-mathquill .dcg-mq-root-block
