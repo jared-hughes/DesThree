@@ -4,7 +4,9 @@ const _expects = [
   {
     name: 'Graph loads',
     expects: [
-      'startup: Black canvas with both expressions detected'
+      'startup: Black canvas. All expressions marked',
+      'open folder: Two new DesThree expressions marked',
+      'scroll down: More DesThree expressions marked'
     ]
   },
   {

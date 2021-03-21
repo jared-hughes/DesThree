@@ -9,10 +9,12 @@ export default class Model extends MVCPart {
     this.values = {}
     this.dependents = {}
     this.scene = new THREE.Scene()
+    this.exprs = new Set()
   }
 
   init () {
     this.initDefaultCamera()
+    this.initExpressionsObserver()
   }
 
   initDefaultCamera () {
@@ -26,13 +28,41 @@ export default class Model extends MVCPart {
     this.camera.lookAt(0, 0, 0)
   }
 
+  initExpressionsObserver () {
+    const targetNode = document.querySelector('.dcg-template-expressioneach')
+    const config = { attributes: false, childList: true, subtree: false }
+    const observer = new window.MutationObserver((mutationsList, observer) => {
+      for (const mutation of mutationsList) {
+        for (const addedNode of mutation.addedNodes) {
+          if (addedNode.nodeName === '#text') {
+            continue
+          }
+          const id = addedNode.attributes['expr-id']?.value
+          if (addedNode.classList.contains('dcg-mathitem') && this.exprs.has(id)) {
+            this.view.updateThreeExpr(addedNode, id, this.errors[id])
+          }
+        }
+      }
+    })
+    observer.observe(targetNode, config)
+  }
+
   setDefinitions (nextDefinitions) {
     this.definitions = nextDefinitions
     this.view.setCanvasVisible(Object.keys(nextDefinitions).length > 0)
   }
 
   setThreeExprs (exprs, errors) {
-    this.view.applyThreeExprs(exprs, errors)
+    for (const id of this.exprs) {
+      if (!exprs.has(id)) {
+        this.view.removeThreeExpr(id)
+      }
+    }
+    for (const id of exprs) {
+      this.view.addThreeExpr(id, errors[id])
+    }
+    this.exprs = exprs
+    this.errors = errors
   }
 
   deleteVariable (variable) {
