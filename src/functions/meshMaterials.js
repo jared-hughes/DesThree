@@ -2,6 +2,9 @@ import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
 import { White } from './misc'
 
+// needs to be double sided for CircleGeometry, PlaneGeometry, and RingGeometry
+const side = THREE.DoubleSide
+
 class MeshMaterial extends FunctionApplication {
 
 }
@@ -15,7 +18,7 @@ class MeshColorMaterial extends MeshMaterial {
   }
 
   constructor (args, ThreeObject) {
-    super(new ThreeObject({ color: args.color.threeObject }))
+    super(new ThreeObject({ color: args.color.threeObject, side }))
   }
 
   argChanged (name, value) {
@@ -55,7 +58,7 @@ export class MeshToonMaterial extends MeshColorMaterial {
 
 export class MeshNormalMaterialStatic extends MeshMaterial {
   constructor () {
-    super(new THREE.MeshNormalMaterial())
+    super(new THREE.MeshNormalMaterial({ side }))
   }
 }
 
@@ -65,7 +68,7 @@ export class MeshNormalMaterial extends MeshMaterial {
   }
 
   constructor (args) {
-    super(new THREE.MeshNormalMaterial())
+    super(new THREE.MeshNormalMaterial({ side }))
   }
 }
 
@@ -74,9 +77,9 @@ export class MeshDepthMaterial extends MeshMaterial {
     return []
   }
 
-  // Because we use a logarithmic depth buffer, camera has to be *very*
+  // Because we dont' use a logarithmic depth buffer, camera has to be *very*
   // close to the object to get any lightness (close to near value of clipping plane)
   constructor (args) {
-    super(new THREE.MeshDepthMaterial())
+    super(new THREE.MeshDepthMaterial({ side }))
   }
 }

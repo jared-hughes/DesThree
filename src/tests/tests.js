@@ -76,7 +76,7 @@ const _expects = [
   {
     name: 'All passthrough geometries',
     expects: [
-      'startup: 11 different geometries visible'
+      'startup: 14 different geometries visible'
     ]
   },
   {

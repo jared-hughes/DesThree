@@ -177,3 +177,57 @@ export class CylinderGeometry extends PassthroughGeometry {
     super(args, THREE.CylinderGeometry)
   }
 }
+
+export class CircleGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    const expectedArgs = [
+      { name: 'radius', type: Type.NUM },
+      { name: 'thetaStart', type: Type.NUM, default: 0 },
+      { name: 'thetaLength', type: Type.NUM, default: 2 * Math.PI },
+      { name: 'segments', type: Type.NUM, default: 16 }
+    ]
+    expectedArgs.order = ['radius', 'segments', 'thetaStart', 'thetaLength']
+    return expectedArgs
+  }
+
+  constructor (args) {
+    super(args, THREE.CircleGeometry)
+  }
+}
+
+export class RingGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    const expectedArgs = [
+      { name: 'innerRadius', type: Type.NUM },
+      { name: 'outerRadius', type: Type.NUM },
+      { name: 'thetaStart', type: Type.NUM, default: 0 },
+      { name: 'thetaLength', type: Type.NUM, default: 2 * Math.PI },
+      { name: 'thetaSegments', type: Type.NUM, default: 16 },
+      { name: 'phiSegments', type: Type.NUM, default: 1 }
+    ]
+    expectedArgs.order = [
+      'innerRadius', 'outerRadius', 'thetaSegments',
+      'phiSegments', 'thetaStart', 'thetaLength'
+    ]
+    return expectedArgs
+  }
+
+  constructor (args) {
+    super(args, THREE.RingGeometry)
+  }
+}
+
+export class PlaneGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'width', type: Type.NUM },
+      { name: 'height', type: Type.NUM },
+      { name: 'widthSegments', type: Type.NUM, default: 1 },
+      { name: 'heightSegments', type: Type.NUM, default: 1 }
+    ]
+  }
+
+  constructor (args) {
+    super(args, THREE.PlaneGeometry)
+  }
+}
