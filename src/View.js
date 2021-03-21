@@ -10,14 +10,24 @@ export default class View extends MVCPart {
 
   init () {
     this.injectStyle()
+    this.initAutoOperatorNames()
     this.initRenderer()
     this.initDropdownListener()
+  }
+
+  initAutoOperatorNames () {
+    const targetNode = document.querySelector('.dcg-template-expressioneach')
+    const config = { attributes: false, childList: true, subtree: false }
+    const observer = new window.MutationObserver((mutationsList, observer) => {
+      console.log('mutation', mutationsList)
+    })
+    observer.observe(targetNode, config)
   }
 
   initDropdownListener () {
     const targetNode = document.querySelector('.dcg-add-expression-container')
     const config = { attributes: false, childList: true, subtree: true }
-    const observer = new window.MutationObserver((mutationsList, observer) => {
+    const observer = new window.MutationObserver((mutationsList) => {
       const newExpressionNode = targetNode.querySelector('.dcg-action-newexpression')
       const newThreeNode = targetNode.querySelector('.three-action-newexpression')
       if (targetNode.querySelector('.dcg-icon-new-expression') && !newThreeNode) {
@@ -70,12 +80,6 @@ export default class View extends MVCPart {
         console.warn(`Could not find mqField for expression id ${id}.`)
         return
       }
-      const atElement = mqField.querySelector('.dcg-mq-nonSymbola')
-      if (atElement && atElement.innerHTML === '@') {
-        atElement.remove()
-        const digit3Element = mqField.querySelector('.dcg-mq-digit')
-        digit3Element?.remove()
-      }
       const autoOperatorNames = mqField._mqMathFieldInstance.__controller.root.cursor.options.autoOperatorNames
       Object.keys(functionNames).forEach(c => {
         autoOperatorNames[c] = c
@@ -84,6 +88,21 @@ export default class View extends MVCPart {
       outerDomNode.classList.add('three-expr')
       if (errors[id]) {
         outerDomNode.classList.add('three-error')
+      }
+      // Don't re-render math on the currently selected expression
+      // because that messes with cursor
+      if (this.calc.selectedExpressionId !== id) {
+        // force a re-render of the MathQuill without changing graph state
+        // warning: if `latex` is changed, MathQuill will apply that change
+        //   next time there is any user change to the latex.
+        const latex = mqField._mqViewInstance.mathField.latex()
+        mqField._mqMathFieldInstance.__controller.renderLatexMath(latex)
+      }
+      const atElement = mqField.querySelector('.dcg-mq-nonSymbola')
+      if (atElement && atElement.innerHTML === '@') {
+        atElement.remove()
+        const digit3Element = mqField.querySelector('.dcg-mq-digit')
+        digit3Element?.remove()
       }
     })
   }
