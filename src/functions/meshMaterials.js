@@ -1,6 +1,6 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
-import { White } from './misc'
+import { Color } from './misc'
 
 // needs to be double sided for CircleGeometry, PlaneGeometry, and RingGeometry
 const side = THREE.DoubleSide
@@ -13,7 +13,7 @@ MeshMaterial.type = Type.MATERIAL
 class MeshColorMaterial extends MeshMaterial {
   static expectedArgs () {
     return [
-      { name: 'color', type: Type.COLOR, default: new White() }
+      { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) }
     ]
   }
 

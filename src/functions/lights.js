@@ -1,12 +1,12 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
-import { ZeroVector3, White } from './misc'
+import { ZeroVector3, Color } from './misc'
 
 class Light extends FunctionApplication {
   static expectedArgs () {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
-      { name: 'color', type: Type.COLOR, default: new White() },
+      { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
       { name: 'position', type: Type.VECTOR3, default: new ZeroVector3() }
       // TODO: additional args (distance, decay)
       // https://threejs.org/docs/index.html#api/en/lights/PointLight
