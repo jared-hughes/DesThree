@@ -1,18 +1,12 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
 
-class Vector extends FunctionApplication {
+export class Vector extends FunctionApplication {
   constructor (x, y, z) {
     super(new THREE.Vector3(x, y, z))
   }
 }
 Vector.type = Type.VECTOR3
-
-export class ZeroVector3 extends Vector {
-  constructor () {
-    super(0, 0, 0)
-  }
-}
 
 export class Vector3 extends Vector {
   static expectedArgs () {
