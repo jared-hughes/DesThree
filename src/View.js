@@ -11,16 +11,13 @@ export default class View extends MVCPart {
   init () {
     this.injectStyle()
     this.initRenderer()
-    this.initDropdownListener()
   }
 
-  initDropdownListener () {
-    const targetNode = document.querySelector('.dcg-add-expression-container')
-    const config = { attributes: false, childList: true, subtree: true }
-    const observer = new window.MutationObserver((mutationsList) => {
-      const newExpressionNode = targetNode.querySelector('.dcg-action-newexpression')
-      const newThreeNode = targetNode.querySelector('.three-action-newexpression')
-      if (targetNode.querySelector('.dcg-icon-new-expression') && !newThreeNode) {
+  modifyAddExpressionDropdown () {
+    if (!document.querySelector('.three-action-newexpression')) {
+      const newExpressionNode = document.querySelector('.dcg-action-newexpression')
+      const newThreeNode = document.querySelector('.three-action-newexpression')
+      if (document.querySelector('.dcg-icon-new-expression') && !newThreeNode) {
         const newNode = newExpressionNode.cloneNode(true)
         newNode.classList.remove('dcg-action-newexpression')
         newNode.classList.add('three-action-newexpression')
@@ -44,8 +41,7 @@ export default class View extends MVCPart {
         })
         newExpressionNode.after(newNode)
       }
-    })
-    observer.observe(targetNode, config)
+    }
   }
 
   getExprElement (id) {

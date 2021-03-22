@@ -12,6 +12,19 @@ export default class Controller extends MVCPart {
   init () {
     this.observeGraph()
     this.observeGraphpaperBounds()
+    this.initDispatchListener()
+  }
+
+  handleDispatchedEvent (e) {
+    switch (e.type) {
+      case 'toggle-add-expression':
+        this.view.modifyAddExpressionDropdown()
+        break
+    }
+  }
+
+  initDispatchListener () {
+    this.calc.controller.dispatcher.register(e => this.handleDispatchedEvent(e))
   }
 
   generateObject (def) {
