@@ -84,3 +84,15 @@ export class ArrowHelper extends FunctionApplication {
   }
 }
 ArrowHelper.type = Type.OBJECT
+
+export class AxesHelper extends PassthroughHelper {
+  static _expectedArgs () {
+    return [
+      { name: 'size', type: Type.NUM, default: 1 }
+    ]
+  }
+
+  constructor (args) {
+    super(args, THREE.AxesHelper)
+  }
+}
