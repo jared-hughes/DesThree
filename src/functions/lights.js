@@ -101,6 +101,42 @@ export class DirectionalLight extends Light {
   }
 }
 
+export class HemisphereLight extends Light {
+  // careful, shadows cannot be produced easily and cheaply
+  static expectedArgs () {
+    return [
+      { name: 'intensity', type: Type.NUM, default: 1 },
+      { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
+      { name: 'groundColor', type: Type.COLOR, default: new Color(255, 255, 255) },
+      { name: 'direction', type: Type.VECTOR3, default: new Vector(0, -1, 0) }
+    ]
+  }
+
+  constructor (args) {
+    super(new THREE.HemisphereLight())
+    this.applyArgs(args)
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'intensity':
+        this.threeObject.intensity = value
+        break
+      case 'color':
+        this.threeObject.color = value.threeObject
+        break
+      case 'groundColor':
+        this.threeObject.groundColor = value.threeObject
+        break
+      case 'direction':
+        // direction points from position to (0, 0, 0)
+        // so position should be the negative vector of direction
+        this.threeObject.position.copy(value.threeObject.clone().multiplyScalar(-1))
+        break
+    }
+  }
+}
+
 export class SpotLight extends Light {
   // careful, target behaves weirdly
   static expectedArgs () {

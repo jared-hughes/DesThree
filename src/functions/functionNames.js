@@ -10,7 +10,7 @@ import {
 } from './geometries'
 import { Mesh, Position } from './object3ds'
 import {
-  PointLight, AmbientLight, DirectionalLight, SpotLight
+  PointLight, AmbientLight, DirectionalLight, SpotLight, HemisphereLight
 } from './lights'
 import { PerspectiveCamera } from './cameras'
 import { ColorRGB, Vector3, Show } from './misc'
@@ -45,6 +45,7 @@ const functionNames = {
   Mesh,
   // lights
   DirectionalLight,
+  HemisphereLight,
   AmbientLight,
   PointLight,
   SpotLight,
