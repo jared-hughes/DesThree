@@ -67,11 +67,11 @@ export class DirectionalLight extends Light {
 
   argChanged (name, value) {
     switch (name) {
-      case 'color':
-        this.threeObject.color = value.threeObject
-        break
       case 'intensity':
         this.threeObject.intensity = value
+        break
+      case 'color':
+        this.threeObject.color = value.threeObject
         break
       case 'direction':
         // direction points from position to (0, 0, 0) [default]
@@ -79,5 +79,64 @@ export class DirectionalLight extends Light {
         this.threeObject.position.copy(value.threeObject.clone().multiplyScalar(-1))
         break
     }
+  }
+}
+
+export class SpotLight extends Light {
+  // careful, target behaves weirdly
+  static expectedArgs () {
+    return [
+      { name: 'intensity', type: Type.NUM, default: 1 },
+      { name: 'position', type: Type.VECTOR3 },
+      { name: 'target', type: Type.VECTOR3, default: new Vector(0, 0, 0) },
+      { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
+      { name: 'angle', type: Type.NUM, default: Math.PI / 3 },
+      { name: 'penumbra', type: Type.NUM, default: 0 },
+      { name: 'distanceLimit', type: Type.NUM, default: 0 },
+      { name: 'decay', type: Type.NUM, default: 1 }
+    ]
+  }
+
+  constructor (args) {
+    super(new THREE.SpotLight())
+    this.applyArgs(args)
+  }
+
+  init (calc3) {
+    this.calc3 = calc3
+    this.calc3.model.scene.add(this.threeObject.target)
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'intensity':
+        this.threeObject.intensity = value
+        break
+      case 'position':
+        this.threeObject.position.copy(value.threeObject)
+        break
+      case 'target':
+        this.threeObject.target.position.copy(value.threeObject)
+        break
+      case 'color':
+        this.threeObject.color = value.threeObject
+        break
+      case 'angle':
+        this.threeObject.angle = value
+        break
+      case 'penumbra':
+        this.threeObject.penumbra = value
+        break
+      case 'distanceLimit':
+        this.threeObject.distance = value
+        break
+      case 'decay':
+        this.threeObject.decay = value
+        break
+    }
+  }
+
+  dispose () {
+    this.calc3.model.scene.remove(this.threeObject.target)
   }
 }
