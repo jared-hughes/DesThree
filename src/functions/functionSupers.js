@@ -65,7 +65,8 @@ export class FunctionApplicationList {
       } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
       } else {
-        // this.throw(`Not enough arguments in call to ${this.constructor.name}: ${args.length}`)
+        this.changeArg(expectedArg.name, undefined)
+        // throw Error(`Not enough arguments in call to function: ${args.length}`)
       }
     })
   }
@@ -90,6 +91,8 @@ export class FunctionApplicationList {
       return
     }
 
+    this.argValues[argName] = value
+
     const expectedType = this.Func.expectedArgs().filter(({ name }) => name === argName)[0].type
     if (expectedType === Type.LIST && value.length === undefined) {
       // this.throw("Expected a list but received a number")
@@ -98,9 +101,8 @@ export class FunctionApplicationList {
       // this.throw(`TypeError in function ${this.Func.name}: Expected ${expectedType} but received ${value.type}`)
     }
 
-    this.argValues[argName] = value
-
-    if (Object.values(this.argValues).some(e => e === null || e === undefined || e.isDefined === false)) {
+    const expectedArgValues = this.Func.expectedArgs().map(({ name }) => this.argValues[name])
+    if (expectedArgValues.some(e => e === null || e === undefined || e.isDefined === false)) {
       if (this.isDefined) this.setDefined(false)
     } else {
       const minLength = Math.min(...Object.values(this.argValues).map(e => e.childObjects?.length ?? e.length ?? Infinity))
@@ -144,20 +146,20 @@ export class FunctionApplicationList {
     /* DEV-START */
     if (defined) {
       console.log('Now defined: ', this)
+    } else {
+      this.forEach(obj => {
+        obj.hide && obj.hide()
+      })
     }
     /* DEV-END */
-    this.forEach(obj => {
-      if (obj.type === Type.OBJECT3D) {
-        obj.threeObject.visible = defined
-      }
-    })
-    // defined: about to be visible, so have to rerender
-    // this.isDefined && !defined: was defined but now is not
-    if ((defined || this.isDefined) && this.Func.affectsScene) {
-      this.calc3.model.rerender()
-    }
+    const wasDefined = this.isDefined
     this.isDefined = defined
     this.calc3.model.variableChanged(this.variable)
+    // defined: about to be visible, so have to rerender
+    // wasDefined && !defined: was defined but now is not
+    if ((defined || wasDefined) && this.Func.affectsScene) {
+      this.calc3.model.rerender()
+    }
   }
 
   forEach (func) {
@@ -192,5 +194,30 @@ export class FunctionApplication {
   applyArgs (args) {
     Object.entries(args)
       .map(([k, v]) => v !== undefined && this.argChanged(k, v))
+  }
+}
+
+export class ConstructorPassthrough extends FunctionApplication {
+  static expectedArgs () {
+    const expectedArgs = this._expectedArgs()
+    expectedArgs.order = expectedArgs.order || expectedArgs.map(({ name }) => name)
+    return expectedArgs
+  }
+
+  constructor (args, ThreeConstructor) {
+    super(new ThreeConstructor())
+    this.values = {}
+    this.ThreeConstructor = ThreeConstructor
+    this.applyArgs(args)
+  }
+
+  argChanged (name, value) {
+    this.values[name] = value
+    this.threeObject.dispose && this.threeObject.dispose()
+    delete this.threeObject
+    this.threeObject = new this.ThreeConstructor(
+      ...this.constructor.expectedArgs().order
+        .map(name => this.values[name]?.threeObject ?? this.values[name])
+    )
   }
 }

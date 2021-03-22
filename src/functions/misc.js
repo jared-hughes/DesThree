@@ -76,12 +76,6 @@ export class ColorRGB extends Color {
   }
 }
 
-export class White extends Color {
-  constructor () {
-    super(255, 255, 255)
-  }
-}
-
 export class Show extends FunctionApplication {
   static expectedArgs () {
     return [
@@ -112,6 +106,10 @@ export class Show extends FunctionApplication {
   }
 
   dispose () {
+    this.calc3.model.scene.remove(this.threeObject)
+  }
+
+  hide () {
     this.calc3.model.scene.remove(this.threeObject)
   }
 }

@@ -1,33 +1,10 @@
-import { Type, FunctionApplication } from './functionSupers.js'
+import { Type, ConstructorPassthrough } from './functionSupers.js'
 import * as THREE from 'three'
 
-class Geometry extends FunctionApplication {
+class PassthroughGeometry extends ConstructorPassthrough {
 
 }
-Geometry.type = Type.GEOMETRY
-
-class PassthroughGeometry extends Geometry {
-  static expectedArgs () {
-    const expectedArgs = this._expectedArgs()
-    expectedArgs.order = expectedArgs.order || expectedArgs.map(({ name }) => name)
-    return expectedArgs
-  }
-
-  constructor (args, ThreeConstructor) {
-    super(new ThreeConstructor())
-    this.values = {}
-    this.ThreeConstructor = ThreeConstructor
-    this.applyArgs(args)
-  }
-
-  argChanged (name, value) {
-    this.values[name] = value
-    this.threeObject.dispose()
-    this.threeObject = new this.ThreeConstructor(
-      ...this.constructor.expectedArgs().order.map(name => this.values[name])
-    )
-  }
-}
+PassthroughGeometry.type = Type.GEOMETRY
 
 class PolyhedronGeometry extends PassthroughGeometry {
   static _expectedArgs () {
