@@ -27,7 +27,8 @@ const _expects = [
     expects: [
       'add DesThree expression from dropdown: new expression appears with DesThree logo',
       'type `Show(meshp)` into that expression: Box is visible',
-      'change x_{0}: Box moves'
+      'change x_{0}: Box moves',
+      'Open edit list mode then open add expression dropdown again: DesThree insert still present'
     ]
   },
   {
