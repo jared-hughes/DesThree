@@ -163,7 +163,7 @@ export class FunctionApplicationList {
   }
 
   forEach (func) {
-    if (this.childObjects.length !== undefined) {
+    if (this.childObjects.forEach) {
       this.childObjects.forEach(func)
     } else {
       func(this.childObjects)

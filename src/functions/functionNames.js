@@ -12,7 +12,7 @@ import { Mesh, Position } from './object3ds'
 import { PointLight, AmbientLight } from './lights'
 import { PerspectiveCamera } from './cameras'
 import { ColorRGB, Vector3, Show } from './misc'
-import { GridHelper, PolarGridHelper } from './helpers'
+import { GridHelper, PolarGridHelper, ArrowHelper } from './helpers'
 
 const functionNames = {
   RGB: ColorRGB,
@@ -50,8 +50,9 @@ const functionNames = {
   Position,
   Show,
   // helpers
+  PolarGrid: PolarGridHelper,
   SquareGrid: GridHelper,
-  PolarGrid: PolarGridHelper
+  ArrowHelper: ArrowHelper
 }
 
 export default functionNames

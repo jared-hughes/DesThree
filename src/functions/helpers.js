@@ -1,4 +1,4 @@
-import { Type, ConstructorPassthrough } from './functionSupers.js'
+import { Type, ConstructorPassthrough, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
 import { Color } from './misc'
 
@@ -38,3 +38,49 @@ export class PolarGridHelper extends PassthroughHelper {
     super(args, THREE.PolarGridHelper)
   }
 }
+
+export class ArrowHelper extends FunctionApplication {
+  static expectedArgs () {
+    return [
+      { name: 'origin', type: Type.VECTOR3 },
+      { name: 'vector', type: Type.VECTOR3 },
+      { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
+      { name: 'headLengthScale', type: Type.NUM, default: 0.2 },
+      { name: 'headWidthScale', type: Type.NUM, default: 0.4 }
+    ]
+  }
+
+  constructor (args) {
+    super(new THREE.ArrowHelper())
+    this.applyArgs(args)
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'origin':
+        this.threeObject.position.copy(value.threeObject)
+        break
+      case 'vector':
+        this.length = value.threeObject.length()
+        this.threeObject.setLength(this.length)
+        this.threeObject.setDirection(value.threeObject.clone().normalize())
+        break
+      case 'color':
+        this.threeObject.setColor(value.threeObject)
+        break
+      case 'headLengthScale':
+        this.headLengthScale = value
+        this.threeObject.setLength(this.length, this.length * this.headLengthScale)
+        break
+      case 'headWidthScale':
+        this.headWidthScale = value
+        this.threeObject.setLength(
+          this.length,
+          this.length * this.headLengthScale,
+          this.length * this.headLengthScale * this.headWidthScale
+        )
+        break
+    }
+  }
+}
+ArrowHelper.type = Type.OBJECT
