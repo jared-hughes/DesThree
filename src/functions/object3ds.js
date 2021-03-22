@@ -1,7 +1,7 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
 import { MeshNormalMaterialStatic } from './meshMaterials'
-import { ZeroVector3 } from './misc'
+import { Vector3 } from './misc'
 
 export class Position extends FunctionApplication {
   // https://threejs.org/docs/index.html#api/en/objects/Group
@@ -39,7 +39,7 @@ export class Mesh extends FunctionApplication {
     return [
       { name: 'geometry', type: Type.GEOMETRY },
       { name: 'material', type: Type.MATERIAL, default: new MeshNormalMaterialStatic() },
-      { name: 'position', type: Type.VECTOR3, default: new ZeroVector3() }
+      { name: 'position', type: Type.VECTOR3, default: new Vector3(0, 0, 0) }
     ]
   }
 

@@ -9,7 +9,7 @@ import {
   CircleGeometry, RingGeometry, PlaneGeometry
 } from './geometries'
 import { Mesh, Position } from './object3ds'
-import { PointLight, AmbientLight } from './lights'
+import { PointLight, AmbientLight, DirectionalLight } from './lights'
 import { PerspectiveCamera } from './cameras'
 import { ColorRGB, Vector3, Show } from './misc'
 import { GridHelper, PolarGridHelper, ArrowHelper, AxesHelper } from './helpers'
@@ -44,6 +44,7 @@ const functionNames = {
   // lights
   PointLight,
   AmbientLight,
+  DirectionalLight,
   // camera
   PerspectiveCamera,
   // setup
