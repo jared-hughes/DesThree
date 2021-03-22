@@ -7,46 +7,65 @@ class Light extends FunctionApplication {
 }
 Light.type = Type.OBJECT
 
-class PositionedLight extends FunctionApplication {
+export class PointLight extends Light {
   static expectedArgs () {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
-      { name: 'position', type: Type.VECTOR3, default: new Vector(0, 0, 0) }
-      // TODO: additional args (distance, decay)
-      // https://threejs.org/docs/index.html#api/en/lights/PointLight
+      { name: 'position', type: Type.VECTOR3, default: new Vector(0, 0, 0) },
+      { name: 'distanceLimit', type: Type.NUM, default: 0 },
+      { name: 'decay', type: Type.NUM, default: 1 }
     ]
   }
 
-  constructor (args, ThreeObject) {
-    super(new ThreeObject())
+  constructor (args) {
+    super(new THREE.PointLight())
     this.applyArgs(args)
   }
 
   argChanged (name, value) {
     switch (name) {
-      case 'color':
-        this.threeObject.color = value.threeObject
-        break
       case 'intensity':
         this.threeObject.intensity = value
         break
+      case 'color':
+        this.threeObject.color = value.threeObject
+        break
       case 'position':
         this.threeObject.position.copy(value.threeObject)
+        break
+      case 'distanceLimit':
+        this.threeObject.distance = value
+        break
+      case 'decay':
+        this.threeObject.decay = value
         break
     }
   }
 }
 
-export class PointLight extends PositionedLight {
-  constructor (args) {
-    super(args, THREE.PointLight)
+export class AmbientLight extends Light {
+  static expectedArgs () {
+    return [
+      { name: 'intensity', type: Type.NUM, default: 1 },
+      { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) }
+    ]
   }
-}
 
-export class AmbientLight extends PositionedLight {
   constructor (args) {
-    super(args, THREE.AmbientLight)
+    super(new THREE.AmbientLight())
+    this.applyArgs(args)
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'intensity':
+        this.threeObject.intensity = value
+        break
+      case 'color':
+        this.threeObject.color = value.threeObject
+        break
+    }
   }
 }
 
