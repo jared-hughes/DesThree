@@ -129,9 +129,7 @@ export class FunctionApplicationList {
           /* DEV-START */
           console.log('List value changed: ', argName, value)
           /* DEV-END */
-          this.forEach((obj, i) => {
-            obj.argChanged(argName, FunctionApplicationList.index(value, i))
-          })
+          this.map((obj, i) => obj.argChanged(argName, FunctionApplicationList.index(value, i)))
         } else {
           /* DEV-START */
           console.log('Single value changed: ', argName, value)
@@ -168,9 +166,7 @@ export class FunctionApplicationList {
     if (defined) {
       console.log('Now defined: ', this)
     } else {
-      this.forEach(obj => {
-        obj.hide && obj.hide()
-      })
+      this.map(obj => obj.hide && obj.hide())
     }
     /* DEV-END */
     const wasDefined = this.isDefined
@@ -183,11 +179,11 @@ export class FunctionApplicationList {
     }
   }
 
-  forEach (func) {
-    if (this.childObjects.forEach) {
-      this.childObjects.forEach(func)
+  map (func) {
+    if (this.childObjects.map) {
+      return this.childObjects.map(func)
     } else {
-      func(this.childObjects)
+      return func(this.childObjects)
     }
   }
 
@@ -195,7 +191,7 @@ export class FunctionApplicationList {
     /* DEV-START */
     console.log('Disposing', this)
     /* DEV-END */
-    this.forEach(e => e.dispose())
+    this.map(e => e.dispose())
   }
 }
 
@@ -241,7 +237,7 @@ export class ConstructorPassthrough extends FunctionApplication {
         .map(name => (
           (
             this.values[name]?.childObjects && // FunctionApplicationList
-            this.values[name]?.childObjects.map(e => e.threeObject)
+            this.values[name]?.map(e => e.threeObject)
           ) ??
           this.values[name]?.threeObject ?? // FunctionApplication
           this.values[name] // number
