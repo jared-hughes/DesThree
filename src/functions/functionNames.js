@@ -13,13 +13,13 @@ import {
   PointLight, AmbientLight, DirectionalLight, SpotLight, HemisphereLight
 } from './lights'
 import { PerspectiveCamera } from './cameras'
-import { ColorRGB, Vector3, Show } from './misc'
+import { ColorRGB, Vector2, Vector3, Show } from './misc'
 import { GridHelper, PolarGridHelper, ArrowHelper, AxesHelper } from './helpers'
 import { LinearFog, FogExp2 } from './fogs'
 
 const functionNames = {
   RGB: ColorRGB,
-  '': Vector3,
+  '': [Vector2, Vector3],
   // materials
   LambertMaterial: MeshLambertMaterial,
   NormalMaterial: MeshNormalMaterial,

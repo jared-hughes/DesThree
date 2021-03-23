@@ -1,6 +1,6 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
-import { Vector } from './misc'
+import { Vector3Once } from './misc'
 
 class Camera extends FunctionApplication {
 
@@ -12,7 +12,7 @@ export class PerspectiveCamera extends Camera {
   static expectedArgs () {
     return [
       { name: 'position', type: Type.VECTOR3 },
-      { name: 'lookAt', type: Type.VECTOR3, default: new Vector(0, 0, 0) },
+      { name: 'lookAt', type: Type.VECTOR3, default: new Vector3Once(0, 0, 0) },
       { name: 'fov', type: Type.NUM, default: 75 },
       { name: 'near', type: Type.NUM, default: 0.1 },
       { name: 'far', type: Type.NUM, default: 1000 }

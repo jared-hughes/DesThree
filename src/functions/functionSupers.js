@@ -4,6 +4,7 @@ export const Type = Object.freeze({
   NUM: 'numericValue',
   LIST: 'listValue',
   COLOR: 'Color',
+  VECTOR2: 'Vector2',
   VECTOR3: 'Vector3',
   MATERIAL: 'Material',
   GEOMETRY: 'Geometry',

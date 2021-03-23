@@ -1,14 +1,43 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
 
-export class Vector extends FunctionApplication {
+export class Vector2Once extends FunctionApplication {
+  constructor (x, y) {
+    super(new THREE.Vector2(x, y))
+  }
+}
+Vector2Once.type = Type.VECTOR2
+
+export class Vector2 extends Vector2Once {
+  static expectedArgs () {
+    return [
+      { name: 'x', type: Type.NUM },
+      { name: 'y', type: Type.NUM }
+    ]
+  }
+
+  constructor (args) {
+    super(args.x, args.y)
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'x':
+      case 'y':
+        this.threeObject[name] = value
+        break
+    }
+  }
+}
+
+export class Vector3Once extends FunctionApplication {
   constructor (x, y, z) {
     super(new THREE.Vector3(x, y, z))
   }
 }
-Vector.type = Type.VECTOR3
+Vector3Once.type = Type.VECTOR3
 
-export class Vector3 extends Vector {
+export class Vector3 extends Vector3Once {
   static expectedArgs () {
     return [
       { name: 'x', type: Type.NUM },
