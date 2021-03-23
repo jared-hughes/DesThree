@@ -8,7 +8,6 @@ export const Type = Object.freeze({
   MATERIAL: 'Material',
   GEOMETRY: 'Geometry',
   OBJECT: 'Object', // subclass of THREE.Object3D; includes light and mesh; anything that can move in 3D
-  CAMERA: 'Camera',
   NULL: 'Null'
 })
 

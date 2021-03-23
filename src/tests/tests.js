@@ -85,6 +85,13 @@ const _expects = [
     expects: [
       'startup: 6 spheres visible, each with different materials'
     ]
+  },
+  {
+    name: 'Fog test',
+    expects: [
+      'startup: fog visible',
+      'uncomment last line: exponential-squared fog visible'
+    ]
   }
 ]
 const expects = _expects.map((e, i) => ({ ...e, state: states[i] }))
