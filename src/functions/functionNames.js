@@ -6,7 +6,8 @@ import {
   DodecahedronGeometry, IcosahedronGeometry, TetrahedronGeometry,
   OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
   SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry,
-  CircleGeometry, RingGeometry, PlaneGeometry, LatheGeometry
+  CircleGeometry, RingGeometry, PlaneGeometry, LatheGeometry,
+  ShapeGeometry, ExtrudeGeometry
 } from './geometries'
 import { Mesh, Position } from './object3ds'
 import {
@@ -35,7 +36,9 @@ const functionNames = {
   TorusKnot: TorusKnotGeometry,
   Cylinder: CylinderGeometry,
   Frustum: FrustumGeometry,
+  Extrude: ExtrudeGeometry,
   Sphere: SphereGeometry,
+  Shape: ShapeGeometry,
   Torus: TorusGeometry,
   Plane: PlaneGeometry,
   Lathe: LatheGeometry,

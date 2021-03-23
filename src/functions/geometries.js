@@ -220,8 +220,60 @@ export class LatheGeometry extends PassthroughGeometry {
   }
 
   constructor (args) {
-    console.log('EEE', args.points)
-    // args.points = args.points.map( abs x)
+    // negative values of x are absolute-valued
     super(args, THREE.LatheGeometry)
+  }
+}
+
+class MakeShapeGeometry extends THREE.ShapeGeometry {
+  constructor (points, divisions) {
+    const shape = new THREE.Shape([points[0]])
+    shape.splineThru(points.slice(1))
+    // If divisons === 1, it's equivalent to a polyline
+    // between the points. Otherwise sampling from splines
+    super(shape, (divisions * points.length - 1) / points.length)
+  }
+}
+
+export class ShapeGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'points', type: Type.VECTOR2, takesList: true },
+      { name: 'divisions', type: Type.NUM, default: 1 }
+    ]
+  }
+
+  constructor (args) {
+    super(args, MakeShapeGeometry)
+  }
+}
+
+class MakeExtrudeGeometry extends THREE.ExtrudeGeometry {
+  constructor (points, divisions, depth) {
+    const shape = new THREE.Shape([points[0]])
+    shape.splineThru(points.slice(1))
+    const extrudeSettings = {
+      // see MakeShapeGeometry for info about divisions
+      curveSegments: divisions * (points.length - 1) / points.length,
+      steps: 1,
+      depth: depth,
+      bevelEnabled: false
+    }
+    super(shape, extrudeSettings)
+  }
+}
+
+export class ExtrudeGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'points', type: Type.VECTOR2, takesList: true },
+      { name: 'divisions', type: Type.NUM, default: 1 },
+      { name: 'depth', type: Type.NUM, default: 10 }
+      // TODO: add steps and bevel arguments. bevel first because steps=1 usually?
+    ]
+  }
+
+  constructor (args) {
+    super(args, MakeExtrudeGeometry)
   }
 }
