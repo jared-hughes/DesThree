@@ -1,6 +1,6 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
-import { Vector, Color } from './misc'
+import { Vector3Once, Color } from './misc'
 
 class Light extends FunctionApplication {
 
@@ -12,7 +12,7 @@ export class PointLight extends Light {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
-      { name: 'position', type: Type.VECTOR3, default: new Vector(0, 0, 0) },
+      { name: 'position', type: Type.VECTOR3, default: new Vector3Once(0, 0, 0) },
       { name: 'distanceLimit', type: Type.NUM, default: 0 },
       { name: 'decay', type: Type.NUM, default: 1 }
     ]
@@ -75,7 +75,7 @@ export class DirectionalLight extends Light {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
-      { name: 'direction', type: Type.VECTOR3, default: new Vector(0, -1, 0) }
+      { name: 'direction', type: Type.VECTOR3, default: new Vector3Once(0, -1, 0) }
     ]
   }
 
@@ -108,7 +108,7 @@ export class HemisphereLight extends Light {
       { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
       { name: 'groundColor', type: Type.COLOR, default: new Color(255, 255, 255) },
-      { name: 'direction', type: Type.VECTOR3, default: new Vector(0, -1, 0) }
+      { name: 'direction', type: Type.VECTOR3, default: new Vector3Once(0, -1, 0) }
     ]
   }
 
@@ -143,7 +143,7 @@ export class SpotLight extends Light {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'position', type: Type.VECTOR3 },
-      { name: 'target', type: Type.VECTOR3, default: new Vector(0, 0, 0) },
+      { name: 'target', type: Type.VECTOR3, default: new Vector3Once(0, 0, 0) },
       { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
       { name: 'angle', type: Type.NUM, default: Math.PI / 3 },
       { name: 'penumbra', type: Type.NUM, default: 0 },

@@ -6,20 +6,21 @@ import {
   DodecahedronGeometry, IcosahedronGeometry, TetrahedronGeometry,
   OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
   SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry,
-  CircleGeometry, RingGeometry, PlaneGeometry
+  CircleGeometry, RingGeometry, PlaneGeometry, LatheGeometry,
+  ShapeGeometry, ExtrudeGeometry
 } from './geometries'
 import { Mesh, Position } from './object3ds'
 import {
   PointLight, AmbientLight, DirectionalLight, SpotLight, HemisphereLight
 } from './lights'
 import { PerspectiveCamera } from './cameras'
-import { ColorRGB, Vector3, Show } from './misc'
+import { ColorRGB, Vector2, Vector3, Show } from './misc'
 import { GridHelper, PolarGridHelper, ArrowHelper, AxesHelper } from './helpers'
 import { LinearFog, FogExp2 } from './fogs'
 
 const functionNames = {
   RGB: ColorRGB,
-  '': Vector3,
+  '': [Vector2, Vector3],
   // materials
   LambertMaterial: MeshLambertMaterial,
   NormalMaterial: MeshNormalMaterial,
@@ -35,9 +36,12 @@ const functionNames = {
   TorusKnot: TorusKnotGeometry,
   Cylinder: CylinderGeometry,
   Frustum: FrustumGeometry,
+  Extrude: ExtrudeGeometry,
   Sphere: SphereGeometry,
+  Shape: ShapeGeometry,
   Torus: TorusGeometry,
   Plane: PlaneGeometry,
+  Lathe: LatheGeometry,
   Disc: CircleGeometry,
   Ring: RingGeometry,
   Cone: ConeGeometry,

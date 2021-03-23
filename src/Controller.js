@@ -1,5 +1,4 @@
 import Parser from './controller/Parser'
-import functionNames from './functions/functionNames'
 import { FunctionApplicationList } from './functions/functionSupers'
 import MVCPart from 'MVCPart'
 
@@ -28,13 +27,9 @@ export default class Controller extends MVCPart {
   }
 
   generateObject (def) {
-    if (def.func in functionNames) {
-      const object = new FunctionApplicationList(this.calc3, functionNames[def.func], def.args)
-      object.variable = def.variable
-      return { object: object }
-    } else {
-      return { error: `Function ${def.func} not supported` }
-    }
+    const object = new FunctionApplicationList(this.calc3, def.func, def.args)
+    object.variable = def.variable
+    return { object: object }
   }
 
   observeGraph () {

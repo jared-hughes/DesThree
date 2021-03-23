@@ -208,3 +208,79 @@ export class PlaneGeometry extends PassthroughGeometry {
     super(args, THREE.PlaneGeometry)
   }
 }
+
+export class LatheGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'points', type: Type.VECTOR2, takesList: true },
+      { name: 'segments', type: Type.NUM, default: 12 },
+      { name: 'phiStart', type: Type.NUM, default: 0 },
+      { name: 'phiLength', type: Type.NUM, default: 2 * Math.PI }
+    ]
+  }
+
+  constructor (args) {
+    // negative values of x are absolute-valued
+    super(args, THREE.LatheGeometry)
+  }
+}
+
+function closedSplineThroughPoints (points, divisions) {
+  // If divisons === 1, it will be used as equivalent to a polyline
+  // between the points.
+  // Otherwise samples from a spline passing through the points
+  // (warning: first & last points may not be connected smoothly)
+  const shape = new THREE.Shape([points[0]])
+  shape.splineThru(points.slice(1))
+  shape.closePath()
+  const segmentsMult = (divisions * points.length - 1) / points.length
+  return { shape, segmentsMult }
+}
+
+class MakeShapeGeometry extends THREE.ShapeGeometry {
+  constructor (points, divisions) {
+    const { shape, segmentsMult } = closedSplineThroughPoints(points, divisions)
+    super(shape, segmentsMult)
+  }
+}
+
+export class ShapeGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'points', type: Type.VECTOR2, takesList: true },
+      { name: 'divisions', type: Type.NUM, default: 1 }
+    ]
+  }
+
+  constructor (args) {
+    super(args, MakeShapeGeometry)
+  }
+}
+
+class MakeExtrudeGeometry extends THREE.ExtrudeGeometry {
+  constructor (points, divisions, depth) {
+    const { shape, segmentsMult } = closedSplineThroughPoints(points, divisions)
+    const extrudeSettings = {
+      curveSegments: segmentsMult,
+      steps: 1,
+      depth: depth,
+      bevelEnabled: false
+    }
+    super(shape, extrudeSettings)
+  }
+}
+
+export class ExtrudeGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'points', type: Type.VECTOR2, takesList: true },
+      { name: 'divisions', type: Type.NUM, default: 1 },
+      { name: 'depth', type: Type.NUM, default: 10 }
+      // TODO: add steps and bevel arguments. bevel first because steps=1 usually?
+    ]
+  }
+
+  constructor (args) {
+    super(args, MakeExtrudeGeometry)
+  }
+}

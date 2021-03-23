@@ -31,7 +31,7 @@ export default class Parser {
 
     if (match) {
       return {
-        func: match.groups.func,
+        funcName: match.groups.func,
         nextIndex: funcNameRegex.lastIndex
       }
     } else {
@@ -77,44 +77,21 @@ export default class Parser {
     }
   }
 
-  parseDesThree (text, index) {
-    const desVariable = this.parseDesThreeVariable(text, index)
-    if (desVariable) {
-      return {
-        defs: [
-          {
-            variable: desVariable.variable,
-            func: null,
-            args: null
-          }
-        ],
-        nextIndex: desVariable.nextIndex
-      }
-    }
+  parseDesThreeAssumingFunction (text, index, funcName, func) {
+    const expectedArgs = func.expectedArgs()
 
-    const { variable, nextIndex: i1 } = this.parseAssignment(text, index)
-    const { error, func, nextIndex: i2 } = this.parseFuncName(text, i1)
-    if (error) {
-      return { error }
-    }
-    index = i2
-
-    if (functionNames[func] === undefined) {
-      return { error: `Unidentified function: ${func}` }
-    }
-    const expectedArgs = functionNames[func].expectedArgs()
     const defs = []
     const args = []
 
     // 0-argument function
-    const zeroArgument = text[index] === ')'
-    if (!zeroArgument) {
+    const isZeroArgument = text[index] === ')'
+    if (!isZeroArgument) {
       for (; text[index - 1] !== ')'; index++) {
         if (index >= text.length) {
           return { error: 'ParseError: EOF before closing DesThree matched brace' }
         }
         if (args.length >= expectedArgs.length) {
-          return { error: `ParseError: too many arguments in call to ${func}` }
+          return { error: `ParseError: too many arguments in call to ${funcName}` }
         }
         const expectedType = expectedArgs[args.length].type
         if (expectedType === Type.NUM || expectedType === Type.LIST) {
@@ -135,17 +112,53 @@ export default class Parser {
         }
       }
     }
+    return { defs, args, isZeroArgument, nextIndex: index }
+  }
 
-    defs.push({
-      variable,
-      func,
-      args
-    })
-
-    // return this function's definition preceded by all arguments' definitions
-    return {
-      defs,
-      nextIndex: index + zeroArgument
+  parseDesThree (text, index) {
+    const desVariable = this.parseDesThreeVariable(text, index)
+    if (desVariable) {
+      return {
+        defs: [
+          {
+            variable: desVariable.variable,
+            func: null,
+            args: null
+          }
+        ],
+        nextIndex: desVariable.nextIndex
+      }
     }
+
+    const { variable, nextIndex: i1 } = this.parseAssignment(text, index)
+    const { error, funcName, nextIndex: i2 } = this.parseFuncName(text, i1)
+    if (error) {
+      return { error }
+    }
+    index = i2
+
+    if (functionNames[funcName] === undefined) {
+      return { error: `Unidentified function: ${funcName}` }
+    }
+    const possibleFuncs0 = functionNames[funcName]
+    const possibleFuncs = Array.isArray(possibleFuncs0) ? possibleFuncs0 : [possibleFuncs0]
+    for (const func of possibleFuncs) {
+      const { error, defs, args, isZeroArgument, nextIndex } =
+        this.parseDesThreeAssumingFunction(text, index, funcName, func)
+      if (!error) {
+        defs.push({
+          variable,
+          func,
+          args
+        })
+
+        // return this function's definition preceded by all arguments' definitions
+        return {
+          defs,
+          nextIndex: nextIndex + isZeroArgument
+        }
+      }
+    }
+    return { error: `ParseError: no function found to satisfy ${funcName}` }
   }
 }

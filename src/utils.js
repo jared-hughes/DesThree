@@ -1,7 +1,7 @@
 export function applyToEntries (object, func) {
   return Object.fromEntries(
     Object.entries(object)
-      .map(([k, v]) => [k, func(v)])
+      .map(([k, v]) => [k, func(v, k)])
   )
 }
 
