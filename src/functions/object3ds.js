@@ -45,6 +45,8 @@ export class Mesh extends FunctionApplication {
 
   constructor (args) {
     super(new THREE.Mesh())
+    this.threeObject.castShadow = true
+    this.threeObject.receiveShadow = true
     this.applyArgs(args)
   }
 

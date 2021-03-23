@@ -7,7 +7,16 @@ class Light extends FunctionApplication {
 }
 Light.type = Type.OBJECT
 
-export class PointLight extends Light {
+class LightWithShadows extends Light {
+  constructor (threeObject) {
+    threeObject.castShadow = true
+    // Bias: https://stackoverflow.com/a/48939256/7481517
+    threeObject.shadow.bias = -0.0001
+    super(threeObject)
+  }
+}
+
+export class PointLight extends LightWithShadows {
   static expectedArgs () {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
@@ -102,7 +111,6 @@ export class DirectionalLight extends Light {
 }
 
 export class HemisphereLight extends Light {
-  // careful, shadows cannot be produced easily and cheaply
   static expectedArgs () {
     return [
       { name: 'intensity', type: Type.NUM, default: 1 },
@@ -137,7 +145,7 @@ export class HemisphereLight extends Light {
   }
 }
 
-export class SpotLight extends Light {
+export class SpotLight extends LightWithShadows {
   // careful, target behaves weirdly
   static expectedArgs () {
     return [

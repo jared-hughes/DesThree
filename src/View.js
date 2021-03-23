@@ -155,6 +155,8 @@ export default class View extends MVCPart {
 
   initRenderer () {
     this.renderer = new THREE.WebGLRenderer()
+    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer.shadowMap.enabled = true
     this.renderer.domElement.style.position = 'absolute'
     this.container = document.querySelector('.dcg-container')
     this.container.prepend(this.renderer.domElement)
