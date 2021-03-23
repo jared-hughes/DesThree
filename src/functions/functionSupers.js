@@ -19,6 +19,7 @@ export class FunctionApplicationList {
     // childObjects is a list or a single object
     this.childObjects = []
     this.argValues = {}
+    this.expectedArgsByName = {}
     this.Func = Func
     this.dependencies = {}
     this.type = Func.type
@@ -34,6 +35,7 @@ export class FunctionApplicationList {
     }
 
     Func.expectedArgs().forEach((expectedArg, i) => {
+      this.expectedArgsByName[expectedArg.name] = expectedArg
       if (i < args.length) {
         const expr = args[i]
         this.argValues[expectedArg.name] = expectedArg.default ?? null
@@ -93,22 +95,37 @@ export class FunctionApplicationList {
 
     this.argValues[argName] = value
 
-    const expectedType = this.Func.expectedArgs().filter(({ name }) => name === argName)[0].type
+    const expectedArg = this.expectedArgsByName[argName]
+    const expectedType = expectedArg.type
     if (expectedType === Type.LIST && value.length === undefined) {
       // this.throw("Expected a list but received a number")
     }
     if (expectedType !== Type.LIST && expectedType !== Type.NUM && expectedType !== value.type) {
       // this.throw(`TypeError in function ${this.Func.name}: Expected ${expectedType} but received ${value.type}`)
     }
+    if (expectedArg.takesList && value.length === undefined) {
+      // this.throw('Expected a list of ${expectedType} but only got one')
+    }
 
     const expectedArgValues = this.Func.expectedArgs().map(({ name }) => this.argValues[name])
     if (expectedArgValues.some(e => e === null || e === undefined || e.isDefined === false)) {
       if (this.isDefined) this.setDefined(false)
     } else {
-      const minLength = Math.min(...Object.values(this.argValues).map(e => e.childObjects?.length ?? e.length ?? Infinity))
+      const minLength = Math.min(
+        ...Object.keys(this.argValues)
+          .map(argName => (
+            this.expectedArgsByName[argName].takesList
+              ? Infinity
+              : (
+                  this.argValues[argName].childObjects?.length ??
+                  this.argValues[argName].length ??
+                  Infinity
+                )
+          ))
+      )
       if (minLength === this.childObjects.length) {
         // number of children stayed same, so just change their args
-        if (minLength !== Infinity) {
+        if (minLength !== Infinity && !expectedArg.takesList) {
           /* DEV-START */
           console.log('List value changed: ', argName, value)
           /* DEV-END */
@@ -128,7 +145,11 @@ export class FunctionApplicationList {
         this.childObjects = []
         for (let i = 0; i < (minLength === Infinity ? 1 : minLength); i++) {
           const object = new this.Func(
-            applyToEntries(this.argValues, v => FunctionApplicationList.index(v, i))
+            applyToEntries(this.argValues, (v, argName) => (
+              this.expectedArgsByName[argName].takesList
+                ? v
+                : FunctionApplicationList.index(v, i)
+            ))
           )
           object.init(this.calc3)
           this.childObjects.push(object)
@@ -204,8 +225,8 @@ export class ConstructorPassthrough extends FunctionApplication {
     return expectedArgs
   }
 
-  constructor (args, ThreeConstructor) {
-    super(new ThreeConstructor())
+  constructor (args, ThreeConstructor, argsInit) {
+    super(null)
     this.values = {}
     this.ThreeConstructor = ThreeConstructor
     this.applyArgs(args)
@@ -213,11 +234,18 @@ export class ConstructorPassthrough extends FunctionApplication {
 
   argChanged (name, value) {
     this.values[name] = value
-    this.threeObject.dispose && this.threeObject.dispose()
+    this.threeObject?.dispose && this.threeObject.dispose()
     delete this.threeObject
     this.threeObject = new this.ThreeConstructor(
       ...this.constructor.expectedArgs().order
-        .map(name => this.values[name]?.threeObject ?? this.values[name])
+        .map(name => (
+          (
+            this.values[name]?.childObjects && // FunctionApplicationList
+            this.values[name]?.childObjects.map(e => e.threeObject)
+          ) ??
+          this.values[name]?.threeObject ?? // FunctionApplication
+          this.values[name] // number
+        ))
     )
   }
 }

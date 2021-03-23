@@ -6,7 +6,7 @@ import {
   DodecahedronGeometry, IcosahedronGeometry, TetrahedronGeometry,
   OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
   SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry,
-  CircleGeometry, RingGeometry, PlaneGeometry
+  CircleGeometry, RingGeometry, PlaneGeometry, LatheGeometry
 } from './geometries'
 import { Mesh, Position } from './object3ds'
 import {
@@ -38,6 +38,7 @@ const functionNames = {
   Sphere: SphereGeometry,
   Torus: TorusGeometry,
   Plane: PlaneGeometry,
+  Lathe: LatheGeometry,
   Disc: CircleGeometry,
   Ring: RingGeometry,
   Cone: ConeGeometry,

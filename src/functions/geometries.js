@@ -208,3 +208,20 @@ export class PlaneGeometry extends PassthroughGeometry {
     super(args, THREE.PlaneGeometry)
   }
 }
+
+export class LatheGeometry extends PassthroughGeometry {
+  static _expectedArgs () {
+    return [
+      { name: 'points', type: Type.VECTOR2, takesList: true },
+      { name: 'segments', type: Type.NUM, default: 12 },
+      { name: 'phiStart', type: Type.NUM, default: 0 },
+      { name: 'phiLength', type: Type.NUM, default: 2 * Math.PI }
+    ]
+  }
+
+  constructor (args) {
+    console.log('EEE', args.points)
+    // args.points = args.points.map( abs x)
+    super(args, THREE.LatheGeometry)
+  }
+}
