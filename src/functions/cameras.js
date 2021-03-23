@@ -5,7 +5,8 @@ import { Vector } from './misc'
 class Camera extends FunctionApplication {
 
 }
-Camera.type = Type.CAMERA
+Camera.type = Type.NULL
+Camera.affectsScene = true
 
 export class PerspectiveCamera extends Camera {
   static expectedArgs () {
@@ -58,4 +59,3 @@ export class PerspectiveCamera extends Camera {
     this.calc3.model.initDefaultCamera()
   }
 }
-PerspectiveCamera.affectsScene = true
