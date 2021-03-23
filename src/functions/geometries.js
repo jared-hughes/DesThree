@@ -225,13 +225,22 @@ export class LatheGeometry extends PassthroughGeometry {
   }
 }
 
+function closedSplineThroughPoints (points, divisions) {
+  // If divisons === 1, it will be used as equivalent to a polyline
+  // between the points.
+  // Otherwise samples from a spline passing through the points
+  // (warning: first & last points may not be connected smoothly)
+  const shape = new THREE.Shape([points[0]])
+  shape.splineThru(points.slice(1))
+  shape.closePath()
+  const segmentsMult = (divisions * points.length - 1) / points.length
+  return { shape, segmentsMult }
+}
+
 class MakeShapeGeometry extends THREE.ShapeGeometry {
   constructor (points, divisions) {
-    const shape = new THREE.Shape([points[0]])
-    shape.splineThru(points.slice(1))
-    // If divisons === 1, it's equivalent to a polyline
-    // between the points. Otherwise sampling from splines
-    super(shape, (divisions * points.length - 1) / points.length)
+    const { shape, segmentsMult } = closedSplineThroughPoints(points, divisions)
+    super(shape, segmentsMult)
   }
 }
 
@@ -250,11 +259,9 @@ export class ShapeGeometry extends PassthroughGeometry {
 
 class MakeExtrudeGeometry extends THREE.ExtrudeGeometry {
   constructor (points, divisions, depth) {
-    const shape = new THREE.Shape([points[0]])
-    shape.splineThru(points.slice(1))
+    const { shape, segmentsMult } = closedSplineThroughPoints(points, divisions)
     const extrudeSettings = {
-      // see MakeShapeGeometry for info about divisions
-      curveSegments: divisions * (points.length - 1) / points.length,
+      curveSegments: segmentsMult,
       steps: 1,
       depth: depth,
       bevelEnabled: false

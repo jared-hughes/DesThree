@@ -92,6 +92,12 @@ const _expects = [
       'startup: fog visible',
       'uncomment last line: exponential-squared fog visible'
     ]
+  },
+  {
+    name: 'Path Geometries',
+    expects: [
+      'startup: lathe, shape, and extrude geometries visible'
+    ]
   }
 ]
 const expects = _expects.map((e, i) => ({ ...e, state: states[i] }))
