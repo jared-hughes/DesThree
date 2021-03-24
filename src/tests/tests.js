@@ -98,6 +98,12 @@ const _expects = [
     expects: [
       'startup: lathe, shape, and extrude geometries visible'
     ]
+  },
+  {
+    name: 'Buffer Geometry',
+    expects: [
+      'startup: BufferGeometry (astroid pyramid) visible'
+    ]
   }
 ]
 const expects = _expects.map((e, i) => ({ ...e, state: states[i] }))

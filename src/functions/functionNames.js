@@ -7,20 +7,21 @@ import {
   OctahedronGeometry, TorusKnotGeometry, CylinderGeometry, FrustumGeometry,
   SphereGeometry, TorusGeometry, ConeGeometry, BoxGeometry,
   CircleGeometry, RingGeometry, PlaneGeometry, LatheGeometry,
-  ShapeGeometry, ExtrudeGeometry
+  ShapeGeometry, ExtrudeGeometry, BufferGeometry
 } from './geometries'
 import { Mesh, Position } from './object3ds'
 import {
   PointLight, AmbientLight, DirectionalLight, SpotLight, HemisphereLight
 } from './lights'
 import { PerspectiveCamera } from './cameras'
-import { ColorRGB, Vector2, Vector3, Show } from './misc'
+import { ColorRGB, Vector2, Vector3, Face3, Show } from './misc'
 import { GridHelper, PolarGridHelper, ArrowHelper, AxesHelper } from './helpers'
 import { LinearFog, FogExp2 } from './fogs'
 
 const functionNames = {
   RGB: ColorRGB,
   '': [Vector2, Vector3],
+  Face: Face3,
   // materials
   LambertMaterial: MeshLambertMaterial,
   NormalMaterial: MeshNormalMaterial,
@@ -46,6 +47,7 @@ const functionNames = {
   Ring: RingGeometry,
   Cone: ConeGeometry,
   Box: BoxGeometry,
+  BufferGeometry,
   // objects
   Mesh,
   // lights
