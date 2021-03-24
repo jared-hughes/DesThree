@@ -1,4 +1,4 @@
-import { Type, ConstructorPassthrough } from './functionSupers.js'
+import { Type, ConstructorPassthrough, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
 
 class PassthroughGeometry extends ConstructorPassthrough {
@@ -282,5 +282,42 @@ export class ExtrudeGeometry extends PassthroughGeometry {
 
   constructor (args) {
     super(args, MakeExtrudeGeometry)
+  }
+}
+
+export class BufferGeometry extends FunctionApplication {
+  static expectedArgs () {
+    return [
+      { name: 'faces', type: Type.FACE3, takesList: true }
+    ]
+  }
+
+  constructor (args) {
+    super(new THREE.BufferGeometry())
+    this.applyArgs(args)
+  }
+
+  updateMesh (faces) {
+    const positionsArray = new Float32Array(9 * faces.childObjects.length)
+    faces.childObjects.forEach((face, i) => {
+      face.points.forEach((point, j) => {
+        positionsArray[9 * i + 3 * j + 0] = point.x
+        positionsArray[9 * i + 3 * j + 1] = point.y
+        positionsArray[9 * i + 3 * j + 2] = point.z
+      })
+    })
+    this.threeObject.setAttribute('position', new THREE.BufferAttribute(positionsArray, 3))
+    this.threeObject.deleteAttribute('normal')
+    this.threeObject.computeFaceNormals()
+    this.threeObject.computeVertexNormals()
+    this.threeObject.normalizeNormals()
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'faces':
+        this.updateMesh(value)
+        break
+    }
   }
 }

@@ -6,6 +6,7 @@ export const Type = Object.freeze({
   COLOR: 'Color',
   VECTOR2: 'Vector2',
   VECTOR3: 'Vector3',
+  FACE3: 'Face3',
   MATERIAL: 'Material',
   GEOMETRY: 'Geometry',
   OBJECT: 'Object', // subclass of THREE.Object3D; includes light and mesh; anything that can move in 3D
@@ -205,7 +206,7 @@ export class FunctionApplication {
   }
 
   dispose () {
-    this.threeObject.dispose && this.threeObject.dispose()
+    this.threeObject?.dispose && this.threeObject.dispose()
   }
 
   applyArgs (args) {

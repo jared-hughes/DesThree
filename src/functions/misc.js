@@ -61,6 +61,33 @@ export class Vector3 extends Vector3Once {
   }
 }
 
+export class Face3 extends FunctionApplication {
+  static expectedArgs () {
+    return [
+      { name: 'a', type: Type.VECTOR3 },
+      { name: 'b', type: Type.VECTOR3 },
+      { name: 'c', type: Type.VECTOR3 }
+    ]
+  }
+
+  constructor (args) {
+    super(null)
+    this.points = [null, null, null]
+    this.applyArgs(args)
+  }
+
+  argChanged (name, value) {
+    switch (name) {
+      case 'a':
+      case 'b':
+      case 'c':
+        this.points['abc'.indexOf(name)] = value.threeObject
+        break
+    }
+  }
+}
+Face3.TYPE = Type.TRIANGLE3
+
 export class Color extends FunctionApplication {
   constructor (r, g, b) {
     super(new THREE.Color(clampMap255(r), clampMap255(g), clampMap255(b)))
