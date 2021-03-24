@@ -187,7 +187,7 @@ export default class View extends MVCPart {
       `, but you have version ${VERSION} installed. ` +
       'Read migration information at '
     )
-    const link = 'https://github.com/jared-hughes/DesThree/docs/Migration.md'
+    const link = 'https://github.com/jared-hughes/DesThree/blob/master/docs/CHANGELOG.md'
     const linkElement = textElement.nextElementSibling
     linkElement.innerHTML = link
     linkElement.href = link
