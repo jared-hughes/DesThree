@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const { merge } = require('webpack-merge')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const LiveReloadPlugin = require('webpack-livereload-plugin')
@@ -30,6 +31,9 @@ const cfg = merge(webpackConfig, {
     }),
     new UserScriptMetaDataPlugin({
       metadata
+    }),
+    new webpack.DefinePlugin({
+      VERSION: JSON.stringify(metadata.version + '-dev')
     })
   ]
 })

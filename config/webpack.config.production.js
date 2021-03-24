@@ -1,5 +1,6 @@
 const { merge } = require('webpack-merge')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const webpack = require('webpack')
 
 const UserScriptMetaDataPlugin = require('userscript-metadata-webpack-plugin')
 const metadata = require('./metadata')
@@ -31,6 +32,9 @@ const cfg = merge({}, webpackConfig, {
   plugins: [
     new UserScriptMetaDataPlugin({
       metadata
+    }),
+    new webpack.DefinePlugin({
+      VERSION: JSON.stringify(metadata.version)
     })
   ]
 })

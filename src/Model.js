@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import MVCPart from 'MVCPart'
+/* global VERSION */
 
 export default class Model extends MVCPart {
   constructor (calc3) {
@@ -10,6 +11,7 @@ export default class Model extends MVCPart {
     this.dependents = {}
     this.scene = new THREE.Scene()
     this.exprs = new Set()
+    this.config = {}
   }
 
   init () {
@@ -49,7 +51,11 @@ export default class Model extends MVCPart {
 
   setDefinitions (nextDefinitions) {
     this.definitions = nextDefinitions
-    this.view.setCanvasVisible(Object.keys(nextDefinitions).length > 0)
+    const hasDesThree = Object.keys(nextDefinitions).length > 0
+    if (!hasDesThree) {
+      this.calc.removeExpression({ id: '@3-header' })
+    }
+    this.view.setCanvasVisible(hasDesThree)
   }
 
   setThreeExprs (exprs, errors) {
@@ -102,5 +108,44 @@ export default class Model extends MVCPart {
 
   rerender () {
     this.view.rerender()
+  }
+
+  clearHeader () {
+    this.header = {}
+  }
+
+  applyHeaderData (expr, data) {
+    this.header = data
+    this.headerExpr = expr
+    this.applyHeaderStyle()
+  }
+
+  applyHeaderStyle () {
+    if (this.header.version === VERSION) {
+      this.view.markCorrectVersion()
+    } else {
+      this.view.markWrongVersion()
+    }
+  }
+
+  initDefaultHeader () {
+    this.header = {
+      version: VERSION
+    }
+    this.insertHeader()
+  }
+
+  insertHeader () {
+    const lines = [
+      `⚠️ Heads up! This graph requires DesThree version ${VERSION} to be viewed as intended. Install DesThree at https://github.com/jared-hughes/DesThree#Installation.`
+    ]
+    const e = this.calc.controller.createItemModel({
+      id: '@3-header', // + this.calc.controller.generateId(),
+      type: 'text',
+      text: lines.join('\n')
+    })
+    this.calc.controller._toplevelInsertItemAt(0, e, true, undefined)
+    this.calc.controller._closeAddExpression()
+    // this.view.markCorrectVersion()
   }
 }

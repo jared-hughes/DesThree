@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import functionNames, { maxFuncNameLength } from './functions/functionNames'
 import MVCPart from 'MVCPart'
+/* global VERSION */
 
 export default class View extends MVCPart {
   constructor (calc3) {
@@ -130,6 +131,13 @@ export default class View extends MVCPart {
       ${outermostMQ('var.dcg-mq-first:nth-of-type(-n+3)')} {
         padding-left: 0;
       }
+      .three-header-hidden {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        margin-top: -3px !important;
+      }
     `
     document.head.appendChild(styleEl)
   }
@@ -163,5 +171,25 @@ export default class View extends MVCPart {
   setCanvasVisible (isVisible) {
     this.renderer.domElement.style.visibility = isVisible ? '' : 'hidden'
     this.container.querySelector('.dcg-grapher').style.visibility = isVisible ? 'hidden' : ''
+  }
+
+  markCorrectVersion () {
+    const element = this.getExprElement('@3-header')
+    element.classList.add('three-header-hidden')
+  }
+
+  markWrongVersion () {
+    const element = this.getExprElement('@3-header')
+    element.classList.remove('three-header-hidden')
+    const textElement = element.querySelector('.dcg-displayTextarea').firstChild
+    textElement.textContent = textElement.textContent.replace(
+      /. Install[^\n]+/,
+      `, but you have version ${VERSION} installed. ` +
+      'Read migration information at '
+    )
+    const link = 'https://github.com/jared-hughes/DesThree/docs/Migration.md'
+    const linkElement = textElement.nextElementSibling
+    linkElement.innerHTML = link
+    linkElement.href = link
   }
 }

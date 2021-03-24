@@ -9,15 +9,21 @@ export default class Controller extends MVCPart {
   }
 
   init () {
+    this.initDispatchListener()
     this.observeGraph()
     this.observeGraphpaperBounds()
-    this.initDispatchListener()
   }
 
   handleDispatchedEvent (e) {
+    /* DEV-START */
+    console.log('Event', e)
+    /* DEV-END */
     switch (e.type) {
       case 'toggle-add-expression':
         this.view.modifyAddExpressionDropdown()
+        break
+      case 'show-expressions-list':
+        this.model.applyHeaderStyle()
         break
     }
   }
@@ -37,6 +43,18 @@ export default class Controller extends MVCPart {
     this.graphChanged()
   }
 
+  foundHeader (expr) {
+    const regex = /version (?<version>\d+\.\d+\.\d+(?:-dev)?)/
+    const match = expr.text.match(regex)
+    if (match === null) {
+      throw new Error(`version not found in header ${expr.text}`)
+    }
+    const graphVersion = match.groups.version
+    this.model.applyHeaderData(expr, {
+      version: graphVersion
+    })
+  }
+
   graphChanged () {
     // TODO: pass expression id into inner argument variable generator
     const threeExprs = new Set()
@@ -44,8 +62,14 @@ export default class Controller extends MVCPart {
     const nextDefinitions = {} // {[expression id]: rawLatex}
     const nextExprVariables = {} // {[expression id]: [list of affected variables]}
     const nextVariables = new Set()
+    this.model.clearHeader()
+    let headerFound = false
     // TODO: can this just be this.calc.getExpressions()?
     this.calc.getState().expressions.list.forEach(expr => {
+      if (expr.id === '@3-header') {
+        headerFound = true
+        this.foundHeader(expr)
+      }
       const rawLatex = expr.latex || ''
       if (expr.type === 'expression' && rawLatex.startsWith('@3')) {
         nextDefinitions[expr.id] = rawLatex
@@ -91,6 +115,9 @@ export default class Controller extends MVCPart {
         }
       }
     })
+    if (!headerFound) {
+      this.model.initDefaultHeader()
+    }
 
     // TODO: check for cyclic definitions
     // TODO: check for two+ cameras defined
