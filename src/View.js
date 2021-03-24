@@ -72,11 +72,12 @@ export default class View extends MVCPart {
       autoOperatorNames._maxLength = Math.max(maxFuncNameLength, autoOperatorNames._maxLength)
       // Don't re-render math on the currently selected expression
       // because that messes with cursor
-      if (this.calc.selectedExpressionId !== id) {
+      const mathField = mqField._mqViewInstance.mathField
+      if (this.calc.selectedExpressionId !== id && mathField) {
         // force a re-render of the MathQuill without changing graph state
         // warning: if `latex` is changed, MathQuill will apply that change
         //   next time there is any user change to the latex.
-        const latex = mqField._mqViewInstance.mathField.latex()
+        const latex = mathField.latex()
         mqField._mqMathFieldInstance.__controller.renderLatexMath(latex)
       }
     }

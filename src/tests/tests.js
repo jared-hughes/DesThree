@@ -6,7 +6,8 @@ const _expects = [
     expects: [
       'startup: Black canvas. All expressions marked',
       'open folder: Two new DesThree expressions marked',
-      'scroll down: More DesThree expressions marked'
+      'scroll down: More DesThree expressions marked',
+      'show and hide expressions list, then scroll: All DesThree expressions still marked'
     ]
   },
   {

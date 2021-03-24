@@ -23,7 +23,9 @@ export default class Controller extends MVCPart {
         this.view.modifyAddExpressionDropdown()
         break
       case 'show-expressions-list':
+        this.graphChanged()
         this.model.applyHeaderStyle()
+        this.model.initExpressionsObserver()
         break
     }
   }
