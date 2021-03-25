@@ -141,9 +141,9 @@ export class SpotLight extends Light {
   // careful, target behaves weirdly
   static expectedArgs () {
     return [
-      { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'position', type: Type.VECTOR3 },
       { name: 'target', type: Type.VECTOR3, default: new Vector3Once(0, 0, 0) },
+      { name: 'intensity', type: Type.NUM, default: 1 },
       { name: 'color', type: Type.COLOR, default: new Color(255, 255, 255) },
       { name: 'angle', type: Type.NUM, default: Math.PI / 3 },
       { name: 'penumbra', type: Type.NUM, default: 0 },

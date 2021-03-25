@@ -11,6 +11,16 @@ The goal of this project is to unite the two:
 
 This project is unofficial, so it may break at any time due to changes in the Desmos code.
 
+## Installation
+
+1. Install the TamperMonkey browser extension
+2. Click on `DesThree.user.js` in [the latest Release](https://github.com/jared-hughes/DesThree/releases/latest), then hit <kbd>Install</kbd>.
+  - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
+3. Open https://www.desmos.com/calculator/znvwjvv8wg to test it! You should see 9 blue-ish boxes moving up and down.
+4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
+
+Please report any bugs here on the [Github issues tracker](https://github.com/jared-hughes/DesThree/issues/) or discuss on the [Unofficial Desmos Discord](https://discord.gg/vCBupKs9sB) in #programming.
+
 ## Development
 
 1. Clone the repository
@@ -33,15 +43,6 @@ Periodically, update test definitions based on Chrome's code coverage tool.
 
 To build once for production, use `npm run build` instead of `npm run dev`. The built script should be available in `dist/DesThree.user.js`, which can be pasted directly into TamperMonkey.
 
-## Installation
-
-1. Install the TamperMonkey browser extension
-2. Click on `DesThree.user.js` in [the latest Release](https://github.com/jared-hughes/DesThree/releases/latest), then hit <kbd>Install</kbd>.
-  - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
-3. Open https://www.desmos.com/calculator/znvwjvv8wg to test it! You should see 9 blue-ish boxes moving up and down.
-4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
-
-Please report any bugs here on the [Github issues tracker](https://github.com/jared-hughes/DesThree/issues/) or discuss on the [Unofficial Desmos Discord](https://discord.gg/vCBupKs9sB) at #programming.
 
 ## Usage
 
@@ -233,8 +234,7 @@ Go crazy, and have fun!
 
 ## Function Reference
 
-### Functions that return a Geometry
-
+### Functions that return a Geometry from numeric arguments
 
 #### [Icosahedron](https://threejs.org/docs/#api/en/geometries/IcosahedronGeometry), [Dodecahedron](https://threejs.org/docs/#api/en/geometries/DodecahedronGeometry), [Octahedron](https://threejs.org/docs/#api/en/geometries/OctahedronGeometry), [Tetrahedron](https://threejs.org/docs/#api/en/geometries/TetrahedronGeometry)
 
@@ -267,8 +267,8 @@ Property | Type | Default | Description
 --- | --- | --- | ---
 radius | number | |
 tube | number | | Radius of tube
-radialSegments | number | 64 | Greater = smoother
-tubularSegments | number | 8 | Greater = smoother
+radialSegments | number | 8 | Greater = smoother
+tubularSegments | number | 64 | Greater = smoother
 p | number | 2 | How many times the geometry winds around its axis of rotational symmetry
 q | number | 3 | How many times the geometry winds around a circle in the interior of the torus
 
@@ -302,13 +302,90 @@ height | number | |
 radialSegments | number | 16 | Greater = smoother
 heightSegments | number | 1 |
 
+#### [Disc](https://threejs.org/docs/#api/en/geometries/CircleGeometry)
+
+A filled circle (flat). Lowering the value of the `segments` argument would make a polygon.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+radius | number | |
+thetaStart | number | 0 |
+thetaLength | number | 2π | `Disc(1, 0, π)` is a semi-circle
+segments | number | 16 | `Disc(1, 0, 2π, 6)` is a hexagon
+
+#### [Ring](https://threejs.org/docs/#api/en/geometries/RingGeometry)
+
+Also known as an [annulus](https://en.wikipedia.org/wiki/Annulus_(mathematics))
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+innerRadius | number | |
+outerRadius | number | |
+thetaStart | number | 0 |
+thetaLength | number | 2π |
+thetaSegments | number | 16 |
+phiSegments | number | 1 |
+
+#### [Plane](https://threejs.org/docs/#api/en/geometries/PlaneGeometry)
+
+A rectangular plane of finite size.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+width | number | |
+height | number | |
+widthSegments | number | 1 |
+heightSegments | number | 1 |
+
+### Functions that return a Geometry using a list of points
+
+#### [Shape](https://threejs.org/docs/#api/en/geometries/ShapeGeometry)
+
+Connects 2D points into a flat shape, assuming their y coordinate is 0.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+points | list of [Vector2](#Vector2)s | |
+divisions | number | 1 | number of subdivisions to take of a spline passing through those points. If divisions = 1, then this a polygon between those points
+
+#### [Extrude](https://threejs.org/docs/#api/en/geometries/ExtrudeGeometry)
+
+Connects 2D points into a polygon and extrudes to a specified depth
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+points | list of [Vector2](#Vector2) | |
+divisions | number | 1 | number of subdivisions to take of a spline passing through those points. If divisions = 1, then this a polygon between those points
+depth | number | 10 | distance to extrude
+
+#### [Lathe](https://threejs.org/docs/#api/en/geometries/LatheGeometry)
+
+May also be known as "revolve."
+
+Resolves `(x,y)` points around the y-axis. The `x` values are automatically absolute-valued.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+points | list of [Vector2](#Vector2)s | |
+segments | number | 12 | greater = smoother
+phiStart | number | 0 |
+phiLength | number | 2π |
+
+#### [BufferGeometry](https://threejs.org/docs/#api/en/geometries/BufferGeometry)
+
+Creates a geometry directly from a list of faces. Most powerful method for creating a geometry.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+faces | list of [Face3](#Face3)s | |
+
 ### Functions that return a Material
 
 #### [BasicMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-color | Color | white |
+color | [Color](#functions-that-return-a-color) | white |
 
 Always colored as the given color, ignoring lighting.
 
@@ -324,7 +401,7 @@ No arguments. Colors each point in gray-scale based on its depth from the camera
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-color | Color | white |
+color | [Color](#functions-that-return-a-color) | white |
 
 This uses [Gourand shading](https://en.wikipedia.org/wiki/Gouraud_shading), which calculates shading for each vertex and does linear interpolation to find pixel shading. As such, it only tends to look best for low-poly objects like cubes/boxes.
 
@@ -332,42 +409,132 @@ This uses [Gourand shading](https://en.wikipedia.org/wiki/Gouraud_shading), whic
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-color | Color | white |
+color | [Color](#functions-that-return-a-color) | white |
 
 This uses [Phong shading](https://en.wikipedia.org/wiki/Phong_shading), which calculates shading on each pixel and additionally includes specular highlights (shiny surfaces). This tends to look better than MeshLambertMaterial for rounded objects like spheres but is slower.
 
-#### [ToonMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshPhongMaterial)
+#### [ToonMaterial](https://threejs.org/docs/index.html#api/en/materials/MeshToonMaterial)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-color | Color | white |
+color | [Color](#functions-that-return-a-color) | white |
 
 Looks like a cartoon drawing.
 
-### Functions that return an Object3D (something that can be shown)
+### Functions that return an Object3D
 
 #### [Mesh](https://threejs.org/docs/#api/en/objects/Mesh)
+
+Create an object from a geometry and material.
 
 Property | Type | Default | Description
 --- | --- | --- | ---
 geometry | Geometry | |
-material | Material | `NormalMaterial()` |
-position | Vector3 | (0,0,0) |
+material | [Material](#functions-that-return-a-material) | `NormalMaterial()` |
+position | [Vector3](#Vector3) | (0,0,0) |
 
-#### [PointLight](https://threejs.org/docs/index.html#api/en/lights/PointLight), [AmbientLight](https://threejs.org/docs/index.html#api/en/lights/AmbientLight)
+### [SquareGrid](https://threejs.org/docs/#api/en/helpers/GridHelper)
+
+Draw a square grid of the given size
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+size | number | | width, in world units
+divisions | number | 10 | greater = more grid lines
+center lines color | [Color](#functions-that-return-a-color) | white | only applies if divisions is even
+grid color | [Color](#functions-that-return-a-color) | gray |
+
+### [PolarGrid](https://threejs.org/docs/#api/en/helpers/PolarGridHelper)
+
+Draw a polar grid of the given size. The two colors alternate.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+radius | number | |
+radials | number | 16 | number of radial lines to draw
+circles | number | 6 | number of circles to draw
+divisions | number | 64 |
+color1 | [Color](#functions-that-return-a-color) | white |
+color2 | [Color](#functions-that-return-a-color) | white |
+
+### [ArrowHelper](https://threejs.org/docs/#api/en/helpers/ArrowHelper)
+
+Draw an arrow from tail with components given in vector.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+tail | [Vector3](#Vector3) | |
+vector | [Vector3](#Vector3) | |
+color | [Color](#functions-that-return-a-color) | white |
+headLengthScale | number | 0.2 | length of the arrow head, as a multiplier of the length of the vector
+headWidthScale | number | 0.4 | diameter of the arrow head, as a multiplier of the length of the arrow head
+
+### [AxesHelper](https://threejs.org/docs/#api/en/helpers/AxisHelper)
+
+Draws standard x, y, z axes.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+size | number | 1 |
+
+
+
+#### [PointLight](https://threejs.org/docs/index.html#api/en/lights/PointLight)
 
 Property | Type | Default | Description
 --- | --- | --- | ---
 intensity | number | 1 | Brightness
-color | Color | white |
-position | Vector3 | (0,0,0) | ignored for `AmbientLight`s
+color | [Color](#functions-that-return-a-color) | white |
+position | [Vector3](#Vector3) | (0,0,0) |
+
+#### [AmbientLight](https://threejs.org/docs/index.html#api/en/lights/AmbientLight)
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+intensity | number | 1 | Brightness
+color | [Color](#functions-that-return-a-color) | white |
+
+#### [HemisphereLight](https://threejs.org/docs/index.html#api/en/lights/HemisphereLight)
+
+Like AmbientLight, but the color changes from sky to ground
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+intensity | number | 1 | Brightness
+sky color | [Color](#functions-that-return-a-color) | white |
+ground color | [Color](#functions-that-return-a-color) | white |
+direction | [Vector3](#Vector3) | down = (0, -1, 0) | direction vector from sky to ground
+
+#### [DirectionalLight](https://threejs.org/docs/index.html#api/en/lights/DirectionalLight)
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+intensity | number | 1 | Brightness
+color | [Color](#functions-that-return-a-color) | white |
+direction | [Vector3](#Vector3) | down = (0, -1, 0) | direction of travel of light rays
+
+#### [SpotLight](https://threejs.org/docs/index.html#api/en/lights/SpotLight)
+
+Like a PointLight except it emits light only within a cone from its position pointing towards a target. The angle and other settings of the cone can be controlled
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+position | [Vector3](#Vector3) | |
+target | [Vector3](#Vector3) | (0,0,0) |
+intensity | number | 1 | Brightness
+color | [Color](#functions-that-return-a-color) | white |
+angle | number | 60° = π/3 |
+penumbra | number | 0 | Takes values from 0 to 1. Percent of attenuation due to the penumbra effect (outer lighter part of the shadow)
+distanceLimit | number | 0 | Maximum distance of light (dims linearly). Set to 0 to allow infinite distance
+decay | number | 2 | Set to 2 to follow inverse-square low
+
 
 #### Position
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-object | Object3D | | `Geometry` not accepted, only others in this "Functions that return an Object3D" section.
-position | Vector3 | | Vector by which to translate the object.
+object | [Object3D](#functions-that-return-an-object3d) | | Geometry not accepted
+position | [Vector3](#Vector3) | | Vector by which to translate the object.
 
 ### Functions that directly affect the scene
 
@@ -375,8 +542,8 @@ position | Vector3 | | Vector by which to translate the object.
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-position | Vector3 | | Position of the camera
-lookAt | Vector3 | (0,0,0) | Position of the point the camera looks at
+position | [Vector3](#Vector3) | | Position of the camera
+lookAt | [Vector3](#Vector3) | (0,0,0) | Position of the point the camera looks at
 fov | number | 75 | field of view (degrees, <kbd>planned:</kbd> Change treatment based on radian mode of calculator)
 near | number | 0.1 | near clipping plane of [camera frustum](https://en.wikipedia.org/wiki/Viewing_frustum)
 far | number | 1000 | far clipping plane of [camera frustum](https://en.wikipedia.org/wiki/Viewing_frustum)
@@ -385,9 +552,25 @@ far | number | 1000 | far clipping plane of [camera frustum](https://en.wikipedi
 
 Property | Type | Default | Description
 --- | --- | --- | ---
-object | Object3D | |
+object | [Object3D](#functions-that-return-an-object3d) | |
 
-### Miscellaneous
+#### [LinearFog](https://threejs.org/docs/#api/en/scenes/Fog)
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+near | number | |
+far | number | |
+color | [Color](#functions-that-return-a-color) | |
+
+#### [FogExp](https://threejs.org/docs/#api/en/scenes/FogExp2)
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+density | number | |
+color | [Color](#functions-that-return-a-color) | |
+
+
+### Functions that return a Color
 
 #### [RGB](https://threejs.org/docs/#api/en/math/Color)
 
@@ -396,3 +579,33 @@ Property | Type | Default | Description
 r | number | | Red component, 0 to 255
 g | number | | Green component, 0 to 255
 b | number | | Blue component, 0 to 255
+
+### Miscellaneous
+
+#### [Vector2](https://threejs.org/docs/#api/en/math/Vector2)
+
+Please note that Desmos points (declared in vanilla Desmos expressions) are not currently supported.
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+x | number | |
+y | number | |
+
+#### [Vector3](https://threejs.org/docs/#api/en/math/Vector3)
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+x | number | |
+y | number | |
+z | number | |
+
+
+#### Face
+
+A collection of three vertices, used as an argument for [BufferGeometry](#BufferGeometry). Be careful with the order of the three vertices (clockwise or counterclockwise) because that affects computed face normals, which affects lighting
+
+Property | Type | Default | Description
+--- | --- | --- | ---
+vertex a | [Vector3](#Vector3) | |
+vertex b | [Vector3](#Vector3) | |
+vertex c | [Vector3](#Vector3) | |
