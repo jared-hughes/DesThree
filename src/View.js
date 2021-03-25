@@ -182,7 +182,9 @@ export default class View extends MVCPart {
   markWrongVersion () {
     const element = this.getExprElement('@3-header')
     element.classList.remove('three-header-hidden')
-    const textElement = element.querySelector('.dcg-displayTextarea').firstChild
+    const outerElement = element.querySelector('.dcg-displayTextarea')
+    if (!outerElement) return
+    const textElement = outerElement.firstChild
     textElement.textContent = textElement.textContent.replace(
       /. Install[^\n]+/,
       `, but you have version ${VERSION} installed. ` +
