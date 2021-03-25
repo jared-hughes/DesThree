@@ -2,6 +2,16 @@
 
 The following guide describes changes in each version, including how to migrate graphs from earlier versions to later versions.
 
+### 0.5.3
+
+#### Bug fixes
+
+- Fix critical bug where typing was effectively impossible in graphs without DesThree expressions
+
+#### Migrating from 0.5.3
+
+No manual action is required.
+
 ### 0.5.2
 
 #### Enhancements
