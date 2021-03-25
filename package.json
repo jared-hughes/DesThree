@@ -1,7 +1,7 @@
 {
   "name": "DesThree",
   "description": "Desmos bindings for three.js",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "author": {
     "name": "Jared Hughes (fireflame241)"
   },

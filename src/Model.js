@@ -94,7 +94,9 @@ export default class Model extends MVCPart {
   }
 
   variableChanged (variable) {
+    /* DEV-START */
     console.log('variable changed', variable);
+    /* DEV-END */
     (this.dependents[variable] || [])
       .forEach(object => object.afterDepChanged(variable))
   }

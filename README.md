@@ -16,8 +16,8 @@ This project is unofficial, so it may break at any time due to changes in the De
 1. Install the TamperMonkey browser extension
 2. Click on `DesThree.user.js` in [the latest Release](https://github.com/jared-hughes/DesThree/releases/latest), then hit <kbd>Install</kbd>.
   - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
-3. Open https://www.desmos.com/calculator/znvwjvv8wg to test it! You should see 9 blue-ish boxes moving up and down.
-4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
+3. Open https://www.desmos.com/calculator/7kykpkx0ji to test it! You should see 9 blue-ish boxes moving up and down.
+4. Updates should be handled automatically. If you want to manually check for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
 Please report any bugs here on the [Github issues tracker](https://github.com/jared-hughes/DesThree/issues/) or discuss on the [Unofficial Desmos Discord](https://discord.gg/vCBupKs9sB) in #programming.
 
@@ -43,8 +43,11 @@ Periodically, update test definitions based on Chrome's code coverage tool.
 
 To build once for production, use `npm run build` instead of `npm run dev`. The built script should be available in `dist/DesThree.user.js`, which can be pasted directly into TamperMonkey.
 
+Other release details are available in [RELEASE.md](https://github.com/jared-hughes/DesThree/blob/master/docs/RELEASE.md)
 
 ## Usage
+
+[Changelog](https://github.com/jared-hughes/DesThree/blob/master/docs/CHANGELOG.md)
 
 DesThree will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
 
@@ -56,7 +59,7 @@ If you ever can't type something (e.g. `PointLight` automatically replaces `int`
 
 ### Example 1: Setting Camera Position
 
-The simplest expression you can write simply sets the position of the camera as `(x,y,z)=(1,2,5)` (https://www.desmos.com/calculator/41c8uy2xoo):
+The simplest expression you can write simply sets the position of the camera as `(x,y,z)=(1,2,5)` (https://www.desmos.com/calculator/kfrthd8hi2):
 
 ```js
 pos = (1,2,5)
@@ -79,7 +82,7 @@ Showing a cube may be more complicated than what you expect. The process goes as
   - Create a mesh, which combines the material and geometry into one object. Meshes default to being placed at `(0,0,0)`.
   - Show the mesh
 
-These steps can be done as follows (https://www.desmos.com/calculator/xa2jew0a9n):
+These steps can be done as follows (https://www.desmos.com/calculator/xrkjalnljc):
 
 ```js
 pos = (1,2,5)
@@ -90,7 +93,7 @@ mesh = Mesh(cubeGeometry, material)
 Show(mesh)
 ```
 
-Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/dw3c2jbczi):
+Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/0p2edbeurd):
 
 ```js
 PerspectiveCamera((1,2,5))
@@ -108,7 +111,7 @@ Show(Mesh(Box(1,1,1), NormalMaterial()))
 
 A great part about using Desmos is that we can use sliders and math in the expressions.
 
-To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/rdn9xsm0ai):
+To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/uxh0fw0dy7):
 
 ```js
 PerspectiveCamera((1,2,5))
@@ -122,7 +125,7 @@ meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
 
-Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/wsyb0l9fpy):
+Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/il25sbc8ye):
 ```js
 meshp = Mesh(cubeGeometry, material, (x_0, y_0, z_0))
 Show(meshp)
@@ -134,7 +137,7 @@ Show(meshp)
 
 To improve our future viewing, we will orbit the camera using equations of [spherical coordinates](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
 
-This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/ietknqkjsr):
+This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/sgmgyvb0py):
 ```js
 r_c = 5
 theta_c = 0
@@ -177,7 +180,7 @@ show(mesh)
 
 With these last few materials, you need to add lights if you want to see anything.
 
-Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/utlbo3ifrx):
+Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/cwzd79in67):
 
 ```js
 Show(Position(PointLight(1), (-7, 6, 2)))
@@ -185,9 +188,9 @@ Show(Position(PointLight(1), (-7, 6, 2)))
 
 (Alternatively, you can use `Show(PointLight(1, RGB(255,255,255), (-7,6,2)))`, which avoids the `Position` function).
 
-Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/b2i93iyk0l). Ugh, that's too dark.
+Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/ovbpdnqfwt). Ugh, that's too dark.
 
-One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/4c7ktmyhxe):
+One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/vhnymosjof):
 
 ```js
 Show(AmbientLight(0.3))
@@ -202,7 +205,7 @@ Show(AmbientLight(0.3))
 
 Anywhere a number can be accepted, a list of values can be accepted instead.
 
-Let's make a sphere with radius `1` and place it at x-coordinates `[-10, -5, 0, 5, 10]` (https://www.desmos.com/calculator/n51emwwmly):
+Let's make a sphere with radius `1` and place it at x-coordinates `[-10, -5, 0, 5, 10]` (https://www.desmos.com/calculator/7ivyalyjvd):
 
 ```js
 geometry = Sphere(1)
@@ -211,7 +214,7 @@ meshp = Position(mesh, ([-10,-5,...,10], 0, 0))
 Show(meshp)
 ```
 
-Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/fkta2c4gzj):
+Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/zc3lhqmiei):
 
 ```js
 L_x = [-10,-5,...,10]
@@ -220,7 +223,7 @@ meshp = Position(mesh, L_x, (0.05*L_x^2, 0))
 Show(meshp)
 ```
 
-You can even make a list of geometries (https://www.desmos.com/calculator/sbk9q2p8ft)
+You can even make a list of geometries (https://www.desmos.com/calculator/hgjhzei5hi)
 
 ```js
 L_x = [-12.5,-7.5,...,12.5]
