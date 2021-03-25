@@ -17,7 +17,7 @@ This project is unofficial, so it may break at any time due to changes in the De
 2. Click on `DesThree.user.js` in [the latest Release](https://github.com/jared-hughes/DesThree/releases/latest), then hit <kbd>Install</kbd>.
   - ⚠️ Be sure you trust myself and the source code. Malicious userscripts can make unwanted access to your data (this one does not).
 3. Open https://www.desmos.com/calculator/7kykpkx0ji to test it! You should see 9 blue-ish boxes moving up and down.
-4. Updates should be handled automatically. If you want to check early for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
+4. Updates should be handled automatically. If you want to manually check for updates, click <kbd>Check for userscript updates</kbd> on the Tampermonkey extension icon.
 
 Please report any bugs here on the [Github issues tracker](https://github.com/jared-hughes/DesThree/issues/) or discuss on the [Unofficial Desmos Discord](https://discord.gg/vCBupKs9sB) in #programming.
 
@@ -43,8 +43,11 @@ Periodically, update test definitions based on Chrome's code coverage tool.
 
 To build once for production, use `npm run build` instead of `npm run dev`. The built script should be available in `dist/DesThree.user.js`, which can be pasted directly into TamperMonkey.
 
+Other release details are available in [RELEASE.md](https://github.com/jared-hughes/DesThree/blob/master/docs/RELEASE.md)
 
 ## Usage
+
+[Changelog](https://github.com/jared-hughes/DesThree/blob/master/docs/CHANGELOG.md)
 
 DesThree will automatically load in *every* graph you load with the userscript enabled, and at present, it completely covers the normal 2D graph.
 
