@@ -59,7 +59,7 @@ If you ever can't type something (e.g. `PointLight` automatically replaces `int`
 
 ### Example 1: Setting Camera Position
 
-The simplest expression you can write simply sets the position of the camera as `(x,y,z)=(1,2,5)` (https://www.desmos.com/calculator/kfrthd8hi2):
+The simplest expression you can write simply sets the position of the camera as `(x,y,z)=(1,2,5)` (https://www.desmos.com/calculator/i8min5dnfo):
 
 ```js
 pos = (1,2,5)
@@ -82,7 +82,7 @@ Showing a cube may be more complicated than what you expect. The process goes as
   - Create a mesh, which combines the material and geometry into one object. Meshes default to being placed at `(0,0,0)`.
   - Show the mesh
 
-These steps can be done as follows (https://www.desmos.com/calculator/xrkjalnljc):
+These steps can be done as follows (https://www.desmos.com/calculator/6t1l6vhfiy):
 
 ```js
 pos = (1,2,5)
@@ -93,7 +93,7 @@ mesh = Mesh(cubeGeometry, material)
 Show(mesh)
 ```
 
-Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/0p2edbeurd):
+Alternatively, you can place them all in one expression (https://www.desmos.com/calculator/0cjxlfabx5):
 
 ```js
 PerspectiveCamera((1,2,5))
@@ -111,7 +111,7 @@ Show(Mesh(Box(1,1,1), NormalMaterial()))
 
 A great part about using Desmos is that we can use sliders and math in the expressions.
 
-To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/uxh0fw0dy7):
+To see an example, we will move the box around in 3D. We use the `Position` function to create a new mesh that corresponds to the mesh translated (https://www.desmos.com/calculator/pygwi1lnpi):
 
 ```js
 PerspectiveCamera((1,2,5))
@@ -125,7 +125,7 @@ meshp = Position(mesh, (x_0, y_0, z_0))
 Show(meshp)
 ```
 
-Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/il25sbc8ye):
+Alternatively, we can specify position directly in the `Mesh` function (https://www.desmos.com/calculator/ir00nvxzxs):
 ```js
 meshp = Mesh(cubeGeometry, material, (x_0, y_0, z_0))
 Show(meshp)
@@ -137,7 +137,7 @@ Show(meshp)
 
 To improve our future viewing, we will orbit the camera using equations of [spherical coordinates](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
 
-This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/sgmgyvb0py):
+This simply involves a few more equations instead of placing the camera at a fixed position (https://www.desmos.com/calculator/3cy48fxofl):
 ```js
 r_c = 5
 theta_c = 0
@@ -180,7 +180,7 @@ show(mesh)
 
 With these last few materials, you need to add lights if you want to see anything.
 
-Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/cwzd79in67):
+Let's add a single point light at `(-7, 6, 2)` with an intensity (brightness) of 1 (https://www.desmos.com/calculator/oznclpvvns):
 
 ```js
 Show(Position(PointLight(1), (-7, 6, 2)))
@@ -188,9 +188,9 @@ Show(Position(PointLight(1), (-7, 6, 2)))
 
 (Alternatively, you can use `Show(PointLight(1, RGB(255,255,255), (-7,6,2)))`, which avoids the `Position` function).
 
-Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/ovbpdnqfwt). Ugh, that's too dark.
+Looks good right? Yes, but try rotating to the back side (https://www.desmos.com/calculator/imbwxpqh1a). Ugh, that's too dark.
 
-One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/vhnymosjof):
+One solution would be to add more point lights so nothing can be dark, but that would get confusing and not look good. Instead, let's add an ambient light, which adds the intensity to every face (https://www.desmos.com/calculator/lsnje9ira5):
 
 ```js
 Show(AmbientLight(0.3))
@@ -205,7 +205,7 @@ Show(AmbientLight(0.3))
 
 Anywhere a number can be accepted, a list of values can be accepted instead.
 
-Let's make a sphere with radius `1` and place it at x-coordinates `[-10, -5, 0, 5, 10]` (https://www.desmos.com/calculator/7ivyalyjvd):
+Let's make a sphere with radius `1` and place it at x-coordinates `[-10, -5, 0, 5, 10]` (https://www.desmos.com/calculator/j4yf8gqofe):
 
 ```js
 geometry = Sphere(1)
@@ -214,7 +214,7 @@ meshp = Position(mesh, ([-10,-5,...,10], 0, 0))
 Show(meshp)
 ```
 
-Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/zc3lhqmiei):
+Just like in vanilla Desmos, if several lists are passed to a function, a list is produced from applying the function to corresponding terms with the output length being the minimum of the lengths of the input lists (https://www.desmos.com/calculator/ebdz3ges1f):
 
 ```js
 L_x = [-10,-5,...,10]
@@ -223,7 +223,7 @@ meshp = Position(mesh, L_x, (0.05*L_x^2, 0))
 Show(meshp)
 ```
 
-You can even make a list of geometries (https://www.desmos.com/calculator/hgjhzei5hi)
+You can even make a list of geometries with different parameters (https://www.desmos.com/calculator/zdy9szxjzy)
 
 ```js
 L_x = [-12.5,-7.5,...,12.5]
