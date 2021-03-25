@@ -117,7 +117,8 @@ export default class Controller extends MVCPart {
         }
       }
     })
-    if (!headerFound) {
+    const hasDesThree = Object.values(nextDefinitions).length > 0
+    if (!headerFound && hasDesThree) {
       this.model.initDefaultHeader()
     }
 

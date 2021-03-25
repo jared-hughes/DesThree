@@ -13,7 +13,9 @@ const _expects = [
   {
     name: 'Ignore graphs without DesThree expressions',
     expects: [
-      'startup: Extension does not place black canvas'
+      'startup: Extension does not place black canvas',
+      'add new expression: Focus enters the new expression',
+      'type in that new expression: Focus is not lost'
     ]
   },
   {
