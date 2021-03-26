@@ -3,7 +3,7 @@
  * It cannot be renamed or moved.
  */
 
-import dcgview from 'dcgview'
+import DCGView from 'DCGView'
 
 export function jsx (el, props) {
   /**
@@ -11,21 +11,24 @@ export function jsx (el, props) {
    *   jsx(el, {...props, children: child})
    * or jsxs(el, {...props, children: [child1, child2, ...]})
    * but we want
-   *   dcgview.createElement(el, props, ...children)
+   *   DCGView.createElement(el, props, ...children)
    * see change info at https://github.com/reactjs/rfcs/blob/createlement-rfc/text/0000-create-element-changes.md
    */
   let children = props.children
   if (!Array.isArray(children)) {
+    // occurs for jsx but not jsxs
     children = [children]
   }
+  // "Text should be a const or a getter:"
+  children = children.map(e => typeof e === 'string' ? DCGView.const(e) : e)
   delete props.children
   for (const [k, v] of Object.entries(props)) {
-    // dcgview.createElement also expects 0-argument functions
+    // DCGView.createElement also expects 0-argument functions
     if (typeof v !== 'function') {
-      props[k] = dcgview.const(v)
+      props[k] = DCGView.const(v)
     }
   }
-  return dcgview.createElement(el, props, ...children)
+  return DCGView.createElement(el, props, ...children)
 }
 
 // jsxs is for a list of children like <Component><A/><B/></Component>

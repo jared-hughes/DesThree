@@ -20,7 +20,7 @@ const cfg = merge(webpackConfig, {
   },
   // https://webpack.js.org/configuration/devtool claims this is the slowest option
   // no reason to change for now though
-  devtool: false, // 'eval-source-map',
+  devtool: 'eval-source-map',
   watch: true,
   watchOptions: {
     ignored: /node_modules/

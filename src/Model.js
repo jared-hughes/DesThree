@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import MVCPart from 'MVCPart'
+import { initGraphSettings } from 'model/graphSettings'
 /* global VERSION */
 
 export default class Model extends MVCPart {
@@ -11,7 +12,9 @@ export default class Model extends MVCPart {
     this.dependents = {}
     this.scene = new THREE.Scene()
     this.exprs = new Set()
-    this.config = {}
+    // reset on every graph load
+    // TODO: persist save state
+    this.graphSettings = initGraphSettings()
   }
 
   init () {
@@ -149,5 +152,20 @@ export default class Model extends MVCPart {
     this.calc.controller._toplevelInsertItemAt(0, e, true, undefined)
     this.calc.controller._closeAddExpression()
     // this.view.markCorrectVersion()
+  }
+
+  setProperty (key, value) {
+    this.graphSettings[key] = value
+    switch (key) {
+      case 'fogMode':
+        // switch (value) {
+        //   case FogModes.NONE:
+        //     // delete this.graphSettings.near
+        // }
+        this.view.applyFog(this.graphSettings)
+        break
+      default:
+        throw new Error(`Unexpected property: ${key}`)
+    }
   }
 }

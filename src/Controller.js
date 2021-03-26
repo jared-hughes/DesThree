@@ -27,6 +27,17 @@ export default class Controller extends MVCPart {
         this.model.applyHeaderStyle()
         this.model.initExpressionsObserver()
         break
+      case 'toggle-graph-settings':
+        this.view.mountSettings()
+        break
+      case '@3-set-graph-settings':
+        for (const k in e) {
+          if (k !== 'type') {
+            this.model.setProperty(k, e[k])
+          }
+        }
+        this.view.updateSettingsView()
+        break
     }
   }
 
@@ -145,5 +156,13 @@ export default class Controller extends MVCPart {
   applyGraphpaperBounds () {
     const bounds = this.calc.graphpaperBounds.pixelCoordinates
     this.model.setBounds(bounds)
+  }
+
+  getGraphSettings () {
+    return this.model.graphSettings
+  }
+
+  dispatch (e) {
+    this.calc.controller.dispatch(e)
   }
 }

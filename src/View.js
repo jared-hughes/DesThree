@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import functionNames, { maxFuncNameLength } from './functions/functionNames'
 import MVCPart from 'MVCPart'
-import MyPillbox from 'components/MyPillbox'
-import dcgview from 'dcgview'
+import SettingsInterior from 'components/SettingsInterior'
+import DCGView from 'DCGView'
 /* global VERSION */
 
 export default class View extends MVCPart {
@@ -14,17 +14,24 @@ export default class View extends MVCPart {
   init () {
     this.injectStyle()
     this.initRenderer()
-    this.testJSX()
   }
 
-  testJSX () {
-    dcgview.mountToNode(
-      MyPillbox,
-      document.querySelector('.dcg-expressionlist'),
+  mountSettings () {
+    const rootNode = document.querySelector('.dcg-popover-interior')
+    if (rootNode === null) {
+      return
+    }
+    this.settingsView = DCGView.mountToNode(
+      SettingsInterior,
+      rootNode,
       {
-        controller: dcgview.const(this.calc3.calc.controller)
+        controller: DCGView.const(this.controller)
       }
     )
+  }
+
+  updateSettingsView () {
+    this.settingsView && this.settingsView.update()
   }
 
   modifyAddExpressionDropdown () {
@@ -207,5 +214,9 @@ export default class View extends MVCPart {
     const linkElement = textElement.nextElementSibling
     linkElement.innerHTML = link
     linkElement.href = link
+  }
+
+  applyFog ({ fogMode, near, far, density }) {
+    console.log(fogMode, near, far, density)
   }
 }
