@@ -16,8 +16,11 @@ const webpackConfig = {
   },
   module: {
     rules: [
-      // js uses the default loader
-      // other loaders would go here, but there is no need for any
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: ['babel-loader']
+      }
     ]
   },
   plugins: [

@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import functionNames, { maxFuncNameLength } from './functions/functionNames'
 import MVCPart from 'MVCPart'
+import MyPillbox from 'components/MyPillbox'
+import dcgview from 'dcgview'
 /* global VERSION */
 
 export default class View extends MVCPart {
@@ -12,6 +14,17 @@ export default class View extends MVCPart {
   init () {
     this.injectStyle()
     this.initRenderer()
+    this.testJSX()
+  }
+
+  testJSX () {
+    dcgview.mountToNode(
+      MyPillbox,
+      document.querySelector('.dcg-expressionlist'),
+      {
+        controller: dcgview.const(this.calc3.calc.controller)
+      }
+    )
   }
 
   modifyAddExpressionDropdown () {
