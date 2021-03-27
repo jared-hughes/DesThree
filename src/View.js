@@ -9,6 +9,7 @@ export default class View extends MVCPart {
   constructor (calc3) {
     super(calc3)
     this.renderer = null
+    this.fogThreeObject = null
   }
 
   init () {
@@ -214,9 +215,5 @@ export default class View extends MVCPart {
     const linkElement = textElement.nextElementSibling
     linkElement.innerHTML = link
     linkElement.href = link
-  }
-
-  applyFog ({ fogMode, near, far, density }) {
-    console.log(fogMode, near, far, density)
   }
 }

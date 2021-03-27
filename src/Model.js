@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import MVCPart from 'MVCPart'
-import { initGraphSettings } from 'model/graphSettings'
+import { initGraphSettings, FogModes } from 'model/graphSettings'
 /* global VERSION */
 
 export default class Model extends MVCPart {
@@ -15,6 +15,7 @@ export default class Model extends MVCPart {
     // reset on every graph load
     // TODO: persist save state
     this.graphSettings = initGraphSettings()
+    this.fogThreeObject = null
   }
 
   init () {
@@ -154,18 +155,41 @@ export default class Model extends MVCPart {
     // this.view.markCorrectVersion()
   }
 
-  setProperty (key, value) {
+  applyGraphSettingsJSON (json) {
+    if (json !== this.graphSettingsJSON) {
+      const obj = JSON.parse(json)
+      this.graphSettings = obj
+      this.applyFog(this.graphSettings)
+    }
+  }
+
+  setGraphSettingsProperty (key, value) {
     this.graphSettings[key] = value
+    this.graphSettingsJSON = JSON.stringify(this.graphSettings)
+    this.calc.controller.dispatch({
+      type: 'set-graph-settings',
+      xAxisLabel: this.graphSettingsJSON
+    })
     switch (key) {
       case 'fogMode':
-        // switch (value) {
-        //   case FogModes.NONE:
-        //     // delete this.graphSettings.near
-        // }
-        this.view.applyFog(this.graphSettings)
+      case 'fogNearLatex':
+      case 'fogFarLatex':
+      case 'fogColorLatex':
+        this.applyFog(this.graphSettings)
         break
       default:
         throw new Error(`Unexpected property: ${key}`)
     }
+  }
+
+  applyFog ({ fogMode, near, far, density }) {
+    if (fogMode === FogModes.NONE) {
+      this.scene.fog = null
+    } else if (fogMode === FogModes.LINEAR) {
+      this.scene.fog = new THREE.Fog(new THREE.Color(0, 0, 0), 2, 3)
+    } else if (fogMode === FogModes.EXP) {
+      this.scene.fog = new THREE.FogExp2(new THREE.Color(0, 0, 0), 0.01)
+    }
+    this.rerender()
   }
 }

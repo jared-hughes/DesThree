@@ -12,6 +12,7 @@ export default class Controller extends MVCPart {
     this.initDispatchListener()
     this.observeGraph()
     this.observeGraphpaperBounds()
+    this.freshGraph()
   }
 
   handleDispatchedEvent (e) {
@@ -30,14 +31,18 @@ export default class Controller extends MVCPart {
       case 'toggle-graph-settings':
         this.view.mountSettings()
         break
-      case '@3-set-graph-settings':
-        for (const k in e) {
-          if (k !== 'type') {
-            this.model.setProperty(k, e[k])
-          }
-        }
-        this.view.updateSettingsView()
+      case 'set-state':
+        this.freshGraph()
         break
+    }
+  }
+
+  setGraphSettings (e) {
+    for (const k in e) {
+      this.model.setGraphSettingsProperty(k, e[k])
+    }
+    if ('fogMode' in e) {
+      this.view.updateSettingsView()
     }
   }
 
@@ -66,6 +71,13 @@ export default class Controller extends MVCPart {
     this.model.applyHeaderData(expr, {
       version: graphVersion
     })
+  }
+
+  freshGraph () {
+    this.model.applyGraphSettingsJSON(
+      this.calc.controller.getGraphSettings().xAxisLabel
+    )
+    this.graphChanged()
   }
 
   graphChanged () {
