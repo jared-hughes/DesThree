@@ -10,6 +10,7 @@ export default class View extends MVCPart {
     super(calc3)
     this.renderer = null
     this.fogThreeObject = null
+    this.exprs = new Set()
   }
 
   init () {
@@ -71,17 +72,17 @@ export default class View extends MVCPart {
       .querySelector(`.dcg-expressionitem[expr-id="${id}"]`)
   }
 
-  updateThreeExpr (outerDomNode, id, error) {
+  updateThreeExpr (outerDomNode, id) {
     if (outerDomNode === null) {
       // occurs when the node is inside a collapsed folder
       return
     }
     outerDomNode.classList.add('three-expr')
-    if (error) {
-      outerDomNode.classList.add('three-error')
-    } else {
-      outerDomNode.classList.remove('three-error')
-    }
+    // if (error) {
+    //   outerDomNode.classList.add('three-error')
+    // } else {
+    //   outerDomNode.classList.remove('three-error')
+    // }
     const mqField = outerDomNode?.querySelector('.dcg-mq-editable-field')
     if (mqField) {
       const opt = mqField._mqMathFieldInstance.__controller.root.cursor.options
@@ -104,8 +105,8 @@ export default class View extends MVCPart {
     }
   }
 
-  addThreeExpr (id, error) {
-    this.updateThreeExpr(this.getExprElement(id), id, error)
+  addThreeExpr (id) {
+    this.updateThreeExpr(this.getExprElement(id), id)
   }
 
   removeThreeExpr (id) {
@@ -177,7 +178,7 @@ export default class View extends MVCPart {
     console.groupCollapsed('rerender', window.performance.now())
     console.log(this.model.scene)
     console.log(this.model.camera)
-    console.log(this.model.values)
+    console.log(this.controller.evaluator.values)
     console.groupEnd()
     /* DEV-END */
     this.renderer.render(this.model.scene, this.model.camera)
@@ -215,5 +216,12 @@ export default class View extends MVCPart {
     const linkElement = textElement.nextElementSibling
     linkElement.innerHTML = link
     linkElement.href = link
+  }
+
+  applyHasDesThree (hasDesThree) {
+    if (!hasDesThree) {
+      this.calc.removeExpression({ id: '@3-header' })
+    }
+    this.view.setCanvasVisible(hasDesThree)
   }
 }

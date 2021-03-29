@@ -7,9 +7,6 @@ export default class Model extends MVCPart {
   constructor (calc3) {
     super(calc3)
     this.camera = null
-    this.definitions = {}
-    this.values = {}
-    this.dependents = {}
     this.scene = new THREE.Scene()
     this.exprs = new Set()
     // reset on every graph load
@@ -45,7 +42,7 @@ export default class Model extends MVCPart {
           }
           const id = addedNode.attributes['expr-id']?.value
           if (addedNode.classList.contains('dcg-mathitem') && this.exprs.has(id)) {
-            this.view.updateThreeExpr(addedNode, id, this.errors[id])
+            this.view.updateThreeExpr(addedNode, id)
           }
         }
       }
@@ -53,56 +50,16 @@ export default class Model extends MVCPart {
     observer.observe(targetNode, config)
   }
 
-  setDefinitions (nextDefinitions) {
-    this.definitions = nextDefinitions
-    const hasDesThree = Object.keys(nextDefinitions).length > 0
-    if (!hasDesThree) {
-      this.calc.removeExpression({ id: '@3-header' })
-    }
-    this.view.setCanvasVisible(hasDesThree)
-  }
-
-  setThreeExprs (exprs, errors) {
+  setThreeExprs (exprs) {
     for (const id of this.exprs) {
       if (!exprs.has(id)) {
         this.view.removeThreeExpr(id)
       }
     }
     for (const id of exprs) {
-      this.view.addThreeExpr(id, errors[id])
+      this.view.addThreeExpr(id)
     }
     this.exprs = exprs
-    this.errors = errors
-  }
-
-  deleteVariable (variable) {
-    if (variable in this.values) {
-      this.values[variable].dispose()
-      delete this.values[variable]
-    }
-  }
-
-  changeVariable (variable, valueFunc) {
-    // pass in function instead of value itself to defer construction
-    // until after deleting the variable
-    this.deleteVariable(variable)
-    if (valueFunc !== null) {
-      const value = valueFunc()
-      if (value.error) {
-        console.warn(value.error)
-      } else {
-        this.values[variable] = value
-      }
-    }
-    this.variableChanged(variable)
-  }
-
-  variableChanged (variable) {
-    /* DEV-START */
-    console.log('variable changed', variable);
-    /* DEV-END */
-    (this.dependents[variable] || [])
-      .forEach(object => object.afterDepChanged(variable))
   }
 
   setBounds (bounds) {

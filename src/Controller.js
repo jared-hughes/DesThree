@@ -1,11 +1,10 @@
-import Parser from './controller/Parser'
-import { FunctionApplicationList } from './functions/functionSupers'
 import MVCPart from 'MVCPart'
+import Evaluator from 'controller/Evaluator'
 
 export default class Controller extends MVCPart {
   constructor (calc3) {
     super(calc3)
-    this.parser = new Parser()
+    this.evaluator = new Evaluator(calc3)
   }
 
   init () {
@@ -50,12 +49,6 @@ export default class Controller extends MVCPart {
     this.calc.controller.dispatcher.register(e => this.handleDispatchedEvent(e))
   }
 
-  generateObject (def) {
-    const object = new FunctionApplicationList(this.calc3, def.func, def.args)
-    object.variable = def.variable
-    return { object: object }
-  }
-
   observeGraph () {
     this.calc.observeEvent('change', () => this.graphChanged())
     this.graphChanged()
@@ -82,14 +75,12 @@ export default class Controller extends MVCPart {
 
   graphChanged () {
     // TODO: pass expression id into inner argument variable generator
-    const threeExprs = new Set()
-    const errorsByExprId = {}
-    const nextDefinitions = {} // {[expression id]: rawLatex}
-    const nextExprVariables = {} // {[expression id]: [list of affected variables]}
-    const nextVariables = new Set()
     this.model.clearHeader()
     let headerFound = false
-    // TODO: can this just be this.calc.getExpressions()?
+    let hasDesThree = false
+    const threeExprs = new Set()
+
+    this.evaluator.startUpdateBatch()
     this.calc.getState().expressions.list.forEach(expr => {
       if (expr.id === '@3-header') {
         headerFound = true
@@ -97,66 +88,20 @@ export default class Controller extends MVCPart {
       }
       const rawLatex = expr.latex || ''
       if (expr.type === 'expression' && rawLatex.startsWith('@3')) {
-        nextDefinitions[expr.id] = rawLatex
+        hasDesThree = true
         threeExprs.add(expr.id)
-        if (this.model.definitions[expr.id] === rawLatex) {
-          // definition remains same; no change
-          nextExprVariables[expr.id] = this.model.exprVariables[expr.id]
-          this.model.exprVariables[expr.id].forEach(v => nextVariables.add(v))
-        } else {
-          // definition changed to a new definition
-          const latex = rawLatex
-            .slice(2) // slice off the '@3'
-            .replaceAll(/\\left|\\right/g, '')
-            .replaceAll(/\\ /g, ' ')
-          const { error, defs } = this.parser.parseDesThree(latex, 0)
-          nextExprVariables[expr.id] = []
-          if (error) {
-            // TODO: better error handling (GH#7). This is repeated 3+ times
-            console.warn(error)
-            errorsByExprId[expr.id] = error
-          } else {
-            defs.forEach(newDef => {
-              if (newDef.func === null || newDef.func === undefined) return
-              const variable = newDef.variable
-              if (nextVariables.has(variable)) {
-                const error = `Duplicate variable: ${variable}`
-                console.warn(error)
-                errorsByExprId[expr.id] = error
-              } else {
-                nextVariables.add(variable)
-                nextExprVariables[expr.id].push(variable)
-                // TODO: know this is a fresh variable?
-                const { object, error } = this.generateObject(newDef)
-                if (error) {
-                  console.warn(error)
-                  errorsByExprId[expr.id] = error
-                } else {
-                  this.model.changeVariable(variable, () => object)
-                }
-              }
-            })
-          }
-        }
+        this.evaluator.addExpressionMaybeDuplicate(rawLatex, expr.id)
       }
     })
-    const hasDesThree = Object.values(nextDefinitions).length > 0
     if (!headerFound && hasDesThree) {
       this.model.initDefaultHeader()
     }
+    this.evaluator.endUpdateBatch()
 
     // TODO: check for cyclic definitions
     // TODO: check for two+ cameras defined
-    this.model.setThreeExprs(threeExprs, errorsByExprId)
-
-    for (const variable in this.model.values) {
-      if (!nextVariables.has(variable)) {
-        // this variable was deleted from use
-        this.model.changeVariable(variable, null)
-      }
-    }
-    this.model.setDefinitions(nextDefinitions)
-    this.model.exprVariables = nextExprVariables
+    this.model.setThreeExprs(threeExprs)
+    this.view.applyHasDesThree(hasDesThree)
   }
 
   observeGraphpaperBounds () {

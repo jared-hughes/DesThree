@@ -59,11 +59,12 @@ export class FunctionApplicationList {
           )
         } else {
           this.dependencies[expr] = expectedArg.name
-          if (this.calc3.model.values[expr]) {
+          if (this.calc3.controller.evaluator.values[expr]) {
             this.afterDepChanged(expr)
           }
-          this.calc3.model.dependents[expr] = this.calc3.model.dependents[expr] || new Set()
-          this.calc3.model.dependents[expr].add(this)
+          this.calc3.controller.evaluator.dependents[expr] =
+            this.calc3.controller.evaluator.dependents[expr] || new Set()
+          this.calc3.controller.evaluator.dependents[expr].add(this)
         }
       } else if (i >= args.length && expectedArg.default !== undefined) {
         this.changeArg(expectedArg.name, expectedArg.default)
@@ -76,7 +77,7 @@ export class FunctionApplicationList {
 
   afterDepChanged (variable) {
     const argName = this.dependencies[variable]
-    this.changeArg(argName, this.calc3.model.values[variable])
+    this.changeArg(argName, this.calc3.controller.evaluator.values[variable])
   }
 
   static index (v, i) {
@@ -172,7 +173,7 @@ export class FunctionApplicationList {
     /* DEV-END */
     const wasDefined = this.isDefined
     this.isDefined = defined
-    this.calc3.model.variableChanged(this.variable)
+    this.calc3.controller.evaluator.variableChanged(this.variable)
     // defined: about to be visible, so have to rerender
     // wasDefined && !defined: was defined but now is not
     if ((defined || wasDefined) && this.Func.affectsScene) {
