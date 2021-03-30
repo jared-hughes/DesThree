@@ -132,6 +132,7 @@ export default class Model extends MVCPart {
       case 'fogNearLatex':
       case 'fogFarLatex':
       case 'fogColorLatex':
+      case 'fogDensityLatex':
         this.applyFog(this.graphSettings)
         break
       default:
@@ -151,7 +152,7 @@ export default class Model extends MVCPart {
       )
     } else if (fogMode === FogModes.EXP) {
       this.controller.evaluator.addNewExpression(
-        `__fog=FogExp2(${fogDensityLatex}, ${fogColorLatex}${colorAppendString})`,
+        `__fog=FogExp2(${fogDensityLatex}${colorAppendString})`,
         '__fog',
         true
       )

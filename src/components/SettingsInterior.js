@@ -2,6 +2,7 @@ import DCGView from 'DCGView'
 import { Checkbox, If } from './desmosComponents'
 import { FogModes } from 'model/graphSettings'
 import SmallMathQuillInput from './SmallMathQuillInput'
+import SegmentedControl from './SegmentedControl'
 
 export default class SettingsInterior extends DCGView.Class {
   init () {
@@ -26,18 +27,49 @@ export default class SettingsInterior extends DCGView.Class {
           predicate={() => this.getFogMode() !== FogModes.NONE}
         >{() => (
           <div>
-            Near:
-            <SmallMathQuillInput
-              latex={() => this.getSettingsLatex('fogNearLatex')}
-              onUserChangedLatex={latex => this.handleSetLatex('fogNearLatex', latex)}
-              ariaLabel='fogNear'
+            <SegmentedControl
+              names={['Linear', 'Exp2']}
+              selectedIndex={() => this.getFogMode() === FogModes.LINEAR ? 0 : 1}
+              setSelectedIndex={index => this.setFogIndex(index)}
             />
-            Far:
-            <SmallMathQuillInput
-              latex={() => this.getSettingsLatex('fogFarLatex')}
-              onUserChangedLatex={latex => this.handleSetLatex('fogFarLatex', latex)}
-              ariaLabel='fogFar'
-            />
+            <If
+              predicate={() => this.getFogMode() === FogModes.LINEAR}
+            >
+              {
+                () => (
+                  <div>
+                    Near:
+                    <SmallMathQuillInput
+                      latex={() => this.getSettingsLatex('fogNearLatex')}
+                      onUserChangedLatex={latex => this.handleSetLatex('fogNearLatex', latex)}
+                      ariaLabel='fogNear'
+                    />
+                    Far:
+                    <SmallMathQuillInput
+                      latex={() => this.getSettingsLatex('fogFarLatex')}
+                      onUserChangedLatex={latex => this.handleSetLatex('fogFarLatex', latex)}
+                      ariaLabel='fogFar'
+                    />
+                  </div>
+                )
+              }
+            </If>
+            <If
+              predicate={() => this.getFogMode() === FogModes.EXP}
+            >
+              {
+                () => (
+                  <div>
+                    Density:
+                    <SmallMathQuillInput
+                      latex={() => this.getSettingsLatex('fogDensityLatex')}
+                      onUserChangedLatex={latex => this.handleSetLatex('fogDensityLatex', latex)}
+                      ariaLabel='fogDensity'
+                    />
+                  </div>
+                )
+              }
+            </If>
             Color:
             <SmallMathQuillInput
               latex={() => this.getSettingsLatex('fogColorLatex')}
@@ -58,6 +90,12 @@ export default class SettingsInterior extends DCGView.Class {
   toggleFog () {
     this.controller.setGraphSettings({
       fogMode: this.getFogMode() === FogModes.NONE ? FogModes.LINEAR : FogModes.NONE
+    })
+  }
+
+  setFogIndex (index) {
+    this.controller.setGraphSettings({
+      fogMode: [FogModes.LINEAR, FogModes.EXP][index]
     })
   }
 
