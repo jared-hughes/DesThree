@@ -1,6 +1,7 @@
 import functionNames from 'functions/functionNames'
 import { Type } from 'functions/functionSupers'
 import { LinearFog, FogExp2 } from 'functions/fogs'
+import { PerspectiveCamera } from 'functions/cameras'
 
 export default class Parser {
   constructor () {
@@ -143,7 +144,8 @@ export default class Parser {
         ? {
             ...functionNames,
             LinearFog,
-            FogExp2
+            FogExp2,
+            PerspectiveCamera
           }
         : functionNames
     if (fullFunctionNames[funcName] === undefined) {

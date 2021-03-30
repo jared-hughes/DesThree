@@ -135,6 +135,13 @@ export default class Model extends MVCPart {
       case 'fogDensityLatex':
         this.applyFog(this.graphSettings)
         break
+      case 'camPositionLatex':
+      case 'camLookAtLatex':
+      case 'camFOVLatex':
+      case 'camNearLatex':
+      case 'camFarLatex':
+        this.applyCamera(this.graphSettings)
+        break
       default:
         throw new Error(`Unexpected property: ${key}`)
     }
@@ -158,5 +165,16 @@ export default class Model extends MVCPart {
       )
     }
     this.rerender()
+  }
+
+  applyCamera ({ camPositionLatex, camLookAtLatex, camFOVLatex, camNearLatex, camFarLatex }) {
+    const args = [
+      camPositionLatex, camLookAtLatex, camFOVLatex, camNearLatex, camFarLatex
+    ]
+    this.controller.evaluator.addNewExpression(
+      `__cam=PerspectiveCamera(${args.join(',')})`,
+      '__cam',
+      true
+    )
   }
 }

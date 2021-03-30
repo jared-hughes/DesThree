@@ -13,7 +13,6 @@ import { Mesh, Position } from './object3ds'
 import {
   PointLight, AmbientLight, DirectionalLight, SpotLight, HemisphereLight
 } from './lights'
-import { PerspectiveCamera } from './cameras'
 import { ColorRGB, Vector2, Vector3, Face3, Show } from './misc'
 import { GridHelper, PolarGridHelper, ArrowHelper, AxesHelper } from './helpers'
 
@@ -55,8 +54,6 @@ const functionNames = {
   AmbientLight,
   PointLight,
   SpotLight,
-  // camera
-  PerspectiveCamera,
   // setup
   Position,
   Show,

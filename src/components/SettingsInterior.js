@@ -79,6 +79,40 @@ export default class SettingsInterior extends DCGView.Class {
           </div>
         )}
         </If>
+        <div className='dcg-group-title'>
+          Camera
+        </div>
+        Position:
+        <SmallMathQuillInput
+          latex={() => this.getSettingsLatex('camPositionLatex')}
+          onUserChangedLatex={latex => this.handleSetLatex('camPositionLatex', latex)}
+          ariaLabel='cameraPosition'
+        />
+        Look at:
+        <SmallMathQuillInput
+          latex={() => this.getSettingsLatex('camLookAtLatex')}
+          onUserChangedLatex={latex => this.handleSetLatex('camLookAtLatex', latex)}
+          ariaLabel='cameraLookAt'
+        />
+        FOV:
+        <SmallMathQuillInput
+          latex={() => this.getSettingsLatex('camFOVLatex')}
+          onUserChangedLatex={latex => this.handleSetLatex('camFOVLatex', latex)}
+          ariaLabel='camFOV'
+        />
+        Clipping planes:
+        Near:
+        <SmallMathQuillInput
+          latex={() => this.getSettingsLatex('camNearLatex')}
+          onUserChangedLatex={latex => this.handleSetLatex('camNearLatex', latex)}
+          ariaLabel='camNear'
+        />
+        Far:
+        <SmallMathQuillInput
+          latex={() => this.getSettingsLatex('camFarLatex')}
+          onUserChangedLatex={latex => this.handleSetLatex('camFarLatex', latex)}
+          ariaLabel='camFar'
+        />
       </div>
     )
   }
