@@ -139,13 +139,22 @@ export default class Model extends MVCPart {
     }
   }
 
-  applyFog ({ fogMode, near, far, density }) {
+  applyFog ({ fogMode, fogNearLatex, fogFarLatex, fogColorLatex, fogDensityLatex }) {
+    const colorAppendString = fogColorLatex ? ',' + fogColorLatex : ''
     if (fogMode === FogModes.NONE) {
-      this.scene.fog = null
+      this.controller.evaluator.deleteVariable('__fog')
     } else if (fogMode === FogModes.LINEAR) {
-      this.scene.fog = new THREE.Fog(new THREE.Color(0, 0, 0), 2, 3)
+      this.controller.evaluator.addNewExpression(
+        `__fog=LinearFog(${fogNearLatex}, ${fogFarLatex}${colorAppendString})`,
+        '__fog',
+        true
+      )
     } else if (fogMode === FogModes.EXP) {
-      this.scene.fog = new THREE.FogExp2(new THREE.Color(0, 0, 0), 0.01)
+      this.controller.evaluator.addNewExpression(
+        `__fog=FogExp2(${fogDensityLatex}, ${fogColorLatex}${colorAppendString})`,
+        '__fog',
+        true
+      )
     }
     this.rerender()
   }

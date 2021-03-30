@@ -15,3 +15,8 @@ export function helperExpression (calculator, expr, type, callback) {
   })
   return helper
 }
+
+export function cleanLatex (latex) {
+  return latex.replaceAll(/\\left|\\right/g, '')
+    .replaceAll(/\\ /g, ' ')
+}

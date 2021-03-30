@@ -1,4 +1,4 @@
-import { helperExpression, applyToEntries } from '../utils'
+import { applyToEntries } from '../utils'
 
 export const Type = Object.freeze({
   NUM: 'numericValue',
@@ -14,9 +14,10 @@ export const Type = Object.freeze({
 })
 
 export class FunctionApplicationList {
-  constructor (calc3, Func, args) {
+  constructor (calc3, Func, args, onSetDefined) {
     this.calc3 = calc3
     this.isDefined = false
+    this.onSetDefined = onSetDefined
     // childObjects is a list or a single object
     this.childObjects = []
     this.argValues = {}
@@ -34,50 +35,6 @@ export class FunctionApplicationList {
       this.childObjects.init(this.calc3)
       this.setDefined(true)
     }
-
-    Func.expectedArgs().forEach((expectedArg, i) => {
-      this.expectedArgsByName[expectedArg.name] = expectedArg
-      if (i < args.length) {
-        const expr = args[i]
-        this.argValues[expectedArg.name] = expectedArg.default ?? null
-        if (expectedArg.type === Type.NUM || expectedArg.type === Type.LIST) {
-          // Desmos request #78115: 'numericValue' event is triggered for both
-          // numeric and list values in some cases. May cause issues.
-          helperExpression(
-            this.calc3.calc, expr, 'listValue',
-            value => {
-              this.changeArg(expectedArg.name, value)
-            }
-          )
-          helperExpression(
-            this.calc3.calc, expr, 'numericValue',
-            value => {
-              if (expectedArg.type !== Type.LIST && !isNaN(value)) {
-                this.changeArg(expectedArg.name, value)
-              }
-            }
-          )
-        } else {
-          this.dependencies[expr] = expectedArg.name
-          if (this.calc3.controller.evaluator.values[expr]) {
-            this.afterDepChanged(expr)
-          }
-          this.calc3.controller.evaluator.dependents[expr] =
-            this.calc3.controller.evaluator.dependents[expr] || new Set()
-          this.calc3.controller.evaluator.dependents[expr].add(this)
-        }
-      } else if (i >= args.length && expectedArg.default !== undefined) {
-        this.changeArg(expectedArg.name, expectedArg.default)
-      } else {
-        this.changeArg(expectedArg.name, undefined)
-        // throw Error(`Not enough arguments in call to function: ${args.length}`)
-      }
-    })
-  }
-
-  afterDepChanged (variable) {
-    const argName = this.dependencies[variable]
-    this.changeArg(argName, this.calc3.controller.evaluator.values[variable])
   }
 
   static index (v, i) {
@@ -173,7 +130,7 @@ export class FunctionApplicationList {
     /* DEV-END */
     const wasDefined = this.isDefined
     this.isDefined = defined
-    this.calc3.controller.evaluator.variableChanged(this.variable)
+    this.onSetDefined(defined)
     // defined: about to be visible, so have to rerender
     // wasDefined && !defined: was defined but now is not
     if ((defined || wasDefined) && this.Func.affectsScene) {

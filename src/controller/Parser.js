@@ -1,5 +1,6 @@
 import functionNames from 'functions/functionNames'
 import { Type } from 'functions/functionSupers'
+import { LinearFog, FogExp2 } from 'functions/fogs'
 
 export default class Parser {
   constructor () {
@@ -77,7 +78,7 @@ export default class Parser {
     }
   }
 
-  parseDesThreeAssumingFunction (text, index, funcName, func) {
+  parseDesThreeAssumingFunction (text, index, funcName, func, policy) {
     const expectedArgs = func.expectedArgs()
 
     const defs = []
@@ -102,7 +103,7 @@ export default class Parser {
           index = i3
           args.push(latex)
         } else {
-          const { error, defs: argDefs, nextIndex: i4 } = this.parseDesThree(text, index)
+          const { error, defs: argDefs, nextIndex: i4 } = this.parseDesThree(text, index, policy)
           if (error) {
             return { error }
           }
@@ -115,7 +116,7 @@ export default class Parser {
     return { defs, args, isZeroArgument, nextIndex: index }
   }
 
-  parseDesThree (text, index) {
+  parseDesThree (text, index, policy) {
     const desVariable = this.parseDesThreeVariable(text, index)
     if (desVariable) {
       return {
@@ -137,14 +138,22 @@ export default class Parser {
     }
     index = i2
 
-    if (functionNames[funcName] === undefined) {
+    const fullFunctionNames =
+      policy.enablePrivates
+        ? {
+            ...functionNames,
+            LinearFog,
+            FogExp2
+          }
+        : functionNames
+    if (fullFunctionNames[funcName] === undefined) {
       return { error: `Unidentified function: ${funcName}` }
     }
-    const possibleFuncs0 = functionNames[funcName]
+    const possibleFuncs0 = fullFunctionNames[funcName]
     const possibleFuncs = Array.isArray(possibleFuncs0) ? possibleFuncs0 : [possibleFuncs0]
     for (const func of possibleFuncs) {
       const { error, defs, args, isZeroArgument, nextIndex } =
-        this.parseDesThreeAssumingFunction(text, index, funcName, func)
+        this.parseDesThreeAssumingFunction(text, index, funcName, func, policy)
       if (!error) {
         defs.push({
           variable,

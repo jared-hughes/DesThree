@@ -67,6 +67,7 @@ export default class Controller extends MVCPart {
   }
 
   freshGraph () {
+    this.evaluator.clearDetachedVariables()
     this.model.applyGraphSettingsJSON(
       this.calc.controller.getGraphSettings().xAxisLabel
     )
