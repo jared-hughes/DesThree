@@ -1,6 +1,5 @@
 import { Type, FunctionApplication } from './functionSupers.js'
 import * as THREE from 'three'
-import { Color } from './misc'
 
 class Fog extends FunctionApplication {
   constructor (args, threeObject) {
@@ -25,9 +24,9 @@ Fog.affectsScene = true
 export class LinearFog extends Fog {
   static expectedArgs () {
     return [
-      { name: 'near', type: Type.NUM, default: 1 },
-      { name: 'far', type: Type.NUM, default: 1000 },
-      { name: 'color', type: Type.COLOR, default: new Color(0, 0, 0) }
+      { name: 'near', type: Type.NUM },
+      { name: 'far', type: Type.NUM },
+      { name: 'color', type: Type.COLOR }
     ]
   }
 
@@ -53,8 +52,8 @@ export class LinearFog extends Fog {
 export class FogExp2 extends Fog {
   static expectedArgs () {
     return [
-      { name: 'density', type: Type.NUM, default: 0.00025 },
-      { name: 'color', type: Type.COLOR, default: new Color(0, 0, 0) }
+      { name: 'density', type: Type.NUM },
+      { name: 'color', type: Type.COLOR }
     ]
   }
 

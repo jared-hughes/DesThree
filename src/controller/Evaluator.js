@@ -152,9 +152,6 @@ export default class Evaluator extends MVCPart {
       this.values[variable].dispose()
       delete this.values[variable]
     }
-    if (this.detachedVariables.has(variable)) {
-      this.detachedVariables.delete(variable)
-    }
   }
 
   changeVariable (variable, valueFunc) {

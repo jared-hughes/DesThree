@@ -147,34 +147,52 @@ export default class Model extends MVCPart {
     }
   }
 
+  addSettingsExpression (name, funcName, args) {
+    this.controller.evaluator.addNewExpression(
+      `${name}=${funcName}(${args.join(',')})`,
+      name, true
+    )
+  }
+
   applyFog ({ fogMode, fogNearLatex, fogFarLatex, fogColorLatex, fogDensityLatex }) {
-    const colorAppendString = fogColorLatex ? ',' + fogColorLatex : ''
     if (fogMode === FogModes.NONE) {
       this.controller.evaluator.deleteVariable('__fog')
     } else if (fogMode === FogModes.LINEAR) {
-      this.controller.evaluator.addNewExpression(
-        `__fog=LinearFog(${fogNearLatex}, ${fogFarLatex}${colorAppendString})`,
+      this.addSettingsExpression(
         '__fog',
-        true
+        'LinearFog',
+        // use || instead of ?? because we reach the alternative for empty strings
+        [
+          fogNearLatex || '1',
+          fogFarLatex || '1000',
+          fogColorLatex || 'RGB(0,0,0)'
+        ]
       )
     } else if (fogMode === FogModes.EXP) {
-      this.controller.evaluator.addNewExpression(
-        `__fog=FogExp2(${fogDensityLatex}${colorAppendString})`,
+      this.addSettingsExpression(
         '__fog',
-        true
+        'FogExp2',
+        [
+          fogDensityLatex || '0.00025',
+          fogColorLatex || 'RGB(0,0,0)'
+        ]
       )
     }
     this.rerender()
   }
 
   applyCamera ({ camPositionLatex, camLookAtLatex, camFOVLatex, camNearLatex, camFarLatex }) {
-    const args = [
-      camPositionLatex, camLookAtLatex, camFOVLatex, camNearLatex, camFarLatex
-    ]
-    this.controller.evaluator.addNewExpression(
-      `__cam=PerspectiveCamera(${args.join(',')})`,
+    this.addSettingsExpression(
       '__cam',
-      true
+      'PerspectiveCamera',
+      [
+        camPositionLatex || '(2,2,2)',
+        camLookAtLatex || '(0,0,0)',
+        camFOVLatex || '75',
+        camNearLatex || '0.1',
+        camFarLatex || '1000'
+      ]
     )
+    this.rerender()
   }
 }
