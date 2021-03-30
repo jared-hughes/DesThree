@@ -161,6 +161,9 @@ export default class View extends MVCPart {
         overflow: hidden;
         margin-top: -3px !important;
       }
+      .three-wide-mathquill .dcg-mq-editable-field.dcg-math-input {
+        max-width: 150px !important;
+      }
     `
     document.head.appendChild(styleEl)
   }

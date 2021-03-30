@@ -4,3 +4,5 @@ export const MathQuillView = window.require('dcgview-helpers/mathquill-view').de
 export const {
   If, For, IfDefined, IfElse, Input, Switch, SwitchUnion, Textarea
 } = window.require('dcgview').Components
+
+export const StaticMathquillView = window.require('dcgview-helpers/static-mathquill-view').default

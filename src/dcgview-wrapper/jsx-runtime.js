@@ -7,6 +7,7 @@
  * If you know React, then you know DCGView.
  * Some exceptions:
  *  - DCGView was forked sometime in 2016, before React Fragments and some other features
+ *  - use class instead of className
  *  - there's some function name changes, like React.Component → DCGView.Class,
  *    rerender → template.
  *    However, there are functional differences:
