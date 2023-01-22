@@ -4,39 +4,31 @@ import { Type, FunctionApplicationList } from 'functions/functionSupers'
 import { helperExpression, cleanLatex } from 'utils'
 
 export default class Evaluator extends MVCPart {
+  /**
+   * Entry points:
+   *  - constructor (of course): initialize empty evaluator
+   *  - setStatements: set latex statements (main panel), overriding existing ones
+   *  - setSettingsStatements: set latex statements from settings panel, overriding existing ones
+   */
+
   constructor (calc3) {
     super(calc3)
     this.parser = new Parser()
     this.values = {} // {variableName: FunctionApplicationList value}
     this.dependents = {} // {variableName: FunctionApplicationList object dependents}
     this.errorMessages = {} // {exprID: error message}
-    this.exprVariables = {} // {exprID: list of variables defined in that experssion}
+    this.exprVariables = {} // {exprID: list of variables defined in that expression}
     this.latexDefinitions = {} // {exprID: raw latex of expression} (to check for change)
     // detached variables are not cleared when the expressions list changes
     this.detachedVariables = new Set() // set of variable names
   }
 
-  clearDetachedVariables () {
-    this.detachedVariables = new Set()
-    this.detachedVariables.forEach(varName => this.deleteVariable(varName))
-  }
-
-  startUpdateBatch () {
-    this.nextDefinedVariables = new Set()
-  }
-
-  endUpdateBatch () {
-    for (const variable in this.values) {
-      if (!this.nextDefinedVariables.has(variable)) {
-        // this variable was deleted from use
-        this.changeVariable(variable, null)
-      }
-    }
-  }
-
   registerHelperExpression (object, expr, expectedArg) {
     // Desmos request #78115: 'numericValue' event is triggered for both
     // numeric and list values in some cases. May cause issues.
+    // (more specifically, numerics only trigger numericValue (undefined → number),
+    //  while lists trigger both numericValue (undefined → NaN, exactly once)
+    //  and listValue (undefined → list)).
     helperExpression(
       this.calc3.calc, expr, 'listValue',
       value => {
@@ -102,7 +94,6 @@ export default class Evaluator extends MVCPart {
         this.detachedVariables.add(variable)
       }
       this.exprVariables[exprID].push(variable)
-      // TODO: know this is a fresh variable?
       const { object, error } = this.generateObject(variable, func, args)
       if (error) {
         console.warn(error)
